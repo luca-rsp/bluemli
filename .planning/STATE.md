@@ -1,0 +1,74 @@
+# Project State
+
+## Project Reference
+
+See: .planning/PROJECT.md (updated 2026-05-12)
+
+**Core value:** The product photography and brand voice come through cleanly on a cream-paper page, and the founder can add or remove gallery pieces and pop-up events without writing code or paying a CMS.
+**Current focus:** Phase 1 — Foundations & Brand System
+
+## Current Position
+
+Phase: 1 of 5 (Foundations & Brand System)
+Plan: 0 of TBD in current phase
+Status: Ready to plan
+Last activity: 2026-05-12 — Roadmap created (5 coarse phases, 42/42 v1 requirements mapped)
+
+Progress: [░░░░░░░░░░] 0%
+
+## Performance Metrics
+
+**Velocity:**
+- Total plans completed: 0
+- Average duration: —
+- Total execution time: 0.0 hours
+
+**By Phase:**
+
+| Phase | Plans | Total | Avg/Plan |
+|-------|-------|-------|----------|
+| - | - | - | - |
+
+**Recent Trend:**
+- Last 5 plans: —
+- Trend: —
+
+*Updated after each plan completion*
+
+## Accumulated Context
+
+### Decisions
+
+Decisions are logged in PROJECT.md Key Decisions table. Recent decisions affecting current work:
+
+- **Phase 1 kickoff (planned):** PROJECT.md "Cloudflare Pages" constraint will be updated to "Cloudflare Workers with Static Assets" — `@astrojs/cloudflare@13` dropped Pages support.
+- **Stack pinned (research, 2026-05-12):** Astro 6.2 + `@astrojs/cloudflare@13.5` + `@astrojs/react@5.0.4` + React 19 (SSR-only, no `client:`); single Worker serves static + `/api/*` via `assets.run_worker_first: ["/api/*"]`.
+- **Resend selected over MailChannels (research):** MailChannels' free Workers tier ended 2024-08-31; Resend's 3k/mo free tier + Cloudflare-native tutorial wins.
+- **Per-slug gallery folders (research):** `src/content/gallery/<slug>/index.md` + co-located `hero.jpg` — kills rename/orphan-image risk and works with `image()` schema helper.
+- **Phase 4 contact-form details LOCKED (founder, 2026-05-12):** `From: hi@studiobluemli.com`, inbox = same address (MS365-hosted), display name "Studio Bluemli".
+- **Phase 3 daily cron rebuild LOCKED (founder, 2026-05-12):** Cloudflare cron triggers a 3 AM PT rebuild for pop-up freshness.
+- **Phase 3 About imagery LOCKED (founder, 2026-05-12):** process/craft shots (hands, beads, bench) — no founder face.
+
+### Pending Todos
+
+None yet.
+
+### Blockers/Concerns
+
+- **Phase 1:** `prettier-plugin-astro` v0.14.x may lag Astro 6 — verify and upgrade during planning if a newer release exists.
+- **Phase 2:** Lock the exact image pre-optimization tool (squoosh-cli vs sharp-cli) and document in `CONTENT_EDITING.md`.
+- **Phase 4:** MS365 DNS coexistence — Resend SPF/DKIM/DMARC records must be added *alongside* existing MS365 records without breaking founder's outbound mail. Pre-stage every record edit; screenshot DNS zone first; verify MS365 send/receive after each change.
+
+## Deferred Items
+
+Items acknowledged and carried forward from previous milestone close:
+
+| Category | Item | Status | Deferred At |
+|----------|------|--------|-------------|
+| *(none — first milestone)* | | | |
+
+## Session Continuity
+
+Last session: 2026-05-12
+Stopped at: Roadmap created and approved; PROJECT.md / REQUIREMENTS.md / ROADMAP.md / STATE.md all in place
+Resume file: None (next action: `/gsd-plan-phase 1`)

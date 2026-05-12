@@ -62,7 +62,7 @@ The product photography and brand voice come through cleanly on a cream-paper pa
 
 ## Constraints
 
-- **Hosting**: Cloudflare Pages — site must build to static assets and deploy via Cloudflare's git integration. Cloudflare Workers used only for the contact form endpoint.
+- **Hosting**: Cloudflare Workers with Static Assets — a single Worker serves both the static bundle and the `/api/contact` endpoint via `wrangler.toml`'s `assets.run_worker_first: ["/api/*"]`. (Initial plan was Cloudflare Pages; corrected because `@astrojs/cloudflare@13` — required by Astro 6 — dropped Pages support, and Cloudflare froze Pages investment in favor of Workers.)
 - **Stack**: Astro — picked so the existing React JSX components from the design skill can be reused as-is, while shipping near-zero client JS.
 - **Content storage**: Markdown + YAML files in the repo. No database. Structure must remain compatible with a future git-backed CMS.
 - **Budget**: Free tier wherever possible. Cloudflare Pages free, Umami Cloud free, Resend/Mailchannels free, Turnstile free, GitHub repo.
@@ -74,7 +74,7 @@ The product photography and brand voice come through cleanly on a cream-paper pa
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Astro on Cloudflare Pages | Static-first, can render the existing React JSX components from the design skill, near-zero client JS, deploys cleanly to CF Pages | — Pending |
+| Astro 6.2 on Cloudflare Workers + Static Assets | Static-first, renders the design skill's React JSX server-side, near-zero client JS. Pages was originally chosen but `@astrojs/cloudflare@13` (Astro 6) dropped Pages support — Workers with Static Assets is the active CF target. One Worker serves both static and `/api/contact`. | — Pending |
 | Markdown/YAML in repo for gallery + pop-ups (not a CMS, not a database) | Zero infra, free, founder edits a single file per change, and the structure stays compatible with adding a git-backed CMS later with zero data migration | — Pending |
 | Contact form via Cloudflare Worker + Turnstile + email service (Resend or Mailchannels) | Keeps the site static while still letting visitors send a real message; spam protected; free-tier friendly | — Pending |
 | Umami Cloud (hosted, free tier) for analytics | Privacy-first, no cookies, no consent banner, custom events possible if needed; can migrate to self-hosted later since Umami is OSS | — Pending |
