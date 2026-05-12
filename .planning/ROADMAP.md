@@ -30,7 +30,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. A pull request that introduces `bg-white`, `#fff`, `flower`/`petal`/`floral`/`bloom`/`blossom`, `gradient`, `backdrop-filter`, `border: 1px`, or an uppercase filename under `src/pages/` fails CI before it can be merged.
   4. Favicon (mark.svg + generated .ico/16/32 + existing 180×180 apple-touch-icon) renders correctly in a desktop browser tab and an iOS "add to home screen" preview.
   5. PROJECT.md's Constraints section reads "Cloudflare Workers with Static Assets" (the legacy "Cloudflare Pages" wording is gone).
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+- [ ] 01-01-scaffold-astro-cloudflare-PLAN.md — Scaffold Astro 6.2 + Cloudflare adapter, wrangler.jsonc, Fonts API config, PROJECT.md correction (FND-01, FND-02, FND-07)
+- [ ] 01-02-sync-design-skill-PLAN.md — Sync 11 design-skill JSX components + brand-token CSS into src/ with mechanical transforms + manual SSR-safe edits (FND-06, FND-09)
+- [ ] 01-03-favicon-and-public-assets-PLAN.md — Generate favicon set from mark.svg, copy apple-touch-icon as-is, ship 3 placeholder gallery WebPs (FND-08)
+- [ ] 01-04-baselayout-pages-sample-data-PLAN.md — BaseLayout.astro + 5 page placeholders + sample-data.ts; demo-loaded shell renders (FND-05, FND-12, FND-13)
+- [ ] 01-05-ci-brand-check-and-setup-PLAN.md — GitHub Actions required status check + brand grep scripts + SETUP.md for Cloudflare connect (FND-03, FND-04, FND-10, FND-11)
 **UI hint**: yes
 
 **Key risks / pitfalls:**

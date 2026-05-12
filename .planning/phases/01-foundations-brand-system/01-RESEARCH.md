@@ -1371,32 +1371,39 @@ These are the steps the engineer must perform that **cannot live in code**. Docu
 
 **Items that need user/founder confirmation before plan ships:** None — all assumptions are technical and can be validated at scaffold time, not decisions requiring founder approval.
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+All five Open Questions below were resolved by planner decisions during phase planning (see Plans 01-05). RESOLVED markers added inline per checker BLOCKER #3.
 
 1. **Cloudflare account subdomain (the `<account>` in `studio-bluemli.<account>.workers.dev`)**
    - What we know: every Cloudflare account has a unique `<account-subdomain>.workers.dev` subdomain.
    - What's unclear: the founder's specific subdomain. Engineer can discover this from the Cloudflare dashboard when they create the Worker.
    - Recommendation: planner notes this as a "discoverable at setup time" data point, not a blocker.
+   - **RESOLVED:** Discoverable at setup time, captured in SETUP.md (see Plan 05 Task 3).
 
 2. **Active-link styling for `Header.tsx`**
    - The original `Header.jsx` had an `active` prop with hard-coded link IDs. The new file-based routing has a real URL per page.
    - What we know: `Astro.url.pathname` gives the current route inside an `.astro` file.
    - What's unclear: should the planner pass `active="/"` etc. into the Header from each page's frontmatter, OR compute it in BaseLayout, OR drop active styling for Phase 1?
    - Recommendation: pass `active={Astro.url.pathname}` from BaseLayout (it already knows the current page). Header maps pathname to nav item.
+   - **RESOLVED:** Pass `active` prop from each page (not from BaseLayout) so the prop type is checked at the page boundary. Header type union: `'/' | '/gallery' | '/popups' | '/about' | '/say-hi'` (see Plan 02 Task 3 Edit 1, Plan 04 Task 3).
 
 3. **Sample data: inline-per-page vs single file (D-02 leaves planner choice open)**
    - What we know: D-02 says "inline in each page OR in a single `src/sample-data.ts`".
    - Recommendation: single `src/sample-data.ts` file. Phase 2 deletes one file instead of editing five.
+   - **RESOLVED:** Single `src/sample-data.ts` file (see Plan 04 Task 1).
 
 4. **`/api/*` stub handler in Phase 1**
    - What we know: `run_worker_first: ["/api/*"]` reserves the namespace.
    - What's unclear: in Phase 1, no Worker handler exists; a request to `/api/foo` would 404 from Cloudflare's default.
    - Recommendation: ship a minimal stub handler that returns `501 Not Implemented` for any `/api/*` in Phase 1. Clearer signal than a 404; documents that the route is reserved. Add Worker entry as one-screen `src/server.ts` (or whatever the planner names it) and reference from `wrangler.jsonc`'s `main` (but Astro's `@astrojs/cloudflare/entrypoints/server` should already do this — investigate at plan time whether the entrypoint exposes a hook for `/api/*` or whether we need to write a separate Worker. **Most likely answer:** Phase 1 can leave `/api/*` 404 and add the stub during Phase 4 alongside the real handler. Planner's call.
+   - **RESOLVED:** Bare 404 in Phase 1; explicit `/api/contact` endpoint added in Phase 4 (see Plan 01 Task 2 wrangler.jsonc `run_worker_first: ["/api/*"]`).
 
 5. **Pre-optimized sample images for placeholder gallery**
    - What we know: Phase 1 ships placeholder GalleryGrid with 3 sample pieces; UI-SPEC § "Sample data marker requirement" says alt text uses "Confetti earrings — colorful beaded cluster…".
    - What's unclear: do we use real product photos from `.claude/skills/studio-bluemli-design/assets/product/`, generic shapes, or solid color blocks?
    - Recommendation: Copy 3 product photos from `.claude/skills/studio-bluemli-design/assets/product/` into `public/sample/` and use those. They're already on-brand and pre-optimized.
+   - **RESOLVED:** Generate 3 flat-color cream WebPs labelled 'Sample Piece A/B/C' (see Plan 03 Task 2). Approach changed from copying product photos to generated placeholders so the D-03 sample marker is visually obvious (cream blocks are clearly placeholder; real product photos could be mistaken for production content).
 
 ## Project Constraints (from CLAUDE.md)
 
