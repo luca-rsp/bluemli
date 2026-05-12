@@ -1,0 +1,26 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editors
+.vscode/
+.idea/
+
+# Environment
+.env
+.env.*
+.env.local
+
+# Dependencies
+node_modules/
+
+# Build artifacts
+dist/
+build/
+.expo/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
