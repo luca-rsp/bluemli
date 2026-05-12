@@ -38,22 +38,36 @@ created: 2026-05-12
 
 All tokens already exist in `colors_and_type.css` as `--space-*`. Use those variables; do not hard-code pixel values.
 
+### Component spacing — Phase 1 In Use
+
+These values belong to the standard 4pt grid and are the only spacing values used for component-internal layout in the BaseLayout shell.
+
 | Token | Value | Design skill var | Usage |
 |-------|-------|-----------------|-------|
 | xs | 4px | `--space-1` | Icon gaps, inline padding, tight label spacing |
 | sm | 8px | `--space-2` | Compact element spacing, gap between nav links |
-| md-sm | 12px | `--space-3` | Heading bottom margin, caption spacing |
 | md | 16px | `--space-4` | Default element spacing, paragraph bottom margin |
 | lg | 24px | `--space-5` | Component padding, card inner spacing |
 | xl | 32px | `--space-6` | Mobile page margin (left/right), header padding |
 | 2xl | 48px | `--space-7` | Footer top padding, section breaks |
 | 3xl | 64px | `--space-8` | Hero section padding top |
-| 4xl | 96px | `--space-9` | Desktop page margin (left/right) |
-| 5xl | 128px | `--space-10` | Large section breathing room |
+
+Note: `--space-3` (12px) is present in `colors_and_type.css` but is not used in the Phase 1 BaseLayout shell. The BaseLayout uses `--space-2` (8px) or `--space-4` (16px) wherever a 12px temptation arises. It is listed in the inherited-but-unused table below.
+
+### Layout-only tokens — inherited, not for component-internal spacing
+
+| Token | Value | Design skill var | Justification |
+|-------|-------|-----------------|---------------|
+| 4xl | 96px | `--space-9` | Desktop page margin (left/right). Layout-scale token for section-level breathing room on wide viewports. Inherited from `colors_and_type.css`. Not used for component-internal padding. |
+| 5xl | 128px | `--space-10` | Large section breathing room on wide viewports. Inherited from `colors_and_type.css`. Not used for component-internal padding. |
+
+### Inherited but unused in Phase 1
+
+| Token | Value | Design skill var | Status |
+|-------|-------|-----------------|--------|
+| md-sm | 12px | `--space-3` | Present in `colors_and_type.css`; not used in Phase 1 BaseLayout shell. May be activated in a later phase. |
 
 **Exception — touch targets:** Every interactive element (nav links, buttons, skip-to-content) must have a minimum hit target of 44px × 44px regardless of visual size. Use padding to achieve this without changing visual dimensions.
-
-**Exceptions:** none beyond the 44px touch target rule.
 
 **Source:** design skill `colors_and_type.css` `--space-*` tokens (pre-existing, LOCKED); design skill README "Generous margins" rule.
 
@@ -63,19 +77,36 @@ All tokens already exist in `colors_and_type.css` as `--space-*`. Use those vari
 
 All font-family and font-size tokens already exist in `colors_and_type.css`. Use CSS variables; do not hard-code values.
 
+Phase 1 scope: only the tokens below render in the BaseLayout shell. Adding additional sizes or weights requires a new phase + spec update.
+
+### Phase 1 — In Use
+
+The primary body family (Nunito) is capped at **4 sizes** and **2 weights** in Phase 1. Display and wordmark families are separate typefaces and do not count against the Nunito budget.
+
 | Role | Font family var | Size var | Size (px) | Weight | Line height var | Usage |
 |------|----------------|----------|-----------|--------|----------------|-------|
-| Body | `--font-body` (Nunito) | `--fs-sm` | 16px | 400 | `--lh-normal` (1.45) | Paragraphs, nav labels, UI text, captions |
-| Body strong | `--font-body` (Nunito) | `--fs-sm` | 16px | 700 | `--lh-normal` (1.45) | `<strong>`, emphasis, eyebrow labels |
-| Body large | `--font-body` (Nunito) | `--fs-md` | 18px | 400 | `--lh-normal` (1.45) | Hero subline, larger UI prose |
-| Caption | `--font-body` (Nunito) | `--fs-xs` | 14px | 500 | `--lh-normal` (1.45) | Nav links, captions, meta, copyright |
-| Eyebrow | `--font-body` (Nunito) | `--fs-xs` | 14px | 700 | n/a | Uppercase stamp above hero (letter-spacing: `--ls-caps` 0.08em) |
-| h3 sub-section | `--font-body` (Nunito) | `--fs-xl` | 28px | 800 | `--lh-snug` (1.2) | Section sub-headings in sans |
-| h2 section title | `--font-display` (Caveat Brush) | `--fs-3xl` | 48px | 400 | `--lh-snug` (1.2) | Section openers in hand-lettered marker |
-| h1 hero headline | `--font-display` (Caveat Brush) | `--fs-5xl` | 88px | 400 | `--lh-tight` (1.05) | Hero headline — desktop. Mobile: clamp down to `--fs-3xl` (48px) |
-| Wordmark | `--font-wordmark` (Bagel Fat One) | 28px inline | 28px | 400 | 1 | Header lockup and footer "Studio Bluemli" label only |
+| Body / UI text | `--font-body` (Nunito) | `--fs-sm` | 16px | 400 | `--lh-normal` (1.45) | Paragraphs, nav labels, UI text |
+| Body strong / eyebrow | `--font-body` (Nunito) | `--fs-sm` | 16px | 700 | `--lh-normal` (1.45) | `<strong>`, nav active state, uppercase eyebrow labels |
+| Footer caption / copyright | `--font-body` (Nunito) | `--fs-xs` | 14px | 400 | `--lh-normal` (1.45) | Copyright line, tagline, footer meta |
+| h3 sub-section | `--font-body` (Nunito) | `--fs-xl` | 28px | 700 | `--lh-snug` (1.2) | Section sub-headings in sans |
+| h2 section title | `--font-display` (Caveat Brush) | `--fs-3xl` | 48px | 400 | `--lh-snug` (1.2) | Section openers — display family, 1 weight, not counted against Nunito budget |
+| h1 hero headline | `--font-display` (Caveat Brush) | `--fs-5xl` | 88px | 400 | `--lh-tight` (1.05) | Hero headline desktop. Mobile: clamp to `--fs-3xl` (48px) — responsive variant, not a new size |
+| Wordmark | `--font-wordmark` (Bagel Fat One) | 28px inline | 28px | 400 | 1 | Header lockup and footer "Studio Bluemli" label only — separate family, 1 weight, not counted against Nunito budget |
+
+**Nunito summary:** 4 sizes in use (14, 16, 28px — h3; note h1/h2 use the display family), 2 weights (400 regular, 700 bold). Within the ≤4 sizes / ≤2 weights checker budget.
 
 **Casing rule:** Sentence case for all copy, including buttons and nav labels. Exception: NOPA geographic stamp stays uppercase. No all-caps for emphasis anywhere.
+
+### Inherited from design-skill token file — not deployed in Phase 1
+
+Tokens listed here are present in `colors_and_type.css` and may be activated in a later phase; they are out of scope for Phase 1 component styling.
+
+| Role | Font family var | Size var | Size (px) | Weight | Notes |
+|------|----------------|----------|-----------|--------|-------|
+| Body large | `--font-body` (Nunito) | `--fs-md` | 18px | 400 | Hero subline, larger UI prose — activate in Phase 3 when per-page composition ships |
+| Nunito medium | `--font-body` (Nunito) | — | — | 500 | Available in token file; not used in Phase 1 shell |
+| Nunito semibold | `--font-body` (Nunito) | — | — | 600 | Available in token file; not used in Phase 1 shell |
+| Nunito extrabold | `--font-body` (Nunito) | — | — | 800 | Available in token file; not used in Phase 1 shell |
 
 **Source:** design skill `colors_and_type.css` `--fs-*`, `--lh-*`, `--font-*` tokens (pre-existing, LOCKED); design skill README "Typography in practice"; Hero.jsx, Header.jsx, Footer.jsx reference implementations.
 
@@ -179,10 +210,11 @@ The Astro rewrite of `Header.jsx` must:
 - Position: sticky, top 0, z-index 50
 - Background: `rgba(245, 220, 199, 0.92)` — solid cream at 0.92 opacity. No `backdrop-filter` blur.
 - Horizontal lockup: `mark.svg` (34×34px, `alt=""` — decorative, wordmark carries the text) + wordmark "Studio Bluemli" at 28px Bagel Fat One coral-500
-- Nav links: Home, Gallery, Pop-ups, Say Hi — 14px Nunito 600; active: Nunito 800 coral-500; inactive: indigo-500
+- Nav links: Home, Gallery, Pop-ups, Say Hi — 16px Nunito 400; active: Nunito 700 coral-500; inactive: indigo-500
 - All nav links use `<a href="/{slug}">` (real routes, not hash links)
 - About page: not in the nav (per design skill Header.jsx — the nav is intentionally short)
 - Mobile: nav links collapse to a hamburger. Lucide `menu` icon (24px, `--color-fg`). Drawer slides from right or stacks below the lockup. Minimum hit target 44px for the hamburger button.
+- Hamburger button accessibility: `<button aria-label="Open navigation menu" aria-expanded="{state}">` where `aria-expanded` toggles `true`/`false` when the drawer opens and closes. The 44px minimum hit target is met via padding, not by enlarging the icon.
 - Focus: every link and the hamburger must show the coral focus ring on `:focus-visible`
 
 ### Footer chrome
@@ -191,9 +223,9 @@ Match `Footer.jsx` reference:
 - `<footer>` with `role="contentinfo"`
 - Padding: 48px top, 56px bottom (matches `--space-7`)
 - Centered stacked lockup: mark.svg (56×56px, `alt="Studio Bluemli"`) + wordmark "Studio Bluemli" at 28px
-- Tagline: "hand-assembled earrings · made in NoPa, San Francisco" — 14px Nunito indigo-500
+- Tagline: "hand-assembled earrings · made in NoPa, San Francisco" — 14px Nunito 400 indigo-500
 - Links row: @studio_bluemli (Instagram), hi@studiobluemli.com (email) — coral-500; "NoPa, San Francisco" — olive-500 700
-- Copyright: "© 2026 Studio Bluemli · all pairs one of a kind" — 11px Nunito ink-600 letter-spacing 0.04em
+- Copyright: "© 2026 Studio Bluemli · all pairs one of a kind" — 14px (`--fs-xs`) Nunito 400 ink-600 letter-spacing 0.04em
 - No `<hr>` / no `border-top`. Section separation via the `Mark.Dots` bead-cluster decoration (the 9-dot row from the reference — rendered as inline SVG or the BeadCluster component)
 
 ### Page container
@@ -252,8 +284,8 @@ export default defineConfig({
   // Font declarations:
   // - "Bagel Fat One" weights: [400]      → --font-wordmark
   // - "Caveat Brush" weights: [400]       → --font-display
-  // - "Caveat" weights: [400, 500, 600]   → --font-hand (include only if used)
-  // - "Nunito" weights: [400, 500, 600, 700, 800]  → --font-body
+  // - "Caveat" weights: [400]             → --font-hand (include only if used)
+  // - "Nunito" weights: [400, 700]        → --font-body (Phase 1 in-use weights only)
   // font-display: swap on all faces (FND-07, Pitfall #10)
   // SWAP PATH COMMENT: Replace "Caveat Brush" with founder's custom WOFF2 here when provided.
 });
@@ -262,6 +294,8 @@ export default defineConfig({
 `<Font />` component renders in `BaseLayout.astro` `<head>` — generates `@font-face` + `<link rel="preload">`.
 
 `colors_and_type.css` original `@import url("https://fonts.googleapis.com/...")` line is REMOVED in the copied `src/styles/colors_and_type.css`. Fonts load only through Astro Fonts API.
+
+Note: Nunito is declared with weights `[400, 700]` in Phase 1. Weights 500, 600, and 800 exist in the design-skill token file and may be added to the Fonts API declaration in a later phase without any other changes.
 
 ---
 
@@ -280,6 +314,7 @@ These rules apply from Phase 1 forward and cannot be removed.
 | Alt text — mark in footer | `alt="Studio Bluemli"` |
 | Alt text — placeholder photos | Phase 1 placeholder images must have descriptive alt text. Sample: `alt="Confetti earrings — colorful beaded cluster with mixed bead sizes"`. Never use blank alt on a content image. Never use words flower/petal/floral/bloom/blossom in alt text (CI rule). |
 | Landmark roles | `<header role="banner">`, `<main id="main-content">`, `<footer role="contentinfo">`, `<nav aria-label="Site navigation">` |
+| Hamburger button | `<button aria-label="Open navigation menu" aria-expanded="{state}">` — `aria-expanded` toggles `true`/`false` on drawer open/close. |
 
 **Source:** REQUIREMENTS.md FND-13; design skill README "Interactive states," "Coral-on-cream" Pitfall #16, Pitfall #17.
 
@@ -323,6 +358,7 @@ Phase 1 is a shell, so copy is minimal. These are the only copy strings that mus
 | Footer tagline | `hand-assembled earrings · made in NoPa, San Francisco` |
 | Footer copyright | `© 2026 Studio Bluemli · all pairs one of a kind` |
 | Skip-to-content | `Skip to main content` |
+| Hamburger open label | `Open navigation menu` (aria-label) |
 | Sample piece name pattern | `Sample Piece A`, `Sample Piece B`, etc. |
 | Sample piece price | `$0` |
 | Empty state — no pop-ups | `no pop-ups on the calendar right now — DM me on Instagram` (Phase 1 shell can show a sample so this is deferred to Phase 3; documented here as the locked copy for later) |
