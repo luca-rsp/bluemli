@@ -1,5 +1,6 @@
 /* eslint-disable */
 import React from 'react';
+import Mark from './Mark';
 function About() {
   return (
     <section style={{

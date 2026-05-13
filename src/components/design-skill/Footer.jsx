@@ -1,8 +1,10 @@
 /* eslint-disable */
 import React from 'react';
+import Mark from './Mark';
+
 function Footer() {
   return (
-    <footer style={{
+    <footer role="contentinfo" style={{
       padding: '48px 32px 56px',
       textAlign: 'center',
       borderTop: 'none',
@@ -20,12 +22,12 @@ function Footer() {
       <div style={{ marginTop: 22, display: 'flex', justifyContent: 'center', gap: 22, fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--indigo-500)' }}>
         <a href="https://instagram.com/studio_bluemli" target="_blank" rel="noreferrer" style={{ color: 'var(--coral-500)' }}>@studio_bluemli</a>
         <span style={{ color: 'var(--ink-400)' }}>·</span>
-        <a href="mailto:hello@studiobluemli.com" style={{ color: 'var(--coral-500)' }}>hello@studiobluemli.com</a>
+        <a href="mailto:hi@studiobluemli.com" style={{ color: 'var(--coral-500)' }}>hi@studiobluemli.com</a>
         <span style={{ color: 'var(--ink-400)' }}>·</span>
         <span style={{ color: 'var(--olive-500)', fontWeight: 700 }}>NoPa, San Francisco</span>
       </div>
 
-      <div style={{ marginTop: 24, fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--ink-600)', letterSpacing: '0.04em' }}>
+      <div style={{ marginTop: 24, fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--ink-600)', letterSpacing: '0.04em' }}>
         © 2026 Studio Bluemli · all pairs one of a kind
       </div>
     </footer>

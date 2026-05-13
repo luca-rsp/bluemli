@@ -1,6 +1,8 @@
 /* eslint-disable */
 import React from 'react';
-function Hero({ onCTA }) {
+import BeadCluster from './BeadCluster';
+
+function Hero() {
   return (
     <section id="home" style={{
       minHeight: 560,
@@ -17,8 +19,8 @@ function Hero({ onCTA }) {
 
       <h1 style={{
         fontFamily: 'var(--font-display)',
-        fontSize: 56,
-        lineHeight: 1.6,
+        fontSize: 'clamp(48px, 8vw, 88px)',
+        lineHeight: 1.05,
         color: 'var(--coral-500)',
         margin: '0 0 36px',
         maxWidth: 680,
@@ -34,8 +36,24 @@ function Hero({ onCTA }) {
       </div>
 
       <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', justifyContent: 'center' }}>
-        <Button variant="primary" size="lg" onClick={() => onCTA && onCTA('gallery')}>see the gallery</Button>
-        <Button variant="secondary" size="lg" onClick={() => onCTA && onCTA('pop-ups')}>next pop-up</Button>
+        {/* CTAs are real <a> links, not <Button onClick>. No client: directive,
+            so onClick handlers wouldn't fire anyway — a plain anchor navigates. */}
+        <a href="/gallery" className="hero-cta-primary" style={{
+          display: 'inline-flex', alignItems: 'center',
+          fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 16,
+          padding: '14px 28px',
+          background: 'var(--coral-500)', color: 'var(--cream-50)',
+          textDecoration: 'none', borderRadius: 999,
+          boxShadow: 'var(--shadow-sm)',
+        }}>see the gallery</a>
+        <a href="/popups" className="hero-cta-secondary" style={{
+          display: 'inline-flex', alignItems: 'center',
+          fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 16,
+          padding: '14px 28px',
+          background: 'transparent', color: 'var(--coral-500)',
+          textDecoration: 'none', borderRadius: 999,
+          boxShadow: 'inset 0 0 0 2px var(--coral-500)',
+        }}>next pop-up</a>
       </div>
 
       <div style={{ marginTop: 48 }}>

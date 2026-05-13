@@ -1,0 +1,21 @@
+/* src/styles/components.css
+ * Component-specific styles for design-skill components that need CSS pseudo-classes
+ * (:hover, :active, :focus-visible) which can't be expressed in React inline styles.
+ *
+ * REVIEW FIX M4: this file exists so colors_and_type.css stays a verbatim copy of the
+ * design-skill source (minus the Google Fonts @import). DO NOT move styles from here
+ * back into colors_and_type.css — that file is locked.
+ *
+ * Plan 04's BaseLayout.astro imports this file AFTER colors_and_type.css, so the
+ * --coral-*, --indigo-*, --cream-* tokens are in scope here.
+ */
+
+.btn-primary {
+  transition: background 0.15s ease, transform 0.08s ease;
+}
+.btn-primary:hover {
+  background: var(--coral-700);
+}
+.btn-primary:active {
+  transform: scale(0.97);
+}

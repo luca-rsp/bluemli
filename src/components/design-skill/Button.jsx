@@ -1,7 +1,11 @@
 /* eslint-disable */
 import React from 'react';
+import Mark from './Mark';
+
 // Pill-shaped buttons. Primary coral, secondary cream, ghost w/ hand underline.
-function Button({ variant = 'primary', size = 'md', children, onClick, type = 'button', ...rest }) {
+// Hover and press visuals live in src/styles/components.css under `.btn-primary`
+// (CSS-only — JS hover handlers would never fire without a client: directive).
+function Button({ variant = 'primary', size = 'md', children, type = 'button', ...rest }) {
   const sizes = {
     sm: { padding: '8px 14px', fontSize: 12 },
     md: { padding: '12px 22px', fontSize: 14 },
@@ -21,10 +25,9 @@ function Button({ variant = 'primary', size = 'md', children, onClick, type = 'b
     primary: { background: 'var(--coral-500)', color: 'var(--cream-50)', boxShadow: 'var(--shadow-sm)' },
     secondary: { background: 'var(--cream-50)', color: 'var(--indigo-500)', boxShadow: 'var(--shadow-sm)' },
   };
-  const [press, setPress] = React.useState(false);
   if (variant === 'ghost') {
     return (
-      <button type={type} onClick={onClick}
+      <button type={type}
               style={{ ...base, background: 'transparent', color: 'var(--coral-500)', padding: '4px 2px', position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 6 }}
               {...rest}>
         <span style={{ position: 'relative', paddingBottom: 4 }}>
@@ -35,13 +38,9 @@ function Button({ variant = 'primary', size = 'md', children, onClick, type = 'b
     );
   }
   return (
-    <button type={type} onClick={onClick}
-            onPointerDown={() => setPress(true)}
-            onPointerUp={() => setPress(false)}
-            onPointerLeave={() => setPress(false)}
-            style={{ ...base, ...variants[variant], transform: press ? 'scale(0.97)' : 'none' }}
-            onMouseEnter={e => { if (variant === 'primary') e.currentTarget.style.background = 'var(--coral-700)'; }}
-            onMouseLeave={e => { if (variant === 'primary') e.currentTarget.style.background = 'var(--coral-500)'; }}
+    <button type={type}
+            className={variant === 'primary' ? 'btn-primary' : undefined}
+            style={{ ...base, ...variants[variant] }}
             {...rest}>{children}</button>
   );
 }

@@ -1,6 +1,27 @@
 /* eslint-disable */
 import React from 'react';
-function PopupStrip({ onAppointment }) {
+import Mark from './Mark';
+
+function PopupStrip({ popup }) {
+  // popup: { name, date (ISO), startTime "HH:MM", endTime "HH:MM", tz, location }
+  // The "next pop-up" eyebrow + the popup data render the same strip the design
+  // skill demoed — but the values come from the prop (D-01: demo-loaded → real Phase 3 data).
+  const dateLabel = (() => {
+    if (!popup || !popup.date) return '';
+    // Format the ISO date using Intl.DateTimeFormat with the popup's timezone so
+    // the displayed weekday is correct regardless of build TZ.
+    try {
+      const d = new Date(popup.date + 'T' + (popup.startTime || '12:00') + ':00');
+      return new Intl.DateTimeFormat('en-US', {
+        weekday: 'long', month: 'long', day: 'numeric',
+        timeZone: popup.tz || 'America/Los_Angeles',
+      }).format(d);
+    } catch { return popup.date; }
+  })();
+  const timeLabel = popup && popup.startTime && popup.endTime
+    ? `${popup.startTime}–${popup.endTime}`
+    : '';
+
   return (
     <section id="pop-ups" style={{
       margin: '40px 24px',
@@ -32,18 +53,25 @@ function PopupStrip({ onAppointment }) {
       </h2>
 
       <div style={{ fontFamily: 'var(--font-display)', fontSize: 32, color: 'var(--olive-500)', lineHeight: 1.2, marginTop: 14 }}>
-        at <span style={{ color: 'var(--indigo-500)' }}>NOPA block party</span>
+        at <span style={{ color: 'var(--indigo-500)' }}>{popup?.location || 'TBD'}</span>
       </div>
 
       <div style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 18, color: 'var(--indigo-700)', marginTop: 14 }}>
-        Saturday, June 6 · 10–2 pm
+        {dateLabel}{timeLabel ? ` · ${timeLabel}` : ''}
       </div>
 
       <div style={{ marginTop: 28, display: 'flex', justifyContent: 'center', gap: 14 }}>
-        <Button variant="primary" onClick={() => onAppointment && onAppointment()}>book by appointment</Button>
-        <Button variant="ghost">add to calendar</Button>
+        {/* Real <a> to /say-hi instead of a button handler — no client: directive, so
+            the original handler would never have fired. SSR-safe. */}
+        <a href="/say-hi" style={{
+          display: 'inline-flex', alignItems: 'center', padding: '12px 24px',
+          background: 'var(--coral-500)', color: 'var(--cream-50)',
+          textDecoration: 'none', borderRadius: 8,
+          fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 16,
+        }}>book by appointment</a>
       </div>
     </section>
   );
 }
+
 export default PopupStrip;
