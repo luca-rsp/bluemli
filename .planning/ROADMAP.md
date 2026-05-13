@@ -38,7 +38,7 @@ Plans:
 - [x] 01-03-favicon-and-public-assets-PLAN.md — Generate favicon set from mark.svg, copy apple-touch-icon as-is, ship 3 placeholder gallery WebPs (FND-08)
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 01-04-baselayout-pages-sample-data-PLAN.md — BaseLayout.astro + 5 page placeholders + sample-data.ts; demo-loaded shell renders (FND-05, FND-12, FND-13)
+- [x] 01-04-baselayout-pages-sample-data-PLAN.md — BaseLayout.astro + 5 page placeholders + sample-data.ts; demo-loaded shell renders (FND-05, FND-12, FND-13)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 01-05-ci-brand-check-and-setup-PLAN.md — GitHub Actions required status check + brand grep scripts + Lighthouse CI on preview URL + SETUP.md for Cloudflare connect (FND-04, FND-10, FND-11, FND-12)
