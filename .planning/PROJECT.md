@@ -27,7 +27,7 @@ The product photography and brand voice come through cleanly on a cream-paper pa
 - [ ] Say Hi page with a contact form that emails the founder, plus visible Instagram link
 - [ ] Gallery entries managed via markdown files in `/content/gallery/` — adding/removing a piece is a single file change
 - [ ] Pop-up events managed via a YAML file (or per-event markdown) in `/content`, with past/upcoming split derived from date
-- [ ] Site builds as static assets and deploys to Cloudflare Pages on every push to `main`
+- [ ] Site builds as static assets and deploys to Cloudflare Workers with Static Assets on every push to `main`
 - [ ] Live at apex `studiobluemli.com` (and `www.` redirects to apex) via the existing Cloudflare account
 - [ ] Reuses the `studio-bluemli-design` skill's React components, color/type tokens, and product photography conventions; cream background, never white
 - [ ] Logo (`mark.svg`) renders in header and as favicon, with mark-color variants used contextually
@@ -62,10 +62,10 @@ The product photography and brand voice come through cleanly on a cream-paper pa
 
 ## Constraints
 
-- **Hosting**: Cloudflare Workers with Static Assets — a single Worker serves both the static bundle and the `/api/contact` endpoint via `wrangler.toml`'s `assets.run_worker_first: ["/api/*"]`. (Initial plan was Cloudflare Pages; corrected because `@astrojs/cloudflare@13` — required by Astro 6 — dropped Pages support, and Cloudflare froze Pages investment in favor of Workers.)
+- **Hosting**: Cloudflare Workers with Static Assets — a single Worker serves both the static bundle and the `/api/contact` endpoint via `wrangler.jsonc`'s `assets.run_worker_first: ["/api/*"]`. (Initial plan was Cloudflare Pages; corrected because `@astrojs/cloudflare@13` — required by Astro 6 — dropped Pages support, and Cloudflare froze Pages investment in favor of Workers.)
 - **Stack**: Astro — picked so the existing React JSX components from the design skill can be reused as-is, while shipping near-zero client JS.
 - **Content storage**: Markdown + YAML files in the repo. No database. Structure must remain compatible with a future git-backed CMS.
-- **Budget**: Free tier wherever possible. Cloudflare Pages free, Umami Cloud free, Resend/Mailchannels free, Turnstile free, GitHub repo.
+- **Budget**: Free tier wherever possible. Cloudflare Workers free, Umami Cloud free, Resend/Mailchannels free, Turnstile free, GitHub repo.
 - **Brand fidelity**: Must follow `studio-bluemli-design/SKILL.md` rules — cream background, no white; specific palette; specific fonts (with documented substitutions); product photography is the brand.
 - **Privacy**: Cookieless analytics (Umami) so no EU consent banner is needed.
 - **Performance**: Static-first, image-optimized; phone-first; target Lighthouse mobile ≥ 90 across the board.
