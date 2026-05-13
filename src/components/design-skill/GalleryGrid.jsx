@@ -2,22 +2,19 @@
 import React from 'react';
 
 /**
- * GalleryGrid renders a responsive grid of gallery pieces.
- *
- * @param {Array<{slug: string, name: string, price: number, status: string, photo: string}>} pieces
- * slug is Astro v2 entry.id (mapped in gallery.astro to keep the existing prop shape)
- *
  * @typedef {Object} GalleryGridPiece
- * @property {string} slug
+ * @property {string} slug - Astro v2 entry.id (mapped in gallery.astro)
  * @property {string} name
  * @property {number} price
- * @property {'available' | 'sold' | 'one-of-one' | 'reserved'} status
+ * @property {string} status
  * @property {string} photo
+ */
+
+/**
+ * GalleryGrid renders a responsive grid of gallery pieces.
+ * Each item's `slug` is the Astro v2 entry.id value mapped by gallery.astro.
  *
- * @typedef {Object} GalleryGridProps
- * @property {Array<GalleryGridPiece>} [pieces]
- *
- * @param {GalleryGridProps} props
+ * @param {{ pieces?: GalleryGridPiece[] }} props
  */
 function GalleryGrid({ pieces = [] }) {
   return (
