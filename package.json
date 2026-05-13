@@ -14,7 +14,8 @@
     "sync:design-skill": "node scripts/sync-design-skill.mjs",
     "favicons": "node scripts/generate-favicons.mjs",
     "ci:brand-check": "bash scripts/check-brand-rules.sh",
-    "ci:lowercase-check": "bash scripts/check-lowercase-filenames.sh"
+    "ci:lowercase-check": "bash scripts/check-lowercase-filenames.sh",
+    "prebuild:images": "node scripts/prebuild-images.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^13.5.0",
@@ -31,9 +32,11 @@
     "@astrojs/check": "^0.9.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "heic-convert": "^2.1.0",
     "icon-gen": "^5.0.0",
     "prettier": "^3.3.0",
     "prettier-plugin-astro": "^0.14.1",
+    "sharp": "^0.34.5",
     "typescript": "^5.6.0",
     "wrangler": "^4.0.0"
   }

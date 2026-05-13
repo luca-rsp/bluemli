@@ -42,6 +42,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate responsive WebP variants (prebuild)
+        run: pnpm run prebuild:images
+
       - name: Typecheck
         run: pnpm exec astro check
 
