@@ -1,10 +1,11 @@
 ---
 phase: 2
 slug: content-schema-gallery
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-05-13
+reviewed_at: 2026-05-13
 ---
 
 # Phase 2 — UI Design Contract
@@ -315,11 +316,13 @@ No animations, no transitions beyond the existing global `a { transition: color 
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: FLAG — 7 sizes / 6 weights exceed template 4-size/2-weight cap; documented brand-skill override. `colors_and_type.css` is locked upstream by CLAUDE.md and the brand non-negotiable "never invent new fonts/sizes/weights"; each role-to-size mapping comes from the token file or sketch-findings-bluemli (48px piece name, 16px card name). Not a Phase-2 invention.
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved (2026-05-13) — 5 PASS / 1 FLAG (non-blocking, documented exception)
+
+**Reviewer recommendation:** During execution, verify every used size string in `.astro` files matches a `--fs-*` token name from `colors_and_type.css` (no raw px values for type).
