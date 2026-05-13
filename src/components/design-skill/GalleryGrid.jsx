@@ -1,6 +1,28 @@
 /* eslint-disable */
 import React from 'react';
 
+/**
+ * GalleryGrid renders a responsive grid of gallery pieces.
+ *
+ * The `pieces` prop is intentionally typed with a permissive shape (each item
+ * has slug/name/price/status/photo) rather than imported from src/sample-data.ts —
+ * Phase 2 replaces sample-data with the real `gallery` Content Collection and
+ * the per-item shape there will be similar but not identical. This JSDoc
+ * typedef exists so `astro check` does not infer the default `[]` as `never[]`
+ * and reject callers like `<GalleryGrid pieces={sampleGallery} />`.
+ *
+ * @typedef {Object} GalleryGridPiece
+ * @property {string} slug
+ * @property {string} name
+ * @property {number} price
+ * @property {'available' | 'sold' | 'one-of-one' | 'reserved'} status
+ * @property {string} photo
+ *
+ * @typedef {Object} GalleryGridProps
+ * @property {Array<GalleryGridPiece>} [pieces]
+ *
+ * @param {GalleryGridProps} props
+ */
 function GalleryGrid({ pieces = [] }) {
   return (
     <section id="gallery" style={{
