@@ -1,21 +1,59 @@
 ---
-// src/pages/gallery.astro — Gallery shell (D-18).
-// Phase 1: GalleryGrid renders 3 sample pieces from sample-data.
-// Phase 2: GalleryGrid renders the real `gallery` content collection.
-//
-// prerender = true: required under Plan 01's `output: 'server'` mode so the
-// adapter emits HTML at dist/client/gallery/index.html. Phase 2 may flip this
-// to false if the gallery becomes runtime-driven, but Phase 1 is static.
+// src/pages/gallery.astro — Gallery index (CNT-07).
+// Phase 2: rewired from Phase 1's sample import to the real `gallery`
+// Content Collection. Sort newest-first by published_at (D-14). 400w WebP
+// variants for grid thumbnails (D-03 — 02-RESEARCH.md §5).
+// REVIEWS.md LOW-4: empty-state branch for pieces.length === 0.
 export const prerender = true;
 
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/design-skill/Header';
 import GalleryGrid from '../components/design-skill/GalleryGrid';
 import Footer from '../components/design-skill/Footer';
-import { sampleGallery } from '../sample-data';
+
+const allPieces = await getCollection('gallery');
+
+// D-14: sort by published_at desc (ISO date strings sort lexicographically — newest first).
+const pieces = allPieces
+  .sort((a, b) => b.data.published_at.localeCompare(a.data.published_at))
+  .map((entry) => ({
+    slug:   entry.id,                                    // Astro 6 v2: entry.id is the canonical identifier
+    name:   entry.data.name,
+    price:  entry.data.price,
+    status: entry.data.status,
+    photo:  `/gallery/${entry.id}/hero-400.webp`,        // D-03: 400w for grid thumbnails
+  }));
 ---
 <BaseLayout title="Gallery — Studio Bluemli">
   <Header slot="header" active="/gallery" />
-  <GalleryGrid pieces={sampleGallery} />
+  {pieces.length === 0 ? (
+    <p style={{
+      textAlign: 'center',
+      padding: 'var(--space-9) var(--space-5)',
+      fontFamily: 'var(--font-body)',
+      color: 'var(--color-fg-muted)'
+    }}>
+      New pieces coming soon — follow along on Instagram.
+    </p>
+  ) : (
+    <GalleryGrid pieces={pieces} />
+  )}
   <Footer slot="footer" />
 </BaseLayout>
+
+<style is:global>
+  /* Per-status color contract (UI-SPEC §Color "Status enum color contract"; sketch-findings 002-A).
+     is:global because GalleryGrid.jsx is a React component — Astro's auto-scoped
+     <style> hashes don't reach JSX className strings. */
+  .card-status.available   { color: var(--color-fg-muted);     font-weight: 400; }
+  .card-status.sold        { color: var(--lavender-500);       font-weight: 700; }
+  .card-status.one-of-one  { color: var(--color-accent-leaf);  font-weight: 700; }
+  .card-status.reserved    { color: var(--lavender-500);       font-weight: 700; }
+
+  /* FND-13 focus-visible on the link-wrapped grid card. */
+  .card:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 4px;
+  }
+</style>

@@ -2,26 +2,19 @@
 import React from 'react';
 
 /**
- * GalleryGrid renders a responsive grid of gallery pieces.
- *
- * The `pieces` prop is intentionally typed with a permissive shape (each item
- * has slug/name/price/status/photo) rather than imported from src/sample-data.ts —
- * Phase 2 replaces sample-data with the real `gallery` Content Collection and
- * the per-item shape there will be similar but not identical. This JSDoc
- * typedef exists so `astro check` does not infer the default `[]` as `never[]`
- * and reject callers like `<GalleryGrid pieces={sampleGallery} />`.
- *
  * @typedef {Object} GalleryGridPiece
- * @property {string} slug
+ * @property {string} slug - Astro v2 entry.id (mapped in gallery.astro)
  * @property {string} name
  * @property {number} price
- * @property {'available' | 'sold' | 'one-of-one' | 'reserved'} status
+ * @property {string} status
  * @property {string} photo
+ */
+
+/**
+ * GalleryGrid renders a responsive grid of gallery pieces.
+ * Each item's `slug` is the Astro v2 entry.id value mapped by gallery.astro.
  *
- * @typedef {Object} GalleryGridProps
- * @property {Array<GalleryGridPiece>} [pieces]
- *
- * @param {GalleryGridProps} props
+ * @param {{ pieces?: GalleryGridPiece[] }} props
  */
 function GalleryGrid({ pieces = [] }) {
   return (
@@ -45,25 +38,31 @@ function GalleryGrid({ pieces = [] }) {
 
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
         gap: 24,
       }}>
         {pieces.map((piece) => (
-          <article key={piece.slug} style={{
+          <a key={piece.slug} href={`/gallery/${piece.slug}`} className="card" style={{
             background: 'var(--color-surface-card)',
             borderRadius: 8,
             overflow: 'hidden',
+            display: 'block',
+            textDecoration: 'none',
+            color: 'inherit',
           }}>
             <img src={piece.photo} alt={piece.name} width={400} height={500}
-                 style={{ width: '100%', height: 'auto', aspectRatio: '4/5', objectFit: 'cover', display: 'block' }} />
+                 loading="lazy" decoding="async"
+                 style={{ width: '100%', height: 'auto', aspectRatio: '4/5', objectFit: 'cover', display: 'block', background: 'var(--cream-200)' }} />
             <div style={{ padding: '12px 16px 16px' }}>
-              <div style={{ fontFamily: 'var(--font-body)', fontSize: 16, fontWeight: 700, color: 'var(--color-fg-strong)' }}>{piece.name}</div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4, fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--color-fg-muted)' }}>
-                <span>${piece.price}</span>
-                <span>{piece.status === 'available' ? 'Available' : piece.status === 'sold' ? 'Sold' : piece.status === 'one-of-one' ? 'One of one' : 'Reserved'}</span>
+              <div style={{ fontFamily: 'var(--font-body)', fontSize: 16, fontWeight: 700, color: 'var(--color-fg-strong)', marginBottom: 4 }}>{piece.name}</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', fontFamily: 'var(--font-body)', fontSize: 14 }}>
+                <span style={{ fontWeight: 700, color: 'var(--color-fg-strong)' }}>${piece.price}</span>
+                <span className={`card-status ${piece.status}`}>
+                  {piece.status === 'available' ? 'Available' : piece.status === 'sold' ? 'Sold' : piece.status === 'one-of-one' ? 'One of one' : 'Reserved'}
+                </span>
               </div>
             </div>
-          </article>
+          </a>
         ))}
       </div>
     </section>

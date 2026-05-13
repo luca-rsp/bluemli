@@ -63,6 +63,21 @@ jobs:
       - name: No-hydration / no-browser-JS check (FND-01 — REVIEW FIX M1)
         run: bash scripts/check-no-hydration.sh
 
+      - name: Phase 2 smoke (built HTML greps — MEDIUM-4 replacement for Playwright in CI)
+        run: |
+          # Gallery index references all 6 seeded slugs
+          test "$(grep -oE '/gallery/cluster-[a-z]+\b' dist/client/gallery/index.html | sort -u | wc -l)" = 6
+          # Each detail page has og:image in <head> (HIGH-4 — any host accepted)
+          for slug in blush cobalt coral lavender saffron sage; do
+            awk '/<head>/,/<\/head>/{print}' "dist/client/gallery/cluster-$slug/index.html" \
+              | grep -qE 'og:image.*https?://.+/gallery/cluster-'"$slug"'/hero-800\.webp' \
+              || { echo "MISSING og:image in head: $slug"; exit 1; }
+          done
+          # cluster-sage (status: available per Plan 01) must NOT contain the literal "Sold" label
+          awk '/<body/,/<\/body>/{print}' "dist/client/gallery/cluster-sage/index.html" \
+            | grep -q '\bSold\b' && { echo "FAIL: cluster-sage (available) shows 'Sold' text"; exit 1; }
+          echo "[smoke] Phase 2 dist/client greps passed."
+
       # Lighthouse CI (FND-12). Canonical path: lighthouserc.json declares
       # staticDistDir: "./dist/client" and the action serves it over a local
       # HTTP server it spawns. Audits all 5 prerendered routes at mobile form
