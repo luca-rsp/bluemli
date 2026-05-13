@@ -1,0 +1,313 @@
+/* ============================================================
+   STUDIO BLUEMLI — Colors & Type
+   "Whimsical, bright, colorful earrings. Made in NOPA, SF."
+   ============================================================
+   This file defines every color and type token used across the
+   Bluemli brand. Import it once at the root of any artifact:
+       <link rel="stylesheet" href="/colors_and_type.css">
+   Then use the CSS variables. Semantic vars (e.g. --color-bg)
+   reference palette vars (--cream-100), so palette tweaks
+   propagate everywhere.
+   ============================================================ */
+
+/* ---------- Webfonts (Google Fonts — see README "font substitutions") ---------- */
+
+:root {
+  /* ============================================================
+     PALETTE — pulled directly from the pop-up poster
+     ============================================================ */
+
+  /* Paper / cream — the "page" of every brand surface */
+  --cream-50:  #FAEDE0;   /* lightest paper highlight */
+  --cream-100: #F5DCC7;   /* poster background, default page */
+  --cream-200: #ECCDB3;   /* paper shadow, hover for cream surfaces */
+  --cream-300: #DDB99A;   /* deep cream, badge edges */
+
+  /* Coral / terracotta — the "Studio Bluemli" wordmark color */
+  --coral-300: #E89A82;   /* tints, washes */
+  --coral-500: #D6553B;   /* primary brand red — wordmark, hot accent */
+  --coral-700: #A93C26;   /* press / depth */
+
+  /* Pop pink — "pop-up" stamp, "made in NOPA" badge, IG logo */
+  --pink-200:  #F4C2CB;   /* soft pink wash */
+  --pink-400:  #E89AAA;   /* badge fill */
+  --pink-500:  #D87593;   /* "pop-up" pink */
+  --pink-600:  #C75A7C;   /* press */
+  --pink-hot:  #E94B7E;   /* IG logo hot pink (more saturated than poster pinks) */
+
+  /* Indigo — "whimsical, bright, colorful earrings" body color */
+  --indigo-400: #5A6BB3;
+  --indigo-500: #3E4E8B;   /* primary body text on cream */
+  --indigo-700: #2A3669;   /* deepest text */
+
+  /* Olive — "NOPNA" / leaves / stems */
+  --olive-400: #9AA065;
+  --olive-500: #6E7438;
+  --olive-600: #545A27;
+
+  /* Mustard yellow — small flowers, sparkles */
+  --mustard-400: #F0C966;
+  --mustard-500: #E9B23F;
+  --mustard-600: #BE8C24;
+
+  /* Lavender — bottom-right pressed flower */
+  --lavender-400: #B9A8CE;
+  --lavender-500: #9B85B5;
+  --lavender-600: #7A6594;
+
+  /* Neutral ink — sparing use for fine print */
+  --ink-900: #2B2014;     /* warm near-black, sits on cream */
+  --ink-600: #6C5A47;     /* warm gray, secondary text on cream */
+  --ink-400: #A48F77;     /* hint, dividers */
+
+  /* True dark — only for Instagram dark-mode surfaces */
+  --night-900: #0B0B0D;
+  --night-800: #161618;
+  --night-700: #2A2A2D;
+
+  /* ============================================================
+     SEMANTIC COLOR TOKENS
+     ============================================================ */
+
+  /* Surfaces */
+  --color-bg:           var(--cream-100);   /* default page */
+  --color-bg-soft:      var(--cream-50);    /* card on page */
+  --color-bg-deep:      var(--cream-200);   /* sunken surface */
+  --color-bg-dark:      var(--night-900);   /* IG / dark mode */
+  --color-surface-card: var(--cream-50);
+  --color-overlay-pink: var(--pink-400);    /* watercolor blob badge */
+
+  /* Foreground / text */
+  --color-fg:           var(--indigo-500);  /* default body text */
+  --color-fg-strong:    var(--indigo-700);  /* headings, emphasis */
+  --color-fg-muted:     var(--ink-600);     /* captions, meta */
+  --color-fg-hint:      var(--ink-400);     /* placeholders, dividers */
+  --color-fg-on-dark:   var(--cream-50);
+  --color-fg-on-coral:  var(--cream-50);
+
+  /* Accents (use sparingly + intentionally — never combine more than 3 in one composition) */
+  --color-accent-hot:   var(--coral-500);   /* primary CTA, brand mark */
+  --color-accent-pop:   var(--pink-500);    /* secondary pop, "pop-up" energy */
+  --color-accent-leaf:  var(--olive-500);   /* grounding, place names */
+  --color-accent-sun:   var(--mustard-500); /* sparkles, highlights, sale badges */
+  --color-accent-sky:   var(--indigo-500);  /* tagline, body emphasis */
+  --color-accent-iris:  var(--lavender-500);
+
+  /* Interactive states */
+  --color-link:         var(--coral-500);
+  --color-link-hover:   var(--coral-700);
+  --color-focus-ring:   var(--coral-500);
+
+  /* Borders — Bluemli rarely uses hard borders; when needed, use these */
+  --color-border-soft:  rgba(43, 32, 20, 0.08);
+  --color-border:       rgba(43, 32, 20, 0.16);
+  --color-border-strong:rgba(43, 32, 20, 0.32);
+
+  /* ============================================================
+     TYPE — font families
+     ============================================================
+     Bluemli mixes FOUR voices:
+       1. The retro disco wordmark   → "Studio Bluemli" everywhere brand-marky
+       2. The marker poster headline → playful, slightly wobbly section titles
+       3. The handwritten tagline    → friendly inline asides
+       4. The clean rounded sans     → product detail, UI, long-form
+     ============================================================ */
+  --font-wordmark:    "Bagel Fat One", "Pacifico", "Lobster", system-ui, sans-serif;
+  --font-display:     "Caveat Brush", "Permanent Marker", "Marker Felt", cursive;
+  --font-hand:        "Caveat", "Patrick Hand", "Comic Sans MS", cursive;
+  --font-body:        "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono:        "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+
+  /* Type scale — designed for a 16px base on web, 1080-tall posters at scale 1.0 */
+  --fs-xxs: 12px;
+  --fs-xs:  14px;
+  --fs-sm:  16px;
+  --fs-md:  18px;
+  --fs-lg:  22px;
+  --fs-xl:  28px;
+  --fs-2xl: 36px;
+  --fs-3xl: 48px;
+  --fs-4xl: 64px;
+  --fs-5xl: 88px;
+  --fs-6xl: 128px;
+
+  /* Line heights — handwriting sits looser than sans */
+  --lh-tight:  1.05;
+  --lh-snug:   1.2;
+  --lh-normal: 1.45;
+  --lh-loose:  1.7;
+
+  /* Letter spacing — wordmark stays tight; UI caps get a hair of air */
+  --ls-tight:  -0.02em;
+  --ls-normal: 0;
+  --ls-loose:  0.04em;
+  --ls-caps:   0.08em;
+
+  /* ============================================================
+     SPACING — based on an 8-point grid, with a 4-point half step
+     ============================================================ */
+  --space-0:  0;
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-7:  48px;
+  --space-8:  64px;
+  --space-9:  96px;
+  --space-10: 128px;
+
+  /* ============================================================
+     RADII — soft and generous. Bluemli is never sharp.
+     ============================================================ */
+  --radius-xs:   4px;
+  --radius-sm:   8px;
+  --radius-md:   14px;
+  --radius-lg:   22px;
+  --radius-xl:   32px;
+  --radius-pill: 999px;
+  --radius-blob: 60% 40% 55% 45% / 50% 60% 40% 50%;  /* watercolor-blob badge shape */
+
+  /* ============================================================
+     SHADOWS — soft, warm, low-contrast. Never a hard drop.
+     ============================================================ */
+  --shadow-xs: 0 1px 2px rgba(168, 96, 60, 0.10);
+  --shadow-sm: 0 4px 10px rgba(168, 96, 60, 0.12);
+  --shadow-md: 0 10px 22px rgba(168, 96, 60, 0.14);
+  --shadow-lg: 0 18px 40px rgba(168, 96, 60, 0.18);
+  --shadow-press: inset 0 2px 0 rgba(43, 32, 20, 0.08);
+
+  /* ============================================================
+     MOTION
+     ============================================================ */
+  --ease-soft:   cubic-bezier(0.32, 0.72, 0.32, 1);    /* default ease */
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);    /* button presses, pop-ins */
+  --dur-fast:    140ms;
+  --dur-base:    220ms;
+  --dur-slow:    420ms;
+}
+
+/* ============================================================
+   SEMANTIC ELEMENT STYLES — drop-in defaults
+   ============================================================ */
+
+html, body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* The wordmark — only for "Studio Bluemli" or sister brand marks. Never for body text. */
+.wordmark {
+  font-family: var(--font-wordmark);
+  font-weight: 400;
+  letter-spacing: var(--ls-tight);
+  color: var(--coral-500);
+  line-height: 1;
+}
+
+/* Poster / hero headline — hand-lettered marker. */
+h1, .h1 {
+  font-family: var(--font-display);
+  font-size: var(--fs-5xl);
+  line-height: var(--lh-tight);
+  color: var(--coral-500);
+  letter-spacing: var(--ls-normal);
+  font-weight: 400;
+  margin: 0 0 var(--space-4);
+}
+
+/* Section title — still hand-lettered, smaller. */
+h2, .h2 {
+  font-family: var(--font-display);
+  font-size: var(--fs-3xl);
+  line-height: var(--lh-snug);
+  color: var(--coral-500);
+  font-weight: 400;
+  margin: 0 0 var(--space-3);
+}
+
+/* Sub-section — switches to clean sans for legibility. */
+h3, .h3 {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: var(--fs-xl);
+  line-height: var(--lh-snug);
+  color: var(--color-fg-strong);
+  letter-spacing: var(--ls-normal);
+  margin: 0 0 var(--space-3);
+}
+
+h4, .h4 {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--fs-lg);
+  line-height: var(--lh-snug);
+  color: var(--color-fg-strong);
+  margin: 0 0 var(--space-2);
+}
+
+/* The hand-tagline — sparingly, for friendly inline asides in parentheses or quotes. */
+.tagline, .hand {
+  font-family: var(--font-hand);
+  font-weight: 500;
+  font-size: var(--fs-xl);
+  color: var(--indigo-500);
+  line-height: var(--lh-snug);
+}
+
+/* Body paragraph */
+p, .p {
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+  color: var(--color-fg);
+  margin: 0 0 var(--space-3);
+  text-wrap: pretty;
+}
+
+/* Eyebrow — small label above a hero, ALL CAPS in sans for clarity */
+.eyebrow {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--color-accent-leaf);
+}
+
+/* Caption — under product photos, meta */
+.caption, small {
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  color: var(--color-fg-muted);
+  font-weight: 500;
+}
+
+/* Inline emphasis */
+strong, b { font-weight: 700; color: var(--color-fg-strong); }
+em, i { font-style: italic; }
+
+/* Links */
+a {
+  color: var(--color-link);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  transition: color var(--dur-fast) var(--ease-soft);
+}
+a:hover { color: var(--color-link-hover); }
+
+/* Code */
+code, pre {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  background: var(--cream-200);
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius-xs);
+}
