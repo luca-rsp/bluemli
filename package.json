@@ -15,7 +15,8 @@
     "favicons": "node scripts/generate-favicons.mjs",
     "ci:brand-check": "bash scripts/check-brand-rules.sh",
     "ci:lowercase-check": "bash scripts/check-lowercase-filenames.sh",
-    "prebuild:images": "node scripts/prebuild-images.mjs"
+    "prebuild:images": "node scripts/prebuild-images.mjs",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^13.5.0",
@@ -38,6 +39,7 @@
     "prettier-plugin-astro": "^0.14.1",
     "sharp": "^0.34.5",
     "typescript": "^5.6.0",
-    "wrangler": "^4.0.0"
+    "wrangler": "^4.0.0",
+    "@playwright/test": "^1.52.0"
   }
 }
