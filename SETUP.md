@@ -25,14 +25,16 @@ Otherwise, just push the Phase 1 work to `main`.
 3. Authorize GitHub access and select this repo.
 4. Build settings:
    - **Build command:** `pnpm install --frozen-lockfile && pnpm build && node scripts/write-assetsignore.mjs`
-   - **Deploy command (production):** `npx wrangler deploy`
-   - **Deploy command (preview):** `npx wrangler versions upload`
+   - **Deploy command (production):** `npx wrangler deploy` (default)
+   - **Non-production branch deploy command:** `npx wrangler versions upload` (default — produces preview URLs without promoting to production)
    - **Root directory:** `/` (default)
    - **Production branch:** `main`
-5. **Toggle "Non-production branch builds: ON"** — this is what enables per-branch preview URLs.
-   Without it, only `main` deploys.
+5. Enable per-branch preview builds: **Settings → Build → Branch control**, check
+   **"Builds for non-production branches"**. Without this, only `main` triggers builds.
 
-Source: https://developers.cloudflare.com/workers/ci-cd/builds/
+Sources (verified against current docs via context7):
+- Build settings overview: https://developers.cloudflare.com/workers/ci-cd/builds/configuration/
+- Non-production branches + the "Builds for non-production branches" checkbox: https://developers.cloudflare.com/workers/ci-cd/builds/build-branches/
 
 ## 3. Note the preview URL format
 
@@ -49,16 +51,35 @@ Phase 1 ships on `*.workers.dev` only. The apex `studiobluemli.com` resolves to 
 
 (Required for FND-10 / FND-11: CI blocks PR merge on brand violations.)
 
+GitHub supports two equivalent paths for this — **classic Branch protection rules** OR the newer
+**Rulesets**. Rulesets are GitHub's current recommendation (better discoverability, can stack
+multiple, can be applied without admin access). Either works for Phase 1.
+
+### Option A — Rulesets (recommended)
+
+1. Open the GitHub repo → **Settings → Rules → Rulesets → New ruleset → New branch ruleset**.
+2. Name: `main protection`. Enforcement status: **Active**.
+3. Target branches → **Include default branch** (or `Add target → Include by pattern: main`).
+4. Branch protections — check **Require status checks to pass**:
+   - Click the **+** next to the status-checks list and add **`Build & brand check`** (string-exact;
+     this is the `name:` of the job in `.github/workflows/ci.yml`).
+   - (Recommended) Also check **Require branches to be up to date before merging** (strict mode).
+5. (Recommended) Check **Require a pull request before merging** — at least 0 reviews is fine
+   for a solo project, the point is to force changes through CI.
+6. (Recommended) Check **Block force pushes** — closes the T-05-04 repudiation gap
+   noted in the Plan 05 threat register.
+7. Create.
+
+### Option B — Classic Branch protection rules
+
 1. Open the GitHub repo → **Settings → Branches**.
 2. Click **Add branch protection rule** (or edit the existing rule for `main`).
 3. Branch name pattern: `main`.
 4. Check **Require status checks to pass before merging**.
-5. In the status-checks search box, type **`Build & brand check`** — this is the job name
-   from `.github/workflows/ci.yml` and MUST match exactly. Click it to add as required.
-6. (Optional but recommended) Check **Require pull request before merging** so changes
-   to `main` always go through a PR (and therefore CI).
-7. (Optional but recommended) Check **Do not allow force pushes** — closes the
-   T-05-04 repudiation gap noted in the Plan 05 threat register.
+5. In the status-checks search box, type **`Build & brand check`** — string-exact, matches the
+   `name:` of the job in `.github/workflows/ci.yml`. Click it to add as required.
+6. (Recommended) Check **Require pull request before merging**.
+7. (Recommended) Check **Do not allow force pushes** (closes T-05-04).
 8. Save.
 
 ## 5. Verify the loop end-to-end
@@ -83,10 +104,16 @@ Phase 1 ships on `*.workers.dev` only. The apex `studiobluemli.com` resolves to 
 them. `wrangler secret list` should be empty after Phase 1.
 
 The CI workflow references `${{ secrets.LHCI_GITHUB_APP_TOKEN }}` on the Lighthouse CI step.
-This secret is **optional** — when absent, `treosh/lighthouse-ci-action` falls back to
-`temporaryPublicStorage: true` (uploads reports to a public anonymous bucket so the action
-link works). Adding the token later enables the official Lighthouse CI GitHub App's
-in-PR commenting; not required for Phase 1.
+This secret is **optional**. The workflow always sets `temporaryPublicStorage: true` in
+`ci.yml`, which uploads each Lighthouse report to Google Cloud's anonymous temporary bucket
+(reports are publicly accessible via the action's link and auto-deleted after 7 days). The
+`LHCI_GITHUB_APP_TOKEN` is a separate path — installing the [Lighthouse CI GitHub App](https://github.com/apps/lighthouse-ci)
+and storing its token enables in-PR commenting and a dedicated check run. Not required for
+Phase 1; if you don't install the app, the env variable just resolves to empty and the action
+proceeds with public-storage uploads only.
+
+Verified against `treosh/lighthouse-ci-action` README via context7. `temporaryPublicStorage`
+is an explicit input — it is not a fallback that auto-activates when the token is missing.
 
 ---
 
