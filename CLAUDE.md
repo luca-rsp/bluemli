@@ -175,6 +175,7 @@ Architecture not yet mapped. Follow existing patterns found in the codebase.
 | Skill | Description | Path |
 |-------|-------------|------|
 | studio-bluemli-design | Use this skill to generate well-branded interfaces and assets for Studio Bluemli — a small jewelry studio in NoPa, San Francisco that makes whimsical, bright, colorful hand-assembled beaded-cluster earrings. This skill produces production-ready or throwaway designs across the website (landing + gallery), Instagram (feed posts, stories, profile), and pop-up posters. It contains essential design guidelines, colors, type, fonts, product photography, and React UI kit components for prototyping. | `.claude/skills/studio-bluemli-design/SKILL.md` |
+| sketch-findings-bluemli | Validated design decisions, CSS patterns, and HTML structures from sketch experiments. Auto-load when implementing the gallery surfaces (Phase 2 `/gallery` + `/gallery/<slug>`) or any future per-piece page template. Covers the editorial-plate detail-page layout and the per-status color treatment for the grid. | `.claude/skills/sketch-findings-bluemli/SKILL.md` |
 <!-- GSD:skills-end -->
 
 <!-- GSD:workflow-start source:GSD defaults -->
