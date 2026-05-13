@@ -12,7 +12,7 @@ Ship the five-page editorial portfolio at studiobluemli.com in five coarse, depe
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundations & Brand System** - Astro 6 on Workers + Static Assets, design-skill components copied in, brand non-negotiables enforced via CI
+- [x] **Phase 1: Foundations & Brand System** - Astro 6 on Workers + Static Assets, design-skill components copied in, brand non-negotiables enforced via CI _(complete 2026-05-13)_
 - [ ] **Phase 2: Content Schema & Gallery** - Strict Zod collections with per-slug image co-location; gallery grid + per-piece detail pages live on preview
 - [ ] **Phase 3: Page Composition & Pop-ups** - Landing, popups (timezone-correct split + daily cron), about, say-hi shell, shared SEO, sitemap
 - [ ] **Phase 4: Contact Form & Deliverability** - `/api/contact` Worker with Turnstile + honeypot + KV rate limit + Resend; SPF/DKIM/DMARC co-existing with MS365
@@ -137,7 +137,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundations & Brand System | 0/TBD | Not started | - |
+| 1. Foundations & Brand System | 5/5 | Complete | 2026-05-13 |
 | 2. Content Schema & Gallery | 0/TBD | Not started | - |
 | 3. Page Composition & Pop-ups | 0/TBD | Not started | - |
 | 4. Contact Form & Deliverability | 0/TBD | Not started | - |
