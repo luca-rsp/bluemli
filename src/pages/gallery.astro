@@ -6,12 +6,13 @@
 // REVIEWS.md LOW-4: empty-state branch for pieces.length === 0.
 export const prerender = true;
 
-import { getCollection } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/design-skill/Header';
 import GalleryGrid from '../components/design-skill/GalleryGrid';
 import Footer from '../components/design-skill/Footer';
 
+const site = (await getEntry('site', 'default'))!.data;
 const allPieces = await getCollection('gallery');
 
 // D-14: sort by published_at desc (ISO date strings sort lexicographically — newest first).
@@ -39,7 +40,7 @@ const pieces = allPieces
   ) : (
     <GalleryGrid pieces={pieces} />
   )}
-  <Footer slot="footer" />
+  <Footer slot="footer" igHandle={site.ig_handle} contactEmail={site.contact_email} />
 </BaseLayout>
 
 <style is:global>

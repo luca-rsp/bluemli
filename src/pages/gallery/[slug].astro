@@ -8,7 +8,7 @@
 // Layout follows sketch 001-A (single-column photo-forward plate, 640px max).
 export const prerender = true;
 
-import { getCollection } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/design-skill/Header';
 import Footer from '../../components/design-skill/Footer';
@@ -30,6 +30,8 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { name, price, status, description } = entry.data;
 const slug = entry.id;
+
+const site = (await getEntry('site', 'default'))!.data;
 
 // Image URLs — 800w for hero (D-12) + 1600w via srcset for Retina.
 const heroSrc    = `/gallery/${slug}/hero-800.webp`;
@@ -87,9 +89,9 @@ const statusLabel =
     <p class="description">{description}</p>
 
     <div class="cta-stack">
-      <a class="cta-button" href="https://ig.me/m/studiobluemli">{ctaCopy}</a>
+      <a class="cta-button" href={site.ig_dm_url}>{ctaCopy}</a>
       <span class="mailto-fallback">
-        or email <a href="mailto:hi@studiobluemli.com">hi@studiobluemli.com</a>
+        or email <a href={`mailto:${site.contact_email}`}>{site.contact_email}</a>
       </span>
     </div>
 
@@ -98,7 +100,7 @@ const statusLabel =
     </div>
   </div>
 
-  <Footer slot="footer" />
+  <Footer slot="footer" igHandle={site.ig_handle} contactEmail={site.contact_email} />
 </BaseLayout>
 
 <style>

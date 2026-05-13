@@ -8,13 +8,16 @@
 // handles dynamically — they're independent routes.
 export const prerender = true;
 
+import { getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/design-skill/Header';
 import AppointmentForm from '../components/design-skill/AppointmentForm';
 import Footer from '../components/design-skill/Footer';
+
+const site = (await getEntry('site', 'default'))!.data;
 ---
 <BaseLayout title="Say Hi — Studio Bluemli">
   <Header slot="header" active="/say-hi" />
   <AppointmentForm />
-  <Footer slot="footer" />
+  <Footer slot="footer" igHandle={site.ig_handle} contactEmail={site.contact_email} />
 </BaseLayout>

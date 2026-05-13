@@ -13,7 +13,7 @@
 // Server Mode" and Plan 01-01 SUMMARY's "Output Mode Verification" section.
 export const prerender = true;
 
-import { getCollection } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/design-skill/Header';
 import Hero from '../components/design-skill/Hero';
@@ -23,6 +23,8 @@ import Footer from '../components/design-skill/Footer';
 
 // TODO: Phase 3 (PAG-01, PAG-03) replaces this null stub with getCollection('popups').
 const nextPopup = null;
+
+const site = (await getEntry('site', 'default'))!.data;
 
 const allPieces = await getCollection('gallery');
 // Sort newest-first (D-14), take 3 most-recent for the landing-page preview strip.
@@ -42,5 +44,5 @@ const featuredPieces = allPieces
   <Hero />
   {nextPopup && <PopupStrip popup={nextPopup} />}
   <GalleryGrid pieces={featuredPieces} />
-  <Footer slot="footer" />
+  <Footer slot="footer" igHandle={site.ig_handle} contactEmail={site.contact_email} />
 </BaseLayout>

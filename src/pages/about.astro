@@ -7,13 +7,16 @@
 // prerender = true: required under Plan 01's `output: 'server'` mode.
 export const prerender = true;
 
+import { getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/design-skill/Header';
 import About from '../components/design-skill/About';
 import Footer from '../components/design-skill/Footer';
+
+const site = (await getEntry('site', 'default'))!.data;
 ---
 <BaseLayout title="About — Studio Bluemli">
   <Header slot="header" active="/about" />
   <About />
-  <Footer slot="footer" />
+  <Footer slot="footer" igHandle={site.ig_handle} contactEmail={site.contact_email} />
 </BaseLayout>
