@@ -1,0 +1,76 @@
+# .github/workflows/ci.yml
+# Required status check for Phase 1 foundations (FND-04, FND-10, FND-11, FND-12).
+#
+# After this file is merged once, the engineer adds "Build & brand check"
+# as a required status check in GitHub branch protection. See SETUP.md.
+#
+# REVIEW FIX M1: includes scripts/check-no-hydration.sh (no client: directives
+# + browser JS size budget) — enforced on every PR, not just one local check.
+#
+# Orchestrator decision FND-12: Lighthouse CI runs against the post-build
+# dist/ directory via lighthouse-ci-action's staticDistDir, asserting
+# Performance / Accessibility / Best Practices / SEO ≥ 90 on the landing
+# route `/` (mobile form factor). This replaces the deferred Phase 5
+# Lighthouse step; Phase 5's LCH-05 will extend it to a full-route audit
+# against the live *.workers.dev URL at production cutover.
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  build-and-check:
+    name: Build & brand check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm exec astro check
+
+      - name: Build
+        run: pnpm exec astro build
+
+      - name: Write .assetsignore (Plan 04 postbuild — REVIEW FIX M2)
+        run: node scripts/write-assetsignore.mjs
+
+      - name: Brand-rule grep (FND-10)
+        run: bash scripts/check-brand-rules.sh
+
+      - name: Lowercase filename check (FND-11)
+        run: bash scripts/check-lowercase-filenames.sh
+
+      - name: No-hydration / no-browser-JS check (FND-01 — REVIEW FIX M1)
+        run: bash scripts/check-no-hydration.sh
+
+      # Lighthouse CI (FND-12 — orchestrator decision, replaces deferred Phase 5 step).
+      # Canonical path: lighthouserc.json declares staticDistDir: "./dist/client"
+      # and the action serves it over a local HTTP server it spawns. Audits `/`
+      # at mobile form factor; asserts Performance / Accessibility / Best Practices /
+      # SEO ≥ 0.9. No explicit `urls:` here — that path is the documented fallback
+      # if staticDistDir ever stops working for Astro 6 clean-URL routing.
+      - name: Lighthouse CI (mobile, ≥ 90 on /) — FND-12
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
