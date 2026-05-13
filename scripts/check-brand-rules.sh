@@ -19,7 +19,7 @@ failed=0
 # Uses -P for PCRE negative lookahead. Note: -P is mutually exclusive with -E
 # in both BSD and GNU grep ("conflicting matchers specified"); use -P only. The
 # alternation operator | is supported natively in PCRE.
-if grep -rnP '(bg-white|background:\s*white|#fff(?![0-9a-fA-F])|#[fF]{6})' \
+if grep -rnP '(bg-white|background:\s*white|#[fF]{3}(?![0-9a-fA-F])|#[fF]{6})' \
      --include='*.astro' --include='*.jsx' --include='*.tsx' --include='*.ts' --include='*.css' \
      --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=.git \
      --exclude-dir=.planning --exclude-dir=.claude \
