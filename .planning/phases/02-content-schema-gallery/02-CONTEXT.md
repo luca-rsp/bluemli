@@ -64,10 +64,17 @@ Define the three strict Zod content collections (`gallery`, `popups`, `site`) in
 
 ### Schema Adjustments to CNT-03 (record-of-divergence)
 
-Two REQUIREMENTS.md / ROADMAP.md edits required during planning to keep the spec aligned:
+REQUIREMENTS.md / ROADMAP.md edits required during planning to keep the spec aligned with what Phase 2 actually ships:
 
 - **D-16:** **CNT-03 `photos` → `hero`.** Singular `hero: image()` (required) replaces array `photos`. Multi-photo carry-over deferred to v1.x.
 - **D-17:** **CNT-03 sort key: pick `published_at` (drop the "`order` or" alternative).** Schema field name: `published_at`, ISO date string, required.
+
+### Schema Adjustments to CNT-05 (record-of-divergence)
+
+- **D-18:** **Popups schema realigned with CNT-05** (added during cross-AI review revision per REVIEWS.md MEDIUM-6). The original Phase 2 plan placed `description` in popup frontmatter and omitted `photos`. CNT-05 explicitly specifies that pop-up entries have `description` as the markdown body (free-form) and `photos` as an optional `image()` array. Adjustment:
+  - `description` field is REMOVED from the popups frontmatter Zod schema. Pop-up descriptive copy lives in the markdown body — Astro Content Collections render `entry.body` automatically, no schema field needed.
+  - `photos: z.array(image()).optional()` is ADDED to the popups frontmatter Zod schema, matching CNT-05's optional image-refs.
+  - Plan 05 Task 2 (REQUIREMENTS.md sync) extends its scope to confirm CNT-05 narrative still matches this implementation; no narrative change is required because CNT-05 already specifies the body+photos layout, so D-18 is a correction (Plan 01's first draft drifted, not CNT-05).
 
 ### Claude's Discretion
 
@@ -91,7 +98,7 @@ Two REQUIREMENTS.md / ROADMAP.md edits required during planning to keep the spec
 
 ### Project planning (always)
 - `.planning/PROJECT.md` — Project overview, constraints, brand non-negotiables, Out of Scope
-- `.planning/REQUIREMENTS.md` §CNT-01..CNT-12 — the 12 content requirements traced to Phase 2 (note D-16, D-17 modify CNT-03)
+- `.planning/REQUIREMENTS.md` §CNT-01..CNT-12 — the 12 content requirements traced to Phase 2 (note D-16, D-17 modify CNT-03; D-18 realigns popups schema with CNT-05)
 - `.planning/ROADMAP.md` §"Phase 2: Content Schema & Gallery" — goal, SC1..SC5, key risks/pitfalls
 - `.planning/STATE.md` — Locked decisions from prior research (per-slug folders, WebP pre-opt tool flagged as open — resolved here)
 - `CLAUDE.md` — Project conventions, technology stack table (`zod@4`, `astro:assets`, `astro/loaders`, `passthroughImageService()`), "What NOT to Use"
@@ -193,3 +200,4 @@ Two REQUIREMENTS.md / ROADMAP.md edits required during planning to keep the spec
 
 *Phase: 2-Content Schema & Gallery*
 *Context gathered: 2026-05-13*
+*Revised: 2026-05-13 (D-18 added per cross-AI review — popups schema realignment with CNT-05)*
