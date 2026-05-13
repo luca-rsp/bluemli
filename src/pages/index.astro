@@ -1,7 +1,8 @@
 ---
 // src/pages/index.astro — Landing page shell (D-18, FND-05).
 // Phase 1 demo-loaded: Hero + PopupStrip + GalleryGrid (3 cards).
-// Phase 2 swaps sample-data for real Content Collections.
+// Phase 2 swaps gallery cards to real Content Collections; PopupStrip still uses
+// the Phase 1 inline null stub until Phase 3 (PAG-01, PAG-03) ships getCollection('popups').
 //
 // prerender = true is required because Plan 01 chose `output: 'server'`
 // (modern @astrojs/cloudflare adapter pattern — Worker entrypoint emitted at
@@ -12,18 +13,34 @@
 // Server Mode" and Plan 01-01 SUMMARY's "Output Mode Verification" section.
 export const prerender = true;
 
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/design-skill/Header';
 import Hero from '../components/design-skill/Hero';
 import PopupStrip from '../components/design-skill/PopupStrip';
 import GalleryGrid from '../components/design-skill/GalleryGrid';
 import Footer from '../components/design-skill/Footer';
-import { sampleGallery, sampleNextPopup } from '../sample-data';
+
+// TODO: Phase 3 (PAG-01, PAG-03) replaces this null stub with getCollection('popups').
+const nextPopup = null;
+
+const allPieces = await getCollection('gallery');
+// Sort newest-first (D-14), take 3 most-recent for the landing-page preview strip.
+const featuredPieces = allPieces
+  .sort((a, b) => b.data.published_at.localeCompare(a.data.published_at))
+  .slice(0, 3)
+  .map((entry) => ({
+    slug:   entry.id,
+    name:   entry.data.name,
+    price:  entry.data.price,
+    status: entry.data.status,
+    photo:  `/gallery/${entry.id}/hero-400.webp`,
+  }));
 ---
 <BaseLayout title="Studio Bluemli — handmade beaded earrings, NoPa San Francisco">
   <Header slot="header" active="/" />
   <Hero />
-  <PopupStrip popup={sampleNextPopup} />
-  <GalleryGrid pieces={sampleGallery.slice(0, 3)} />
+  {nextPopup && <PopupStrip popup={nextPopup} />}
+  <GalleryGrid pieces={featuredPieces} />
   <Footer slot="footer" />
 </BaseLayout>
