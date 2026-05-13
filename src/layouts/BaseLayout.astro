@@ -36,6 +36,12 @@ const { title } = Astro.props;
         the preload + @font-face emission for the BaseLayout. */}
     <Font cssVariable="--font-hand-loaded" preload />
 
+    {/* Named slot for per-page <head> additions (per-piece og:image in Plan 04's
+        [slug].astro; Phase 3 PAG-07 SEO.astro will absorb this pattern). Without
+        this slot, <meta slot="head"> tags silently fall into the body, defeating
+        SC4 og:image emission. Identified by 02-PATTERNS.md as the missing piece. */}
+    <slot name="head" />
+
     {/* Global brand tokens — the ONLY place colors_and_type.css is imported.
         Also defines the global :focus-visible rule (FND-13) — applies to EVERY
         interactive element by default. Per-component overrides may exist, but

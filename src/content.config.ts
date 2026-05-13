@@ -58,7 +58,7 @@ const popups = defineCollection({
 });
 
 const site = defineCollection({
-  loader: file('./src/content/site/config.md'),
+  loader: file('./src/content/site/config.yaml'),
   schema: z
     .object({
       tagline: z.string(),
