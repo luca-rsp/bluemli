@@ -15,4 +15,25 @@
 | # | Name | Design Question | Winner | Tags |
 |---|------|----------------|--------|------|
 | 001 | gallery-detail-composition | What does the editorial detail page feel like — where do photo, name, and CTA sit? | A — centered narrow plate (640px) | detail, layout, type |
-| 002 | gallery-grid-sold-treatment | How does "Sold" read in the grid so it feels editorial, not broken? | TBD | grid, badge, sold-state |
+| 002 | gallery-grid-sold-treatment | How does "Sold" read in the grid so it feels editorial, not broken? | A — status bottom-right (sold = lavender-500, one-of-one = olive-500, 700-weight) | grid, badge, sold-state |
+
+## Key Decisions
+
+### Detail page `/gallery/<slug>` (from Sketch 001-A)
+- Centered narrow plate, **640px max content width**.
+- Photo at native aspect ratio, `--radius-sm` corners.
+- Hand-display name (Caveat Brush) at **`--fs-3xl` (48px)**, coral-500, centered.
+- Meta row centered: price (Nunito 800, `--fs-lg`, indigo-700) + status badge (eyebrow caps, olive-500 / lavender-500).
+- Description Nunito body `--fs-md`, `--lh-loose`, centered, max 520px.
+- CTA: coral-500 pill button, Nunito 800. Mailto fallback small text below.
+- Back link top and bottom of plate.
+
+### Gallery grid card (from Sketch 002-A)
+- Phase 1 `GalleryGrid.jsx` layout retained: 4:5 photo + name + meta row (price left, status right).
+- Status color by enum: `available` → muted (`--color-fg-muted`, 400-weight), `sold` → lavender-500 (700), `one-of-one` → olive-500 (700), `reserved` → tbd (likely lavender-500 too).
+- Sold pieces stay in the grid — visible, quiet, never red.
+
+## Open Questions
+
+- **Reserved state** — CNT-04 enum has `available | sold | one-of-one | reserved`, but the seed content only uses three of them. Phase 2 planner should pick a treatment for `reserved` consistent with sold (likely lavender-500 too, copy "Reserved").
+- **Detail page sold-state copy** — D-11 locks the CTA copy flip ("This pair sold — DM me about something similar"). Sketch 001-A demonstrated the *layout*; the planner should verify the sold variant of the same plate doesn't need any visual adjustment beyond status color + CTA text swap.

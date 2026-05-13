@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sketch 002 — Gallery grid sold treatment · Studio Bluemli</title>
+  <link rel="stylesheet" href="../themes/default.css" />
+  <style>
+    /* Sketch tabs */
+    .sketch-tabs {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--cream-50);
+      border-bottom: 1px solid var(--color-border-soft);
+      padding: var(--space-3) var(--space-4);
+      display: flex; gap: var(--space-2); align-items: center;
+      font-family: var(--font-body); font-size: var(--fs-xs);
+    }
+    .sketch-tabs .label {
+      font-weight: 800; letter-spacing: var(--ls-caps); text-transform: uppercase;
+      color: var(--color-fg-muted); margin-right: var(--space-3);
+    }
+    .sketch-tabs button {
+      background: transparent; border: 0; cursor: pointer;
+      padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill);
+      font-family: var(--font-body); font-size: var(--fs-xs); font-weight: 700;
+      color: var(--color-fg);
+    }
+    .sketch-tabs button.is-active { background: var(--coral-500); color: var(--color-fg-on-coral); }
+    .sketch-tabs button:hover:not(.is-active) { background: var(--cream-200); }
+    .sketch-tabs .star { color: var(--mustard-500); margin-right: 2px; }
+
+    .variant { display: none; }
+    .variant.is-active { display: block; }
+
+    /* Site header */
+    .site-header {
+      padding: var(--space-5) var(--space-6);
+      display: flex; justify-content: space-between; align-items: center;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .site-header .mark {
+      font-family: var(--font-display);
+      font-size: var(--fs-2xl);
+      color: var(--coral-500);
+      text-decoration: none;
+    }
+    .site-header nav a {
+      font-family: var(--font-body);
+      font-size: var(--fs-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: var(--ls-caps);
+      color: var(--color-fg-strong);
+      text-decoration: none;
+      margin-left: var(--space-5);
+    }
+    .site-header nav a.is-current { color: var(--coral-500); }
+
+    /* Gallery section heading (matches existing GalleryGrid.jsx pattern) */
+    .gallery-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--space-7) var(--space-6) var(--space-9);
+    }
+    .gallery-eyebrow {
+      text-align: center;
+      font-family: var(--font-body);
+      font-size: var(--fs-xxs);
+      font-weight: 800;
+      letter-spacing: var(--ls-caps);
+      text-transform: uppercase;
+      color: var(--color-accent-leaf);
+      margin-bottom: var(--space-3);
+    }
+    .gallery-title {
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: var(--fs-4xl);
+      color: var(--coral-500);
+      margin: 0 0 var(--space-1);
+      line-height: var(--lh-tight);
+    }
+    .gallery-hand {
+      text-align: center;
+      font-family: var(--font-hand);
+      font-size: var(--fs-lg);
+      color: var(--color-fg-strong);
+      margin-bottom: var(--space-7);
+    }
+
+    /* Grid */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: var(--space-5);
+    }
+
+    /* ============ Card — shared ============ */
+    .card {
+      background: var(--color-surface-card);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .card-photo-wrap { position: relative; }
+    .card-photo {
+      display: block;
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      object-fit: cover;
+      background: var(--cream-200);
+    }
+
+    /* ============ Variant A: status bottom-right of card ============ */
+    .v-a .card-body {
+      padding: var(--space-3) var(--space-4) var(--space-4);
+    }
+    .v-a .card-name {
+      font-family: var(--font-body);
+      font-size: var(--fs-sm);
+      font-weight: 700;
+      color: var(--color-fg-strong);
+      margin: 0 0 var(--space-1);
+    }
+    .v-a .card-meta {
+      display: flex; justify-content: space-between; align-items: baseline;
+      font-family: var(--font-body);
+      font-size: var(--fs-xs);
+      color: var(--color-fg-muted);
+    }
+    .v-a .card-price { color: var(--color-fg-strong); font-weight: 700; }
+    .v-a .card-status { }
+    .v-a .card-status.sold { color: var(--lavender-500); font-weight: 700; }
+    .v-a .card-status.one-of-one { color: var(--color-accent-leaf); font-weight: 700; }
+
+    /* ============ Variant B: muted-indigo eyebrow above name ============ */
+    .v-b .card-body {
+      padding: var(--space-3) var(--space-4) var(--space-4);
+    }
+    .v-b .card-eyebrow {
+      font-family: var(--font-body);
+      font-size: var(--fs-xxs);
+      font-weight: 800;
+      letter-spacing: var(--ls-caps);
+      text-transform: uppercase;
+      color: var(--lavender-500);
+      margin-bottom: var(--space-1);
+      min-height: 14px; /* reserve space so card heights match */
+    }
+    .v-b .card-eyebrow.available { visibility: hidden; }
+    .v-b .card-eyebrow.one-of-one { color: var(--color-accent-leaf); }
+    .v-b .card-name {
+      font-family: var(--font-body);
+      font-size: var(--fs-sm);
+      font-weight: 700;
+      color: var(--color-fg-strong);
+      margin: 0 0 var(--space-1);
+    }
+    .v-b .card-price {
+      font-family: var(--font-body);
+      font-size: var(--fs-xs);
+      font-weight: 700;
+      color: var(--color-fg-strong);
+    }
+    .v-b .card.is-sold .card-name { color: var(--color-fg-muted); }
+
+    /* ============ Variant C: status + price combined caption ============ */
+    .v-c .card-body {
+      padding: var(--space-3) var(--space-4) var(--space-4);
+    }
+    .v-c .card-name {
+      font-family: var(--font-body);
+      font-size: var(--fs-sm);
+      font-weight: 700;
+      color: var(--color-fg-strong);
+      margin: 0 0 var(--space-1);
+    }
+    .v-c .card-caption {
+      font-family: var(--font-body);
+      font-size: var(--fs-xs);
+      color: var(--color-fg-muted);
+      font-weight: 600;
+    }
+    .v-c .card.is-sold .card-caption { color: var(--lavender-500); }
+    .v-c .card.is-one-of-one .card-caption { color: var(--color-accent-leaf); }
+    .v-c .card-caption .dot {
+      display: inline-block; margin: 0 6px;
+      color: var(--color-fg-hint);
+    }
+
+    /* Sketch toolbar */
+    #sketch-tools {
+      position: fixed; bottom: 12px; right: 12px; z-index: 9999;
+      font-family: system-ui, sans-serif; font-size: 12px;
+      background: rgba(20, 20, 25, 0.78); color: #fff;
+      padding: 10px 12px; border-radius: 10px;
+      opacity: 0.4; transition: opacity 0.2s;
+      display: flex; gap: 10px; align-items: center;
+    }
+    #sketch-tools:hover { opacity: 1; }
+    #sketch-tools .group { display: flex; gap: 6px; align-items: center; }
+    #sketch-tools select, #sketch-tools button {
+      background: #2a2a2f; color: #fff; border: 1px solid #3a3a40;
+      padding: 4px 8px; border-radius: 6px; font: inherit; cursor: pointer;
+    }
+    #sketch-tools button.is-active { background: #d6553b; border-color: #d6553b; }
+    #viewport-frame { transition: max-width 0.18s ease; margin: 0 auto; }
+    body.vp-phone   #viewport-frame { max-width: 375px;  box-shadow: 0 0 0 1px rgba(43,32,20,0.06); }
+    body.vp-tablet  #viewport-frame { max-width: 768px;  box-shadow: 0 0 0 1px rgba(43,32,20,0.06); }
+    body.vp-desktop #viewport-frame { max-width: 1280px; }
+    body.vp-full    #viewport-frame { max-width: none; }
+  </style>
+</head>
+<body class="vp-full">
+
+  <!-- ============ Sketch tabs ============ -->
+  <div class="sketch-tabs">
+    <span class="label">Sketch 002 · grid sold treatment</span>
+    <button class="is-active" data-variant="a"><span class="star">★</span>A · Status bottom-right</button>
+    <button data-variant="b">B · Muted-indigo eyebrow</button>
+    <button data-variant="c">C · Status + price caption</button>
+  </div>
+
+  <div id="viewport-frame">
+
+    <!-- Shared site header — same on every variant -->
+    <header class="site-header">
+      <a href="#" class="mark">Studio Bluemli</a>
+      <nav>
+        <a href="#" class="is-current">Gallery</a>
+        <a href="#">Pop-ups</a>
+        <a href="#">About</a>
+        <a href="#">Say hi</a>
+      </nav>
+    </header>
+
+    <!-- ============ Variant A ============ -->
+    <section class="variant v-a is-active" data-variant="a">
+      <div class="gallery-section">
+        <div class="gallery-eyebrow">the gallery</div>
+        <h2 class="gallery-title">this week's pairs</h2>
+        <div class="gallery-hand">(once they're gone, they're gone)</div>
+
+        <div class="gallery-grid">
+          <a href="#" class="card">
+            <div class="card-photo-wrap">
+              <img class="card-photo" src="../assets/cluster-coral.jpg" alt="Coral cluster" />
+            </div>
+            <div class="card-body">
+              <div class="card-name">Coral cluster</div>
+              <div class="card-meta">
+                <span class="card-price">$48</span>
+                <span class="card-status">Available</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="#" class="card">
+            <div class="card-photo-wrap">
+              <img class="card-photo" src="../assets/cluster-cobalt.jpg" alt="Cobalt cluster" />
+            </div>
+            <div class="card-body">
+              <div class="card-name">Cobalt cluster</div>
+              <div class="card-meta">
+                <span class="card-price">$52</span>
+                <span class="card-status sold">Sold</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="#" class="card">
+            <div class="card-photo-wrap">
+              <img class="card-photo" src="../assets/cluster-coral.jpg" alt="Blush cluster" style="filter: hue-rotate(8deg);" />
+            </div>
+            <div class="card-body">
+              <div class="card-name">Blush cluster</div>
+              <div class="card-meta">
+                <span class="card-price">$46</span>
+                <span class="card-status">Available</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="#" class="card">
+            <div class="card-photo-wrap">
+              <img class="card-photo" src="../assets/cluster-cobalt.jpg" alt="Lavender cluster" style="filter: hue-rotate(40deg) saturate(0.85);" />
+            </div>
+            <div class="card-body">
+              <div class="card-name">Lavender cluster</div>
+              <div class="card-meta">
+                <span class="card-price">$54</span>
+                <span class="card-status one-of-one">One of one</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="#" class="card">
+            <div class="card-photo-wrap">
+              <img class="card-photo" src="../assets/cluster-coral.jpg" alt="Saffron cluster" style="filter: hue-rotate(-15deg) saturate(1.1);" />
+            </div>
+            <div class="card-body">
+              <div class="card-name">Saffron cluster</div>
+              <div class="card-meta">
+                <span class="card-price">$44</span>
+                <span class="card-status sold">Sold</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="#" class="card">
+            <div class="card-photo-wrap">
+              <img class="card-photo" src="../assets/cluster-cobalt.jpg" alt="Sage cluster" style="filter: hue-rotate(70deg) saturate(0.7);" />
+            </div>
+            <div class="card-body">
+              <div class="card-name">Sage cluster</div>
+              <div class="card-meta">
+                <span class="card-price">$50</span>
+                <span class="card-status">Available</span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Variant B ============ -->
+    <section class="variant v-b" data-variant="b">
+      <div class="gallery-section">
+        <div class="gallery-eyebrow">the gallery</div>
+        <h2 class="gallery-title">this week's pairs</h2>
+        <div class="gallery-hand">(once they're gone, they're gone)</div>
+
+        <div class="gallery-grid">
+          <a href="#" class="card">
+            <div class="card-photo-wrap">
+              <img class="card-photo" src="../assets/cluster-coral.jpg" alt="Coral cluster" />
+            </div>
+            <div class="card-body">
+              <div class="card-eyebrow available">Available</div>
+              <div class="card-name">Coral cluster</div>
+              <div class="card-price">$48</div>
+            </div>
+          </a>
+
+          <a href="#" class="card is-sold">
+            <div class="card-photo-wrap">
+              <img class="card-photo" src="../assets/cluster-cobalt.jpg" alt="Cobalt cluster" />
+            </div>
+            <div class="card-body">
+              <div class="card-eyebrow">Sold</div>
+              <div class="card-name">Cobalt cluster</div>
+              <div class="card-price">$52</div>
+            </div>
+          </a>
+
+          <a href="#" class="card">
+            <div class="card-photo-wrap">
+              <img class="card-photo" src="../assets/cluster-coral.jpg" alt="Blush cluster" style="filter: hue-rotate(8deg);" />
+            </div>
+            <div class="card-body">
+              <div class="card-eyebrow available">Available</div>
+              <div class="card-name">Blush cluster</div>
+              <div class="card-price">$46</div>
+            </div>
+          </a>
+
+          <a href="#" class="card">
+            <div class="card-photo-wrap">
+              <img class="card-photo" src="../assets/cluster-cobalt.jpg" alt="Lavender cluster" style="filter: hue-rotate(40deg) saturate(0.85);" />
+            </div>
+            <div class="card-body">
+              <div class="card-eyebrow one-of-one">One of one</div>
+              <div class="card-name">Lavender cluster</div>
+              <div class="card-price">$54</div>
+            </div>
+          </a>
+
+          <a href="#" class="card is-sold">
+            <div class="card-photo-wrap">
+              <img class="card-photo" src="../assets/cluster-coral.jpg" alt="Saffron cluster" style="filter: hue-rotate(-15deg) saturate(1.1);" />
+            </div>
+            <div class="card-body">
+              <div class="card-eyebrow">Sold</div>
+              <div class="card-name">Saffron cluster</div>
+              <div class="card-price">$44</div>
+            </div>
+          </a>
+
+          <a href="#" class="card">
+            <div class="card-photo-wrap">
+              <img class="card-photo" src="../assets/cluster-cobalt.jpg" alt="Sage cluster" style="filter: hue-rotate(70deg) saturate(0.7);" />
+            </div>
+            <div class="card-body">
+              <div class="card-eyebrow available">Available</div>
+              <div class="card-name">Sage cluster</div>
+              <div class="card-price">$50</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Variant C ============ -->
+    <section class="variant v-c" data-variant="c">
+      <div class="gallery-section">
+        <div class="gallery-eyebrow">the gallery</div>
+        <h2 class="gallery-title">this week's pairs</h2>
+        <div class="gallery-hand">(once they're gone, they're gone)</div>
+
+        <div class="gallery-grid">
+          <a href="#" class="card">
+            <div class="card-photo-wrap">
+              <img class="card-photo" src="../assets/cluster-coral.jpg" alt="Coral cluster" />
+            </div>
+            <div class="card-body">
+              <div class="card-name">Coral cluster</div>
+              <div class="card-caption">$48</div>
+            </div>
+          </a>
+
+          <a href="#" class="card is-sold">
+            <div class="card-photo-wrap">
+              <img class="card-photo" src="../assets/cluster-cobalt.jpg" alt="Cobalt cluster" />
+            </div>
+            <div class="card-body">
+              <div class="card-name">Cobalt cluster</div>
+              <div class="card-caption">Sold<span class="dot">·</span>$52</div>
+            </div>
+          </a>
+
+          <a href="#" class="card">
+            <div class="card-photo-wrap">
+              <img class="card-photo" src="../assets/cluster-coral.jpg" alt="Blush cluster" style="filter: hue-rotate(8deg);" />
+            </div>
+            <div class="card-body">
+              <div class="card-name">Blush cluster</div>
+              <div class="card-caption">$46</div>
+            </div>
+          </a>
+
+          <a href="#" class="card is-one-of-one">
+            <div class="card-photo-wrap">
+              <img class="card-photo" src="../assets/cluster-cobalt.jpg" alt="Lavender cluster" style="filter: hue-rotate(40deg) saturate(0.85);" />
+            </div>
+            <div class="card-body">
+              <div class="card-name">Lavender cluster</div>
+              <div class="card-caption">One of one<span class="dot">·</span>$54</div>
+            </div>
+          </a>
+
+          <a href="#" class="card is-sold">
+            <div class="card-photo-wrap">
+              <img class="card-photo" src="../assets/cluster-coral.jpg" alt="Saffron cluster" style="filter: hue-rotate(-15deg) saturate(1.1);" />
+            </div>
+            <div class="card-body">
+              <div class="card-name">Saffron cluster</div>
+              <div class="card-caption">Sold<span class="dot">·</span>$44</div>
+            </div>
+          </a>
+
+          <a href="#" class="card">
+            <div class="card-photo-wrap">
+              <img class="card-photo" src="../assets/cluster-cobalt.jpg" alt="Sage cluster" style="filter: hue-rotate(70deg) saturate(0.7);" />
+            </div>
+            <div class="card-body">
+              <div class="card-name">Sage cluster</div>
+              <div class="card-caption">$50</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ============ Sketch toolbar ============ -->
+  <div id="sketch-tools">
+    <div class="group">
+      <span style="opacity:0.7">theme</span>
+      <select id="theme-select" onchange="document.querySelector('link[href*=themes]').href='../themes/'+this.value+'.css'">
+        <option value="default">default</option>
+      </select>
+    </div>
+    <div class="group">
+      <span style="opacity:0.7">viewport</span>
+      <button onclick="setVp('phone')">phone</button>
+      <button onclick="setVp('tablet')">tablet</button>
+      <button onclick="setVp('desktop')">desktop</button>
+      <button class="is-active" onclick="setVp('full')">full</button>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.sketch-tabs button[data-variant]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const v = btn.dataset.variant;
+        document.querySelectorAll('.sketch-tabs button[data-variant]').forEach(b => b.classList.toggle('is-active', b.dataset.variant === v));
+        document.querySelectorAll('.variant').forEach(s => s.classList.toggle('is-active', s.dataset.variant === v));
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      });
+    });
+
+    function setVp(size) {
+      document.body.classList.remove('vp-phone','vp-tablet','vp-desktop','vp-full');
+      document.body.classList.add('vp-' + size);
+      document.querySelectorAll('#sketch-tools .group:nth-child(2) button').forEach(b => {
+        b.classList.toggle('is-active', b.textContent === size);
+      });
+    }
+  </script>
+</body>
+</html>
