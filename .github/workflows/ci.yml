@@ -60,43 +60,14 @@ jobs:
       - name: No-hydration / no-browser-JS check (FND-01 — REVIEW FIX M1)
         run: bash scripts/check-no-hydration.sh
 
-  # Lighthouse runs as a SEPARATE job so a Phase 1 perf gap (FND-12 currently
-  # below the 0.9 threshold across all 5 routes — see gap-closure plan) does
-  # not block merges of unrelated code. The job is still required-by-name when
-  # the founder/engineer wants to gate on it; until then, it is advisory.
-  # The `Build & brand check` job above remains the GitHub ruleset's required
-  # status check.
-  lighthouse:
-    name: Lighthouse CI (advisory until FND-12 closed)
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: build-and-check
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build
-        run: pnpm exec astro build
-
-      - name: Write .assetsignore (postbuild)
-        run: node scripts/write-assetsignore.mjs
-
-      # Canonical path: lighthouserc.json declares staticDistDir: "./dist/client"
-      # and the action serves it over a local HTTP server it spawns. Audits all
-      # 5 prerendered routes at mobile form factor; asserts Performance /
-      # Accessibility / Best Practices / SEO ≥ 0.9.
+      # Lighthouse CI (FND-12). Canonical path: lighthouserc.json declares
+      # staticDistDir: "./dist/client" and the action serves it over a local
+      # HTTP server it spawns. Audits all 5 prerendered routes at mobile form
+      # factor; asserts Performance / Accessibility / Best Practices / SEO
+      # ≥ 0.9. Required-by-default — back inside `Build & brand check` after
+      # the FND-12 fix landed (fontProviders.fontsource() self-hosts WOFF2s
+      # with single-subset @font-face emission, dropping perf below the
+      # threshold to 0.99 on all routes).
       - name: Lighthouse CI (mobile, ≥ 90 on all routes) — FND-12
         uses: treosh/lighthouse-ci-action@v12
         with:
