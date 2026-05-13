@@ -19,3 +19,6 @@
 .btn-primary:active {
   transform: scale(0.97);
 }
+
+/* SETUP step 5 — deliberate brand-rule violation (Rule 1) */
+.ci-violation-test { background: white; }
