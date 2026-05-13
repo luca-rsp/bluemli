@@ -16,8 +16,10 @@ failed=0
 #   bg-white, background: white, #fff (3-digit, not followed by hex), #FFFFFF (6-digit)
 # Whitelists:
 #   #fff8 (cream tint with alpha — the only allowed near-white)
-# Uses -P for PCRE negative lookahead.
-if grep -rEnP '(bg-white|background:\s*white|#fff(?![0-9a-fA-F])|#[fF]{6})' \
+# Uses -P for PCRE negative lookahead. Note: -P is mutually exclusive with -E
+# in both BSD and GNU grep ("conflicting matchers specified"); use -P only. The
+# alternation operator | is supported natively in PCRE.
+if grep -rnP '(bg-white|background:\s*white|#fff(?![0-9a-fA-F])|#[fF]{6})' \
      --include='*.astro' --include='*.jsx' --include='*.tsx' --include='*.ts' --include='*.css' \
      --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=.git \
      --exclude-dir=.planning --exclude-dir=.claude \
