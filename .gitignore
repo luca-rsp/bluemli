@@ -1,26 +1,23 @@
-# macOS
+# Astro
+.astro/
+dist/
+
+# Node
+node_modules/
+
+# Cloudflare Wrangler
+.wrangler/
+.dev.vars
+.env
+.env.local
+
+# OS
 .DS_Store
-.AppleDouble
-.LSOverride
+Thumbs.db
 
 # Editors
 .vscode/
 .idea/
 
-# Environment
-.env
-.env.*
-.env.local
-
-# Dependencies
-node_modules/
-
-# Build artifacts
-dist/
-build/
-.expo/
-
-# Python
-__pycache__/
-*.pyc
-.venv/
+# Misc
+*.log
