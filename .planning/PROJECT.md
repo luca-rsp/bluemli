@@ -14,26 +14,27 @@ The product photography and brand voice come through cleanly on a cream-paper pa
 
 <!-- Shipped and confirmed valuable. -->
 
-(None yet — ship to validate)
+- [x] **Site builds as static assets and deploys to Cloudflare Workers with Static Assets on every push to `main`** _(Phase 1 — FND-04. Live at `studio-bluemli.<account>.workers.dev`; PR previews via Workers Builds non-production branches.)_
+- [x] **Reuses the `studio-bluemli-design` skill's React components, color/type tokens, and product photography conventions; cream background, never white** _(Phase 1 — FND-06, FND-09, FND-10. 11 JSX components synced via `scripts/sync-design-skill.mjs`; brand-rule grep enforced in CI as required status check.)_
+- [x] **Logo (`mark.svg`) renders in header and as favicon, with mark-color variants used contextually** _(Phase 1 — FND-08. Full favicon set generated from `mark.svg`; verified on desktop browser tab + iOS "Add to Home Screen".)_
+- [x] **Mobile-first responsive layout — Lighthouse mobile ≥ 90 across all categories** _(Phase 1 — FND-12. CI gates on Performance 0.99 / Accessibility 0.95 / Best Practices 1.00 / SEO 0.91 across all 5 routes after Fontsource self-hosting closed the Korean-subset payload bug.)_
+- [x] **Brand non-negotiables enforced as code** _(Phase 1 — FND-10, FND-11. CI grep blocks `bg-white`, `#FFF`, `flower`/`petal`/`floral`/`bloom`/`blossom`, `gradient`, `backdrop-filter`, `border: 1px`, and uppercase filenames under `src/pages/` before merge.)_
+- [x] **`:focus-visible` accessibility rule applied to every interactive element** _(Phase 1 — FND-13. Global 2px coral outline at 2px offset in `BaseLayout.astro`.)_
 
 ### Active
 
 <!-- Current scope. Building toward these. -->
 
-- [ ] Landing page with hero (logo, tagline, founder photo or product hero), 3–6 featured gallery pieces, a callout for the next pop-up, and footer links
-- [ ] Gallery page listing all pieces, each with photo(s), name, price, availability status (available / sold / one-of-one), and a short 1–2 sentence description
-- [ ] Pop-ups page showing upcoming events prominently (date, location, time) and a smaller archive of past events
-- [ ] About page (founder story, studio, process — content TBD with founder)
-- [ ] Say Hi page with a contact form that emails the founder, plus visible Instagram link
-- [ ] Gallery entries managed via markdown files in `/content/gallery/` — adding/removing a piece is a single file change
-- [ ] Pop-up events managed via a YAML file (or per-event markdown) in `/content`, with past/upcoming split derived from date
-- [ ] Site builds as static assets and deploys to Cloudflare Workers with Static Assets on every push to `main`
-- [ ] Live at apex `studiobluemli.com` (and `www.` redirects to apex) via the existing Cloudflare account
-- [ ] Reuses the `studio-bluemli-design` skill's React components, color/type tokens, and product photography conventions; cream background, never white
-- [ ] Logo (`mark.svg`) renders in header and as favicon, with mark-color variants used contextually
-- [ ] Mobile-first responsive layout — most visitors arrive from Instagram on phones
-- [ ] Umami Cloud analytics installed (free tier, single script tag, no consent banner needed)
-- [ ] Contact form is spam-protected (Cloudflare Turnstile) and delivers reliably to the founder's inbox
+- [ ] Landing page with hero (logo, tagline, founder photo or product hero), 3–6 featured gallery pieces, a callout for the next pop-up, and footer links _(Phase 1 shipped the demo-loaded shell; Phase 3 composes real content.)_
+- [ ] Gallery page listing all pieces, each with photo(s), name, price, availability status (available / sold / one-of-one), and a short 1–2 sentence description _(Phase 2.)_
+- [ ] Pop-ups page showing upcoming events prominently (date, location, time) and a smaller archive of past events _(Phase 3 — PT-aware past/upcoming split with daily cron rebuild.)_
+- [ ] About page (founder story, studio, process — content TBD with founder) _(Phase 3.)_
+- [ ] Say Hi page with a contact form that emails the founder, plus visible Instagram link _(Phase 1 shipped the shell; Phase 4 wires `/api/contact` with Turnstile + KV rate limit + Resend.)_
+- [ ] Gallery entries managed via markdown files in `/content/gallery/` — adding/removing a piece is a single file change _(Phase 2.)_
+- [ ] Pop-up events managed via a YAML file (or per-event markdown) in `/content`, with past/upcoming split derived from date _(Phase 3.)_
+- [ ] Live at apex `studiobluemli.com` (and `www.` redirects to apex) via the existing Cloudflare account _(Phase 5 — DNS cutover.)_
+- [ ] Umami Cloud analytics installed (free tier, single script tag, no consent banner needed) _(Phase 5.)_
+- [ ] Contact form is spam-protected (Cloudflare Turnstile) and delivers reliably to the founder's inbox _(Phase 4.)_
 
 ### Out of Scope
 
@@ -74,12 +75,13 @@ The product photography and brand voice come through cleanly on a cream-paper pa
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Astro 6.2 on Cloudflare Workers + Static Assets | Static-first, renders the design skill's React JSX server-side, near-zero client JS. Pages was originally chosen but `@astrojs/cloudflare@13` (Astro 6) dropped Pages support — Workers with Static Assets is the active CF target. One Worker serves both static and `/api/contact`. | — Pending |
-| Markdown/YAML in repo for gallery + pop-ups (not a CMS, not a database) | Zero infra, free, founder edits a single file per change, and the structure stays compatible with adding a git-backed CMS later with zero data migration | — Pending |
-| Contact form via Cloudflare Worker + Turnstile + email service (Resend or Mailchannels) | Keeps the site static while still letting visitors send a real message; spam protected; free-tier friendly | — Pending |
-| Umami Cloud (hosted, free tier) for analytics | Privacy-first, no cookies, no consent banner, custom events possible if needed; can migrate to self-hosted later since Umami is OSS | — Pending |
-| No e-commerce in v1 | Sales happen at pop-ups and via DM; checkout infrastructure is a separate product the founder hasn't asked for | — Pending |
-| Reuse `studio-bluemli-design` skill components and tokens | The brand system already exists and is intentional; reinventing it risks drift | — Pending |
+| Astro 6.2 on Cloudflare Workers + Static Assets | Static-first, renders the design skill's React JSX server-side, near-zero client JS. Pages was originally chosen but `@astrojs/cloudflare@13` (Astro 6) dropped Pages support — Workers with Static Assets is the active CF target. One Worker serves both static and `/api/contact`. | ✓ Validated in Phase 1 (Astro 6.3.1 + adapter 13.5 + Workers Builds shipping live preview; zero browser JS in `dist/client`) |
+| Markdown/YAML in repo for gallery + pop-ups (not a CMS, not a database) | Zero infra, free, founder edits a single file per change, and the structure stays compatible with adding a git-backed CMS later with zero data migration | — Phase 2/3 |
+| Contact form via Cloudflare Worker + Turnstile + email service (Resend or Mailchannels) | Keeps the site static while still letting visitors send a real message; spam protected; free-tier friendly | — Phase 4 |
+| Umami Cloud (hosted, free tier) for analytics | Privacy-first, no cookies, no consent banner, custom events possible if needed; can migrate to self-hosted later since Umami is OSS | — Phase 5 |
+| No e-commerce in v1 | Sales happen at pop-ups and via DM; checkout infrastructure is a separate product the founder hasn't asked for | ✓ Validated (no checkout infra in any phase plan) |
+| Reuse `studio-bluemli-design` skill components and tokens | The brand system already exists and is intentional; reinventing it risks drift | ✓ Validated in Phase 1 (11 components synced, brand-rule grep in CI as required status check) |
+| Self-host fonts via Fontsource instead of `fontProviders.google()` | Astro's Google provider preserves Google's per-Unicode-range `@font-face` CSS, which for Korean-primary fonts like Bagel Fat One inflates the inline `<style>` block enough to fail Lighthouse mobile Performance. Fontsource ships pre-subsetted Latin WOFF2s. | ✓ Validated in Phase 1 (Performance 0.76→0.99 across all 5 routes; 95→14 `@font-face` declarations) |
 
 ## Evolution
 
@@ -99,4 +101,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-12 after initialization*
+*Last updated: 2026-05-13 — Phase 1 (Foundations & Brand System) complete. Live on `studio-bluemli.<account>.workers.dev`. Up next: Phase 2 (content schema & gallery).*
