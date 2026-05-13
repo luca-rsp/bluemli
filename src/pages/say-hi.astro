@@ -1,0 +1,20 @@
+---
+// src/pages/say-hi.astro — Say Hi shell (D-18).
+// Phase 1: AppointmentForm is a static shell — <form action="/api/contact"> 404s in Phase 1.
+// Phase 4: /api/contact Worker handler accepts the POST (Turnstile + Resend).
+//
+// prerender = true: required under Plan 01's `output: 'server'` mode. The page
+// itself is static; the FORM POSTs to /api/contact which the Worker (entry.mjs)
+// handles dynamically — they're independent routes.
+export const prerender = true;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/design-skill/Header';
+import AppointmentForm from '../components/design-skill/AppointmentForm';
+import Footer from '../components/design-skill/Footer';
+---
+<BaseLayout title="Say Hi — Studio Bluemli">
+  <Header slot="header" active="/say-hi" />
+  <AppointmentForm />
+  <Footer slot="footer" />
+</BaseLayout>

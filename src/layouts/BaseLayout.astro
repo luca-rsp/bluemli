@@ -1,0 +1,111 @@
+---
+// src/layouts/BaseLayout.astro
+// Shared <head>, header/footer slots, skip-to-content link, Fonts API preload,
+// global :focus-visible rule (FND-13). FND-05, FND-06, FND-07, FND-13.
+import { Font } from 'astro:assets';
+
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>{title}</title>
+
+    {/* Favicon set (FND-08) — files generated/copied by scripts/generate-favicons.mjs (Plan 03) */}
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" href="/favicon-16.png" sizes="16x16" />
+    <link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    {/* Astro Fonts API — generates @font-face + <link rel="preload"> for each font.
+        cssVariable suffix `-loaded` matches astro.config.mjs declarations (Plan 01).
+        The design-skill CSS keeps --font-wordmark/--font-display/--font-body as cascade strings
+        so loaded fonts compose with system-ui fallbacks. */}
+    <Font cssVariable="--font-wordmark-loaded" preload />
+    <Font cssVariable="--font-display-loaded" preload />
+    <Font cssVariable="--font-body-loaded" preload />
+    {/* REVIEW FIX M5: Caveat is loaded as --font-hand-loaded because About.jsx
+        references --font-hand for the signature close. Plan 01 added the
+        Caveat entry to astro.config.mjs Fonts API; this <Font /> tag wires
+        the preload + @font-face emission for the BaseLayout. */}
+    <Font cssVariable="--font-hand-loaded" preload />
+
+    {/* Global brand tokens — the ONLY place colors_and_type.css is imported.
+        Also defines the global :focus-visible rule (FND-13) — applies to EVERY
+        interactive element by default. Per-component overrides may exist, but
+        none may suppress the outline (Plan 02 Task 3 Edit 4 strips any such
+        suppression from design-skill components). */}
+    <style is:global>
+      @import '../styles/colors_and_type.css';
+      /* REVIEW FIX (checker iteration 2 BLOCKER 3): import components.css AFTER
+         colors_and_type.css so the brand tokens (--coral-*, --indigo-*, --cream-*)
+         are in scope when components.css's .btn-primary :hover/:active rules
+         resolve, AND so component-specific overrides win the cascade. Plan 02
+         Edit 7 (REVIEW FIX M4) created src/styles/components.css to keep
+         colors_and_type.css locked as a verbatim copy of the design-skill source. */
+      @import '../styles/components.css';
+
+      /* FND-13: every interactive element MUST show a visible focus ring on keyboard
+         focus. We use a 2px outline (NOT 1px — CI Rule 5) at 2px offset.
+         --color-focus-ring is defined in colors_and_type.css (currently maps to
+         --coral-500); fallback is --indigo-500 (body text color, brand-safe on
+         cream, never coral-on-cream which fails contrast for thin lines).
+         This rule applies to <a>, <button>, <input>, <textarea>, <select>,
+         <summary>, [tabindex], <label> (when role="button"), and any element with
+         :focus-visible. */
+      :focus-visible {
+        outline: 2px solid var(--color-focus-ring, var(--indigo-500));
+        outline-offset: 2px;
+        border-radius: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    {/* FND-13: skip-to-content is the first focusable element in <body>. */}
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <slot name="header" />
+
+    <main id="main-content">
+      <slot />
+    </main>
+
+    <slot name="footer" />
+
+    <style>
+      .skip-link {
+        position: absolute;
+        top: -100px;
+        left: 0;
+        background: var(--coral-500);
+        color: var(--cream-50);
+        padding: var(--space-2) var(--space-4);
+        z-index: 100;
+        text-decoration: none;
+        font-family: var(--font-body);
+      }
+      /* The skip-link gets its own (more prominent) focus treatment because it
+         IS the focus target on Tab from URL bar. The global :focus-visible
+         rule above also applies — outline + outline-offset compose with this. */
+      .skip-link:focus-visible {
+        top: 0;
+      }
+      #main-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 var(--space-6);
+      }
+      @media (min-width: 768px) {
+        #main-content {
+          padding: 0 var(--space-9);
+        }
+      }
+    </style>
+  </body>
+</html>
