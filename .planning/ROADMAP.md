@@ -62,8 +62,19 @@ Plans:
   2. A typo in a gallery frontmatter field (e.g., `availabilty: sold`) fails the build with a clear Zod error message, before the bad data ever ships.
   3. A sold piece, marked `status: sold`, renders in the gallery grid with a quiet editorial "Sold" badge (not hidden) and remains in the portfolio archive.
   4. The per-piece detail page emits a per-piece `og:image` (the piece's hero photo, absolute URL) so an Instagram or iMessage link unfurls correctly.
-  5. `CONTENT_EDITING.md` exists at the repo root with screenshots of the GitHub web UI flow and a clearly labeled "never delete, flip availability" section; zero `git`/`npm`/`cd` instructions appear in any content-editing step.
-**Plans**: TBD
+  5. `CONTENT_EDITING.md` exists at the repo root with the GitHub web UI flow documented in prose (screenshots deferred to first founder content-editing workflow review — section §3 of CONTENT_EDITING.md flags this) and a clearly labeled "never delete, flip availability" section; zero `git`/`npm`/`cd` instructions appear in any content-editing step.
+**Plans**: 5 plans
+Plans:
+**Wave 1**
+- [ ] 02-01-PLAN.md — Schema + 6 seed pieces + site config + BaseLayout head slot (CNT-01..CNT-06, CNT-10)
+- [ ] 02-02-PLAN.md — HEIC→WebP prebuild pipeline + CI step + gitignore (CNT-11)
+- [ ] 02-03-PLAN.md — Phase 1 cleanup (delete ProductSheet, fix #FFF regex)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 02-04-PLAN.md — Wire schema into /gallery + /gallery/<slug> + delete sample-data + activate Rule 7 (CNT-02, CNT-07, CNT-08, CNT-09, CNT-10, CNT-11, PAG-09)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 02-05-PLAN.md — CONTENT_EDITING.md + REQUIREMENTS/ROADMAP narrative sync (CNT-12)
 
 **Key risks / pitfalls:**
 - Schema design is one-shot: every `.strict()` enum, every required field, and the per-slug image co-location pattern must be baked in now (Pitfalls #6, #11, #12) — migrating later means rewriting every existing file.
@@ -138,7 +149,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundations & Brand System | 5/5 | Complete | 2026-05-13 |
-| 2. Content Schema & Gallery | 0/TBD | Not started | - |
+| 2. Content Schema & Gallery | 0/5 | Not started | - |
 | 3. Page Composition & Pop-ups | 0/TBD | Not started | - |
 | 4. Contact Form & Deliverability | 0/TBD | Not started | - |
 | 5. Analytics, Polish & Launch | 0/TBD | Not started | - |

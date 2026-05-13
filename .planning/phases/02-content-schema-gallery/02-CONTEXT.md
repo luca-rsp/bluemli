@@ -23,7 +23,7 @@ Define the three strict Zod content collections (`gallery`, `popups`, `site`) in
 
 - **D-03:** **3 responsive widths: 400 / 800 / 1600.** WebP only. Aspect ratio preserved via sharp `fit: 'inside'` (no cropping in the prebuild step — cropping is a CSS concern at render time). 400w for grid thumbnail on phones, 800w for detail-page on phones + grid on desktop, 1600w for Retina detail-page hero on 2x displays. Smallest realistic set that covers phones, desktop, and Retina.
 
-- **D-04:** **HEIC supported end-to-end.** CI workflow installs `libheif-dev` (one `apt-get` line on `ubuntu-latest`). Prebuild script detects `.heic` extensions and converts to JPEG (in-memory or via tmp file) before sharp runs. Founder uploads whatever her iPhone produces — no manual format conversion required, no need to toggle iOS Camera → Formats → Most Compatible.
+- **D-04:** **HEIC supported end-to-end via pure-JS `heic-convert` (amended 2026-05-13).** Prebuild script detects `.heic` extensions and uses the `heic-convert@2.1.0` npm package to decode HEIC to a JPEG buffer in-memory, then pipes the buffer to sharp for WebP resize. **No system dependency on `libheif-dev`.** The originally proposed `apt-get install libheif-dev` CI step is NOT required and is omitted. Founder uploads whatever her iPhone produces — no manual format conversion required, no need to toggle iOS Camera → Formats → Most Compatible. *Amended during Phase 2 research (RESEARCH.md §2): sharp's prebuilt binaries don't include HEIC support regardless of system `libheif`, and `heic-convert` is the smallest-dependency, pure-JS path that works headlessly in CI.*
 
 - **D-05:** **No staging folder.** The per-slug folder under `src/content/gallery/<slug>/` is the canonical drop location. The earlier "incoming/" pattern was considered and rejected in favor of this single-location model — it eliminates the staging-cleanup question and keeps the founder workflow identical (drop one file via GitHub web UI, done).
 
@@ -139,7 +139,7 @@ Two REQUIREMENTS.md / ROADMAP.md edits required during planning to keep the spec
 - **`.claude/skills/studio-bluemli-design/colors_and_type.css`** (synced to `src/styles/`) — Tokens for hand-display name, Nunito description, coral CTA, muted-indigo "Sold" badge.
 
 ### Established Patterns
-- **`passthroughImageService()`** is non-negotiable — Sharp doesn't run in `workerd` at runtime. The build-time prebuild script is the *only* place that runs sharp, and it runs on the CI Linux runner where libheif is available.
+- **`passthroughImageService()`** is non-negotiable — Sharp doesn't run in `workerd` at runtime. The build-time prebuild script is the *only* place that runs sharp, and it runs on the CI Linux runner. (Note: per amended D-04, HEIC decoding is handled by pure-JS `heic-convert` — no system `libheif` dependency required.)
 - **Brand non-negotiables enforced by CI grep** — every placeholder description must avoid `flower|petal|floral|bloom|blossom`; Phase 1's brand-check Rule 2 currently excludes `colors_and_type.css` + `src/components/design-skill/` but DOES scan `src/content/`. Phase 2's seed `index.md` files MUST pass the rule.
 - **Per-slug folders are LAW** — never put gallery photos in `public/` (Pitfall #8) or `src/assets/`. Always `src/content/gallery/<slug>/hero.*`.
 - **`.strict()` on every collection schema** — typos like `availabilty` fail the build with a clear Zod message.
@@ -152,7 +152,7 @@ Two REQUIREMENTS.md / ROADMAP.md edits required during planning to keep the spec
 - `src/pages/gallery/[slug].astro` ← (new in Phase 2) ← detail page with `getStaticPaths()` enumerating all gallery slugs
 - `public/gallery/<slug>/hero-*.webp` ← (gitignored, generated each build) ← `prebuild` sharp script ← `src/content/gallery/<slug>/hero.*`
 - `BaseLayout.astro` ← may extend to accept a per-page `ogImage` prop for D-12 (or Phase 2 inlines the meta tag on the detail page directly and Phase 3's PAG-07 refactor pulls it into the shared `<SEO />` component)
-- `.github/workflows/ci.yml` ← Phase 2 adds an `apt-get install -y libheif-dev` step BEFORE the `pnpm install` step (sharp + heic-convert needs libheif on the system)
+- `.github/workflows/ci.yml` ← Phase 2 adds a single `Generate responsive WebP variants` step BEFORE the `Build` step (calls `pnpm run prebuild:images`). **No `apt-get install libheif-dev` step is needed** — superseded by D-04's amendment: pure-JS `heic-convert@2.1.0` removes the system-libheif requirement (see RESEARCH.md §2).
 - `scripts/check-brand-rules.sh` ← Phase 2 uncomments Rule 7 (sample-marker grep: `Sample Piece|price: 0` under `src/content/`)
 - `.gitignore` ← Phase 2 adds `public/gallery/` so the build-time variants don't get committed
 - `package.json` ← Phase 2 adds `sharp` + (optionally) `heic-convert` as devDependencies; wires `prebuild` script (or uses Astro integration hook instead)
