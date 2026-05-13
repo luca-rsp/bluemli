@@ -23,7 +23,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ### Phase 1: Foundations & Brand System
 **Goal**: Founder can preview a cream-background, hand-font, design-skill-styled empty shell of all five pages at a `*.workers.dev` URL, with brand non-negotiables enforced by CI so they cannot regress.
 **Depends on**: Nothing (first phase)
-**Requirements**: FND-01, FND-02, FND-03, FND-04, FND-05, FND-06, FND-07, FND-08, FND-09, FND-10, FND-11, FND-12, FND-13
+**Requirements**: FND-01, FND-02, FND-04, FND-05, FND-06, FND-07, FND-08, FND-09, FND-10, FND-11, FND-12, FND-13
 **Success Criteria** (what must be TRUE):
   1. Founder can open a `*.workers.dev` preview URL and confirm cream background, hand-display headline font, Nunito body, and the design-skill header + footer chrome on a placeholder page.
   2. Every push to `main` produces a production deploy and every PR produces a unique preview URL (founder can click both from GitHub).
@@ -32,11 +32,16 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. PROJECT.md's Constraints section reads "Cloudflare Workers with Static Assets" (the legacy "Cloudflare Pages" wording is gone).
 **Plans**: 5 plans
 Plans:
+**Wave 1**
 - [ ] 01-01-scaffold-astro-cloudflare-PLAN.md — Scaffold Astro 6.2 + Cloudflare adapter, wrangler.jsonc, Fonts API config, PROJECT.md correction (FND-01, FND-02, FND-07)
 - [ ] 01-02-sync-design-skill-PLAN.md — Sync 11 design-skill JSX components + brand-token CSS into src/ with mechanical transforms + manual SSR-safe edits (FND-06, FND-09)
 - [ ] 01-03-favicon-and-public-assets-PLAN.md — Generate favicon set from mark.svg, copy apple-touch-icon as-is, ship 3 placeholder gallery WebPs (FND-08)
+
+**Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 01-04-baselayout-pages-sample-data-PLAN.md — BaseLayout.astro + 5 page placeholders + sample-data.ts; demo-loaded shell renders (FND-05, FND-12, FND-13)
-- [ ] 01-05-ci-brand-check-and-setup-PLAN.md — GitHub Actions required status check + brand grep scripts + SETUP.md for Cloudflare connect (FND-03, FND-04, FND-10, FND-11)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 01-05-ci-brand-check-and-setup-PLAN.md — GitHub Actions required status check + brand grep scripts + Lighthouse CI on preview URL + SETUP.md for Cloudflare connect (FND-04, FND-10, FND-11, FND-12)
 **UI hint**: yes
 
 **Key risks / pitfalls:**
@@ -110,7 +115,7 @@ Plans:
 ### Phase 5: Analytics, Polish & Launch
 **Goal**: `https://studiobluemli.com` resolves to the production Worker, `www.` 301-redirects to apex, Umami records every visit and event from the production domain, all 5 pages score Lighthouse mobile ≥ 90, and the founder has walked the "Looks Done But Isn't" launch checklist end-to-end.
 **Depends on**: Phase 4
-**Requirements**: LCH-01, LCH-02, LCH-03, LCH-04, LCH-05, LCH-06, LCH-07, LCH-08
+**Requirements**: FND-03, LCH-01, LCH-02, LCH-03, LCH-04, LCH-05, LCH-06, LCH-07, LCH-08
 **Success Criteria** (what must be TRUE):
   1. Visiting `https://studiobluemli.com` shows the live production site over HTTPS with a valid certificate, and `https://www.studiobluemli.com/anything` returns a 301 to `https://studiobluemli.com/anything`.
   2. Within 5 minutes of cutover, the Umami Cloud dashboard's Realtime view shows the founder's own visit plus custom events (gallery-card click, "inquire on Instagram" click, contact-form submit) — events from preview deploys do **not** appear (`data-domains` is enforced).

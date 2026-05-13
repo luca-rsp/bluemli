@@ -11,6 +11,7 @@ requirements: [FND-06, FND-09, FND-13]
 files_modified:
   - scripts/sync-design-skill.mjs
   - src/styles/colors_and_type.css
+  - src/styles/components.css
   - src/components/design-skill/Mark.jsx
   - src/components/design-skill/Button.jsx
   - src/components/design-skill/BeadCluster.jsx
@@ -31,7 +32,10 @@ must_haves:
     - "src/styles/colors_and_type.css has NO `@import url(\"https://fonts.googleapis.com...\")` line (self-hosting via Fonts API only)"
     - "Header.jsx has NO `backdropFilter` or `WebkitBackdropFilter` (brand rule + CI Rule 4)"
     - "Header.jsx HeaderProps.active union accepts '/' | '/gallery' | '/popups' | '/about' | '/say-hi' (Plan 04 about.astro passes active=\"/about\")"
-    - "Header.jsx ships a CSS-only mobile hamburger (no React state, no `client:` directive) with aria-label='Open navigation menu', aria-expanded, aria-controls, 44px min touch target, :focus-visible styling (UI-SPEC §Header chrome)"
+    - "Header.jsx ships a CSS-only mobile hamburger using <details><summary> (semantic, keyboard-accessible by default, native aria-expanded driven by the open attribute) with 44px min touch target and :focus-visible styling (UI-SPEC §Header chrome; REVIEW FIX H2)"
+    - "Header.jsx <nav> element has NO inline `style={{ display: 'flex' }}` — all responsive display behavior is driven by CSS classes only (REVIEW FIX H2: the inline flex was overriding the mobile collapse rule)"
+    - "src/styles/colors_and_type.css has the same byte size after Plan 02 runs as the source design-skill copy minus the @import-Google-Fonts line — i.e., NO component styles appended (REVIEW FIX M4)"
+    - "src/styles/components.css is a NEW sibling stylesheet for any component-specific styles (like .btn-primary hover/active) that the design-skill copy did NOT already include — colors_and_type.css is locked and not extended (REVIEW FIX M4)"
     - "All `../../assets/logo/` paths are rewritten to `/` (Header, Hero, Footer use `/mark.svg`)"
     - "AppointmentForm.jsx has no `React.useState`, uses a real `<form method=\"POST\" action=\"/api/contact\">`, and has NO `outline: 'none'` (FND-13)"
     - "GalleryGrid.jsx accepts a `pieces` prop and contains no hardcoded `PRODUCTS = [...]` array"
@@ -44,8 +48,11 @@ must_haves:
       provides: "one-shot copy + transform script (D-04..D-06)"
       contains: "transforms"
     - path: "src/styles/colors_and_type.css"
-      provides: "global brand tokens (cream background, font cascades, palette)"
+      provides: "global brand tokens (cream background, font cascades, palette) — COPIED VERBATIM from design skill minus the Google Fonts @import; NEVER EXTENDED in Phase 1 (REVIEW FIX M4)"
       contains: "--color-bg"
+    - path: "src/styles/components.css"
+      provides: "component-specific styles (e.g., .btn-primary hover/active) that live OUTSIDE the locked colors_and_type.css (REVIEW FIX M4)"
+      contains: ".btn-primary"
     - path: "src/components/design-skill/Header.jsx"
       provides: "sticky cream header with logo lockup + nav + CSS-only mobile hamburger"
       contains: "export default Header"
@@ -324,7 +331,7 @@ The sync script handled mechanical transforms. These manual edits encode the pla
 
 **Edit 1 — `src/components/design-skill/Header.jsx`** (PATTERNS.md decision #1, #2; UI-SPEC §Header chrome — CSS-only mobile hamburger REQUIRED in Phase 1):
 
-Replace the synced Header.jsx with this exact content. The hamburger uses the **checkbox-hack** mechanism: a visually-hidden `<input type="checkbox" id="nav-toggle">` plus a `<label for="nav-toggle">` styled as the hamburger button. The `<nav>` is then shown/hidden via the CSS sibling selector `#nav-toggle:checked ~ nav`. The `aria-expanded` state is driven via `[aria-expanded]` attribute selectors targeted from `#nav-toggle:checked ~ * [aria-controls="primary-nav"]`. Pure CSS, no React state, no JS:
+Replace the synced Header.jsx with this exact content (REVIEW FIX H2 — Codex review caught two real bugs in the prior checkbox-hack version: an inline `style={{ display: 'flex' }}` on `<nav>` was overriding the mobile collapse rule, and `aria-expanded="false"` was static. The fix uses native `<details><summary>` — semantic, keyboard-accessible by default, with `aria-expanded` driven natively by the `open` attribute on `<details>` — no JS, no CSS hacks, no static ARIA):
 
 ```jsx
 /* eslint-disable */
@@ -338,22 +345,32 @@ function Header({ active = '/' }) {
     ['/popups',  'pop-ups'],
     ['/say-hi',  'say hi'],
   ];
-  // CSS-only hamburger via the checkbox-hack. The hidden checkbox is the
-  // toggle state. The label-as-button drives aria via CSS sibling selectors.
-  // No useState, no client: directive — pure HTML+CSS.
+  // Mobile nav uses <details><summary>. Native semantics:
+  //  - <summary> is keyboard-focusable, Enter/Space toggles, no JS
+  //  - <details open> drives a native [open] attribute → aria-expanded is computed
+  //    by the platform (do NOT add a static aria-expanded attribute)
+  //  - CSS shows <summary> only on mobile; on desktop, the nav is inline and
+  //    <summary> is hidden (so the disclosure widget is purely a mobile affordance)
   const styleBlock = `
-    /* Visually-hidden checkbox — drives the open/closed state */
-    .nav-toggle { position: absolute; opacity: 0; pointer-events: none; }
-    /* Hamburger button (the <label>). Hidden on desktop, visible on mobile. */
-    .nav-hamburger {
-      display: none;
+    /* Reset the default <details>/<summary> chrome (the disclosure triangle). */
+    .site-mobile-nav { position: relative; }
+    .site-mobile-nav > summary {
+      list-style: none;
+      cursor: pointer;
+    }
+    .site-mobile-nav > summary::-webkit-details-marker { display: none; }
+    .site-mobile-nav > summary::marker { content: ''; }
+
+    /* Hamburger icon inside <summary>. 44px min touch target. */
+    .nav-hamburger-button {
       width: 44px; height: 44px;
-      align-items: center; justify-content: center;
-      cursor: pointer; background: transparent; border: none;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: transparent;
       color: var(--indigo-500);
       border-radius: 4px;
     }
-    .nav-hamburger:focus-visible {
+    .site-mobile-nav > summary:focus-visible .nav-hamburger-button,
+    .site-mobile-nav > summary:focus-visible {
       outline: 2px solid var(--color-focus-ring, var(--indigo-500));
       outline-offset: 2px;
     }
@@ -364,28 +381,64 @@ function Header({ active = '/' }) {
     }
     .nav-hamburger-icon::before { transform: translateY(-7px); }
     .nav-hamburger-icon::after  { transform: translateY(5px); }
-    /* Mobile breakpoint: <= 640px */
+    .site-mobile-nav[open] .nav-hamburger-button { color: var(--coral-500); }
+
+    /* Desktop (>= 641px): show inline nav, hide the <details> chrome. */
+    .site-nav { display: flex; gap: 22px; }
+    .site-mobile-nav { display: none; }
+
+    /* Mobile (<= 640px): hide inline nav, show <details>/<summary>. */
     @media (max-width: 640px) {
-      .nav-hamburger { display: inline-flex; }
-      .site-nav {
-        position: absolute; top: 100%; right: 0; left: 0;
+      .site-nav { display: none; }
+      .site-mobile-nav { display: block; }
+      .site-mobile-nav[open] .site-nav-panel {
+        display: flex;
+        position: absolute;
+        top: 100%; right: 0; left: 0;
         flex-direction: column; gap: 0;
         background: var(--color-bg, #F5DCC7);
         padding: 12px 32px 20px;
-        display: none;
       }
-      .site-nav a { padding: 12px 0; min-height: 44px; display: flex; align-items: center; }
-      /* When the toggle is checked, show the nav AND flip aria-expanded on the label */
-      .nav-toggle:checked ~ .nav-hamburger { color: var(--coral-500); }
-      .nav-toggle:checked ~ .site-nav { display: flex; }
+      .site-nav-panel a { padding: 12px 0; min-height: 44px; display: flex; align-items: center; }
     }
-    /* :focus-visible on nav links */
-    .site-nav a:focus-visible {
+
+    /* :focus-visible on nav links (both desktop inline and mobile panel) */
+    .site-nav a:focus-visible, .site-nav-panel a:focus-visible {
       outline: 2px solid var(--color-focus-ring, var(--indigo-500));
       outline-offset: 2px;
       border-radius: 2px;
     }
+
+    /* REVIEW FIX (checker BLOCKER 1): the <ul> and <li> are flattened
+       into the parent flex container via display:contents on these CSS
+       classes, NOT via an inline JSX display rule. This satisfies the grep
+       gate that forbids inline display rules in Header.jsx. */
+    .nav-list { display: contents; list-style: none; padding: 0; margin: 0; }
+    .nav-item { display: contents; }
   `;
+
+  const renderLinks = (panelClass) => (
+    <ul className={`${panelClass} nav-list`}>
+      {links.map(([href, label]) => (
+        <li key={href} className="nav-item">
+          <a href={href}
+             style={{
+               fontFamily: 'var(--font-body)',
+               fontWeight: active === href ? 700 : 400,
+               fontSize: 16,
+               color: active === href ? 'var(--coral-500)' : 'var(--indigo-500)',
+               textDecoration: 'none',
+               position: 'relative',
+               paddingBottom: 4,
+             }}>
+            {label}
+            {active === href && <Mark.Underline />}
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+
   return (
     <header role="banner" style={{
       position: 'sticky', top: 0, zIndex: 50,
@@ -399,38 +452,24 @@ function Header({ active = '/' }) {
         <span style={{ fontFamily: 'var(--font-wordmark)', fontSize: 28, color: 'var(--coral-500)', letterSpacing: '-0.02em', lineHeight: 1 }}>Studio Bluemli</span>
       </a>
 
-      {/* CSS-only hamburger: hidden checkbox + label-as-button. The :checked
-          state toggles the .site-nav visibility via sibling selector. */}
-      <input id="nav-toggle" className="nav-toggle" type="checkbox" aria-hidden="true" tabIndex={-1} />
-      <label
-        htmlFor="nav-toggle"
-        className="nav-hamburger"
-        role="button"
-        tabIndex={0}
-        aria-label="Open navigation menu"
-        aria-controls="primary-nav"
-        aria-expanded="false"
-      >
-        <span className="nav-hamburger-icon" aria-hidden="true" />
-      </label>
-
-      <nav id="primary-nav" className="site-nav" aria-label="Site navigation" style={{ display: 'flex', gap: 22 }}>
-        {links.map(([href, label]) => (
-          <a key={href} href={href}
-             style={{
-               fontFamily: 'var(--font-body)',
-               fontWeight: active === href ? 700 : 400,
-               fontSize: 16,
-               color: active === href ? 'var(--coral-500)' : 'var(--indigo-500)',
-               textDecoration: 'none',
-               position: 'relative',
-               paddingBottom: 4,
-             }}>
-            {label}
-            {active === href && <Mark.Underline />}
-          </a>
-        ))}
+      {/* Desktop nav — inline. CSS hides this at <= 640px. NO inline display style. */}
+      <nav id="primary-nav" className="site-nav" aria-label="Site navigation">
+        {renderLinks('site-nav-list')}
       </nav>
+
+      {/* Mobile nav — native <details>/<summary>. aria-expanded is computed
+          automatically by the platform from the [open] attribute. Do NOT add
+          a static aria-expanded here. */}
+      <details className="site-mobile-nav">
+        <summary aria-label="Open navigation menu" aria-controls="mobile-nav-panel">
+          <span className="nav-hamburger-button" aria-hidden="true">
+            <span className="nav-hamburger-icon" aria-hidden="true" />
+          </span>
+        </summary>
+        <nav id="mobile-nav-panel" className="site-nav-panel" aria-label="Mobile site navigation">
+          {renderLinks('site-nav-list-mobile')}
+        </nav>
+      </details>
     </header>
   );
 }
@@ -446,6 +485,18 @@ function Header({ active = '/' }) {
 export default Header;
 ```
 
+**Acceptance verification — Header.jsx MUST NOT contain an inline `style={{ display:` on the `<nav>` element** (REVIEW FIX H2): the inline flex was the root cause of the mobile-nav-can't-collapse bug. After writing the file, run:
+
+```bash
+# The <nav> element specifically must have NO inline style attribute on its tag.
+# This regex anchors on `<nav` so it enforces the H2 intent (no inline display
+# clobbering the mobile collapse rule) without false-positives on benign inline
+# styles on <header>, the logo <a>, sub-divs, etc.
+! grep -nE '<nav[^>]*style=\{\{' src/components/design-skill/Header.jsx
+```
+The grep MUST exit 1 (no matches found).
+
+
 Why each change vs synced version:
 - Hash anchors `#home`/`#gallery`/`#pop-ups`/`#say hi` → real routes `/`/`/gallery`/`/popups`/`/say-hi` (PATTERNS.md line 403)
 - `active='home'` default → `active='/'` (route-based per PATTERNS.md "planner decision: pass `active` from the page")
@@ -453,8 +504,7 @@ Why each change vs synced version:
 - `role="banner"` on header and `aria-label="Site navigation"` on nav (UI-SPEC accessibility floor)
 - Font weight 400/700 at 16px (UI-SPEC Typography In Use) — replaces original's 600/800 at 14px
 - `onClick` and `onNav` removed — dead code without hydration; real `<a href>` navigates
-- **NEW: CSS-only mobile hamburger** via the checkbox-hack pattern. The hidden `<input type="checkbox" id="nav-toggle">` is the toggle state. The `<label>` styled as the button is the visible/focusable hamburger; clicking/Enter-on-it toggles the checkbox via standard HTML label semantics. At `max-width: 640px` the `<nav>` is hidden by default and shown via `.nav-toggle:checked ~ .site-nav { display: flex }`. `aria-controls="primary-nav"`, `aria-label="Open navigation menu"`, 44px min touch target, `:focus-visible` styling all present per UI-SPEC §Header chrome.
-- **Note on aria-expanded:** The label's `aria-expanded="false"` attribute is static in the SSR HTML. A fully reactive aria-expanded would require either JS or the `:has()` pseudo-class on `<html>` — both are deferred. The visual state correctly reflects open/closed via CSS; screen readers announce the nav as a landmark either way (`<nav aria-label="Site navigation">`). UI-SPEC requirement satisfied: the hamburger BUTTON exists with the correct attributes and the menu opens/closes without JS. If a future audit demands reactive aria-expanded, swap to `<details>`/`<summary>` (which has built-in aria-expanded driven by the open attribute) — the trade-off there is summary's default chevron arrow needs to be hidden with CSS.
+- **NEW: Native `<details>/<summary>` mobile hamburger** (REVIEW FIX H2). The previous checkbox-hack version had two real bugs Codex caught: (1) the inline `style={{ display: 'flex' }}` on `<nav>` overrode the mobile `.site-nav { display: none }` rule so the nav couldn't collapse, and (2) the static `aria-expanded="false"` never updated. The `<details>/<summary>` approach is strictly better: `<summary>` is keyboard-focusable and Enter/Space togglable natively (no JS, no checkbox), and `aria-expanded` is automatically derived by the platform from the `[open]` attribute on `<details>` — so we never ship a stale ARIA value. The chevron arrow is suppressed via `summary::-webkit-details-marker { display: none }` + `summary::marker { content: '' }`. At `max-width: 640px` the inline `.site-nav` is hidden and the `<details>` widget is shown; on desktop the reverse. 44px min touch target and `:focus-visible` styling are preserved.
 
 **Edit 2 — `src/components/design-skill/Hero.jsx`** (PATTERNS.md decision #3):
 
@@ -634,7 +684,7 @@ export default PopupStrip;
 
 **Verified PopupStrip prop name: `popup`** (matches Plan 04 Task 3 `<PopupStrip popup={sampleNextPopup} />`).
 
-**Step 5b — Read the just-synced About.jsx** and verify: the source is `function About()` with no props, no `useState`, only references `Mark.Heart` (locally imported via the synced ES-module form), CSS vars, and `--font-hand` (which is OPTIONAL per D-16; About is the one component that uses it, so if the Caveat font commented-out block in `astro.config.mjs` is needed, this is where to surface it — but Phase 1 ships About with the cascade fallback per D-16, which is acceptable). **No edits needed beyond mechanical transforms.** Document this in the SUMMARY: "About.jsx required no post-sync edits — passed verification."
+**Step 5b — Read the just-synced About.jsx** and verify: the source is `function About()` with no props, no `useState`, only references `Mark.Heart` (locally imported via the synced ES-module form), CSS vars, and `--font-hand`. Caveat is now actively loaded via the Astro Fonts API (Plan 01) and preloaded in BaseLayout (Plan 04 Task 2) per REVIEW FIX M5. About.jsx's `--font-hand` reference will resolve to the loaded Caveat at runtime — D-16 is satisfied. **No edits needed beyond mechanical transforms.** Document this in the SUMMARY: "About.jsx required no post-sync edits — passed verification."
 
 If, contrary to expectation, the synced About.jsx contains `useState` OR a cross-skill import OR a `client:`-requiring pattern, halt and refactor it now (do not defer). The expected post-sync About.jsx body is roughly:
 
@@ -720,20 +770,52 @@ export default GalleryGrid;
 
 You may keep additional decorative wrappers from the original synced file (e.g., section header) as long as the core constraints above hold.
 
-**Edit 7 — `src/components/design-skill/Button.jsx`** (PATTERNS.md decision #7):
+**Edit 7 — `src/components/design-skill/Button.jsx` AND a NEW `src/styles/components.css`** (PATTERNS.md decision #7; REVIEW FIX M4):
 
-In the synced Button.jsx, convert hover/press handlers to CSS pseudo-classes. Specifically:
+CONTEXT and the design skill lock `colors_and_type.css` as "imported once, never extended" (D-04 / D-06; CLAUDE.md skill rules). Codex flagged that appending `.btn-primary` styles to that file violates the lock. **The fix: put component-specific styles in a NEW sibling stylesheet `src/styles/components.css`**, which Plan 04's BaseLayout will import AFTER `colors_and_type.css` so the tokens are in scope.
+
+**Step 7a — In the synced `src/components/design-skill/Button.jsx`:**
 - DELETE `onMouseEnter`, `onMouseLeave`, `onPointerDown`, `onPointerUp` handler props and any `useState` hover/press state (if present)
-- Replace inline `style={{ background: hover ? coralHover : coral, transform: pressed ? 'scale(0.97)' : 'scale(1)' }}` with a static `style={{...}}` + a `className="btn-primary"` (or similar variant class)
-- Add a `<style>` block inside the component body using a `<style dangerouslySetInnerHTML={{__html: ...}}/>` pattern OR (preferred) a className-only approach where the actual `:hover`/`:active` rules live in `src/styles/colors_and_type.css` if the file already defines `.btn-primary:hover`/`.btn-primary:active` rules (it does at element-default level — check). If `colors_and_type.css` does NOT already define button hover/active rules, append a small block at the END of `src/styles/colors_and_type.css` like:
-```css
-.btn-primary { transition: background 0.15s ease, transform 0.08s ease; }
-.btn-primary:hover { background: var(--coral-700); }
-.btn-primary:active { transform: scale(0.97); }
-```
+- Replace inline `style={{ background: hover ? coralHover : coral, transform: pressed ? 'scale(0.97)' : 'scale(1)' }}` with a static `style={{...}}` + a `className="btn-primary"` (for primary variant). The static `style` keeps token-driven properties (background, color, padding, font, border-radius) that don't change on hover.
 - DO NOT use `border: 1px` — CI Rule 5 will catch it. Use `box-shadow: inset 0 0 0 2px var(--coral-500)` for outline-style variants.
 
-Goal: Button still LOOKS the same in resting state in SSR HTML; hover/press are now interactive without JS via CSS pseudo-classes.
+**Step 7b — Create a NEW file `src/styles/components.css`** at the path `src/styles/components.css` with this exact content (REVIEW FIX M4 — colors_and_type.css MUST remain a verbatim copy of the design-skill source minus the Google Fonts @import; component-specific styles live HERE):
+
+```css
+/* src/styles/components.css
+ * Component-specific styles for design-skill components that need CSS pseudo-classes
+ * (:hover, :active, :focus-visible) which can't be expressed in React inline styles.
+ *
+ * REVIEW FIX M4: this file exists so colors_and_type.css stays a verbatim copy of the
+ * design-skill source (minus the Google Fonts @import). DO NOT move styles from here
+ * back into colors_and_type.css — that file is locked.
+ *
+ * Plan 04's BaseLayout.astro imports this file AFTER colors_and_type.css, so the
+ * --coral-*, --indigo-*, --cream-* tokens are in scope here.
+ */
+
+.btn-primary {
+  transition: background 0.15s ease, transform 0.08s ease;
+}
+.btn-primary:hover {
+  background: var(--coral-700);
+}
+.btn-primary:active {
+  transform: scale(0.97);
+}
+```
+
+**Step 7c — colors_and_type.css MUST NOT be touched in this task.** The only change to that file in Plan 02 was the Google Fonts `@import` strip in Task 2 (mechanical sync). No `.btn-primary` (or any other component selector) gets appended.
+
+**Step 7d — Acceptance verification: colors_and_type.css unchanged after Plan 02 completes** (REVIEW FIX M4). After the sync script runs, record the file's content hash. After Task 3 completes, verify the hash is unchanged (i.e., the only diff vs source is the Google Fonts @import line removal). Use this grep gate as the canonical check:
+
+```bash
+# colors_and_type.css MUST NOT contain any of these component selectors after Plan 02.
+# If a future task appends component styles, this grep fails the build.
+! grep -E "^\.btn-primary|^\.site-nav|^\.nav-hamburger|^\.hero-cta|^\.skip-link" src/styles/colors_and_type.css
+```
+
+Goal: Button still LOOKS the same in resting state in SSR HTML; hover/press are now interactive without JS via CSS pseudo-classes; `colors_and_type.css` is byte-equivalent to the source design-skill file minus the one stripped `@import`.
 
 **Step — Final verification.** Run:
 ```bash
@@ -745,9 +827,9 @@ grep -q "method=\"POST\"" src/components/design-skill/AppointmentForm.jsx && gre
 grep -q "href=\"/gallery\"\|'/gallery'" src/components/design-skill/Header.jsx
 grep -q "role=\"banner\"" src/components/design-skill/Header.jsx
 grep -q "aria-label=\"Open navigation menu\"" src/components/design-skill/Header.jsx
-grep -q "aria-controls=\"primary-nav\"" src/components/design-skill/Header.jsx
+grep -q "aria-controls=\"mobile-nav-panel\"" src/components/design-skill/Header.jsx
 grep -q "/about" src/components/design-skill/Header.jsx   # HeaderProps.active union includes /about
-grep -q "nav-hamburger\|nav-toggle" src/components/design-skill/Header.jsx
+grep -q "nav-hamburger" src/components/design-skill/Header.jsx
 
 # Confirm Footer email is hi@
 grep -q "hi@studiobluemli.com" src/components/design-skill/Footer.jsx
@@ -776,6 +858,24 @@ grep -q "{ popup }" src/components/design-skill/PopupStrip.jsx
 # Confirm no 1px borders anywhere
 ! grep -rE "border(-top|-bottom|-left|-right)?:\s*1px" src/components/design-skill/
 
+# REVIEW FIX H2: Header.jsx must NOT carry an inline style attribute on its <nav> element.
+# The previous version had `<nav className="site-nav" style={{ display: 'flex', gap: 22 }}>` which
+# overrode the mobile collapse rule .site-nav { display: none }. The regex anchors on <nav so it
+# only flags inline styles on the <nav> tag itself (not benign inline styles elsewhere in the file).
+! grep -nE '<nav[^>]*style=\{\{' src/components/design-skill/Header.jsx
+
+# REVIEW FIX H2: Header.jsx must use <details>/<summary> for the mobile hamburger
+# (semantic, native aria-expanded). Grep gates:
+grep -q "<details" src/components/design-skill/Header.jsx
+grep -q "<summary" src/components/design-skill/Header.jsx
+# It must NOT contain a static aria-expanded attribute on the toggle.
+! grep -E 'aria-expanded="(true|false)"' src/components/design-skill/Header.jsx
+
+# REVIEW FIX M4: colors_and_type.css must NOT have been extended with component styles.
+! grep -E '^\.btn-primary|^\.site-nav|^\.nav-hamburger|^\.hero-cta|^\.skip-link' src/styles/colors_and_type.css
+# And the new components.css sibling exists with .btn-primary rules.
+test -f src/styles/components.css && grep -q "\.btn-primary" src/styles/components.css
+
 # Confirm brand rules pass on the synced + edited components
 grep -rEnP "(bg-white|background:\s*white|#fff(?![0-9a-fA-F])|#[fF]{6})" --include="*.jsx" src/components/design-skill/ || echo "PASS: no white bg"
 grep -rEni "\b(flower|petal|floral|bloom|blossom)\b" --include="*.jsx" src/components/design-skill/ || echo "PASS: no flower vocab"
@@ -785,14 +885,14 @@ grep -rEn "(backdrop-filter|backdropFilter|WebkitBackdropFilter)" --include="*.j
 All PASS lines must print. Any grep that finds a violation must be fixed before the task is done.
   </action>
   <verify>
-    <automated>grep -q "method=\"POST\"" src/components/design-skill/AppointmentForm.jsx && grep -q "action=\"/api/contact\"" src/components/design-skill/AppointmentForm.jsx && ! grep -q "useState" src/components/design-skill/AppointmentForm.jsx && grep -q "id=\"say-hi\"" src/components/design-skill/AppointmentForm.jsx && grep -q "role=\"banner\"" src/components/design-skill/Header.jsx && grep -q "aria-label=\"Site navigation\"" src/components/design-skill/Header.jsx && grep -q "aria-label=\"Open navigation menu\"" src/components/design-skill/Header.jsx && grep -q "aria-controls=\"primary-nav\"" src/components/design-skill/Header.jsx && grep -qE "/about" src/components/design-skill/Header.jsx && grep -qE "nav-hamburger|nav-toggle" src/components/design-skill/Header.jsx && grep -qE "href=[\"']/gallery[\"']|'/gallery'" src/components/design-skill/Header.jsx && grep -qE "href=[\"']/popups[\"']|'/popups'" src/components/design-skill/Header.jsx && grep -qE "href=[\"']/say-hi[\"']|'/say-hi'" src/components/design-skill/Header.jsx && grep -q "hi@studiobluemli.com" src/components/design-skill/Footer.jsx && ! grep -q "hello@studiobluemli.com" src/components/design-skill/Footer.jsx && grep -q "role=\"contentinfo\"" src/components/design-skill/Footer.jsx && grep -q "pieces" src/components/design-skill/GalleryGrid.jsx && ! grep -qE "const PRODUCTS\s*=\s*\[" src/components/design-skill/GalleryGrid.jsx && grep -q "{ popup }" src/components/design-skill/PopupStrip.jsx && ! grep -q "NOPA block party" src/components/design-skill/PopupStrip.jsx && ! grep -q "onAppointment" src/components/design-skill/PopupStrip.jsx && ! grep -q "useState" src/components/design-skill/About.jsx && ! grep -E "onMouseEnter|onMouseLeave|onPointerDown|onPointerUp" src/components/design-skill/Button.jsx && ! grep -rE "outline:\s*['\"]?none" src/components/design-skill/ && ! grep -rE "border(-top|-bottom|-left|-right)?:\s*1px" src/components/design-skill/ && ! grep -rEni '\b(flower|petal|floral|bloom|blossom)\b' --include="*.jsx" src/components/design-skill/ && ! grep -rEn "gradient" --include="*.jsx" src/components/design-skill/ && ! grep -rEn "(backdrop-filter|backdropFilter|WebkitBackdropFilter)" --include="*.jsx" src/components/design-skill/</automated>
+    <automated>grep -q "method=\"POST\"" src/components/design-skill/AppointmentForm.jsx && grep -q "action=\"/api/contact\"" src/components/design-skill/AppointmentForm.jsx && ! grep -q "useState" src/components/design-skill/AppointmentForm.jsx && grep -q "id=\"say-hi\"" src/components/design-skill/AppointmentForm.jsx && grep -q "role=\"banner\"" src/components/design-skill/Header.jsx && grep -q "aria-label=\"Site navigation\"" src/components/design-skill/Header.jsx && grep -q "aria-label=\"Open navigation menu\"" src/components/design-skill/Header.jsx && grep -q "aria-controls=\"mobile-nav-panel\"" src/components/design-skill/Header.jsx && grep -qE "/about" src/components/design-skill/Header.jsx && grep -qE "nav-hamburger" src/components/design-skill/Header.jsx && grep -qE "href=[\"']/gallery[\"']|'/gallery'" src/components/design-skill/Header.jsx && grep -qE "href=[\"']/popups[\"']|'/popups'" src/components/design-skill/Header.jsx && grep -qE "href=[\"']/say-hi[\"']|'/say-hi'" src/components/design-skill/Header.jsx && grep -q "hi@studiobluemli.com" src/components/design-skill/Footer.jsx && ! grep -q "hello@studiobluemli.com" src/components/design-skill/Footer.jsx && grep -q "role=\"contentinfo\"" src/components/design-skill/Footer.jsx && grep -q "pieces" src/components/design-skill/GalleryGrid.jsx && ! grep -qE "const PRODUCTS\s*=\s*\[" src/components/design-skill/GalleryGrid.jsx && grep -q "{ popup }" src/components/design-skill/PopupStrip.jsx && ! grep -q "NOPA block party" src/components/design-skill/PopupStrip.jsx && ! grep -q "onAppointment" src/components/design-skill/PopupStrip.jsx && ! grep -q "useState" src/components/design-skill/About.jsx && ! grep -E "onMouseEnter|onMouseLeave|onPointerDown|onPointerUp" src/components/design-skill/Button.jsx && ! grep -rE "outline:\s*['\"]?none" src/components/design-skill/ && ! grep -rE "border(-top|-bottom|-left|-right)?:\s*1px" src/components/design-skill/ && ! grep -rEni '\b(flower|petal|floral|bloom|blossom)\b' --include="*.jsx" src/components/design-skill/ && ! grep -rEn "gradient" --include="*.jsx" src/components/design-skill/ && ! grep -rEn "(backdrop-filter|backdropFilter|WebkitBackdropFilter)" --include="*.jsx" src/components/design-skill/</automated>
   </verify>
   <acceptance_criteria>
     - `src/components/design-skill/Header.jsx` contains `role="banner"`, `aria-label="Site navigation"`, and route paths `/gallery`, `/popups`, `/say-hi` (decision #1, #2)
     - `src/components/design-skill/Header.jsx` does NOT contain `#home`, `#gallery`, `#pop-ups`, `#say hi` hash anchors as primary nav targets (they were replaced)
     - **NEW (checker BLOCKER #1):** `src/components/design-skill/Header.jsx` contains `aria-label="Open navigation menu"` (the CSS-only mobile hamburger button)
-    - **NEW (checker BLOCKER #1):** `src/components/design-skill/Header.jsx` contains `aria-controls="primary-nav"` (links the hamburger button to the nav element)
-    - **NEW (checker BLOCKER #1):** `src/components/design-skill/Header.jsx` contains the strings `nav-hamburger` and `nav-toggle` (the CSS-only hamburger mechanism — checkbox + label pattern)
+    - **NEW (checker BLOCKER #1):** `src/components/design-skill/Header.jsx` contains `aria-controls="mobile-nav-panel"` (links the `<summary>` to the `<nav id="mobile-nav-panel">` it discloses; updated from the obsolete `primary-nav` ID per checker iteration 2 BLOCKER 2 fix)
+    - **NEW (checker BLOCKER #1):** `src/components/design-skill/Header.jsx` contains the string `nav-hamburger` (the hamburger button class for the `<details>/<summary>` mobile disclosure widget — the obsolete `nav-toggle` checkbox-hack class was removed in the REVIEW FIX H2 rewrite per checker iteration 2 BLOCKER 2 fix)
     - **NEW (checker BLOCKER #1):** `src/components/design-skill/Header.jsx` contains a `:focus-visible` style on the hamburger and/or nav links
     - **NEW (checker BLOCKER #2):** `src/components/design-skill/Header.jsx` `HeaderProps.active` union (in the JSDoc typedef OR in TypeScript types if migrated) accepts `/about` — verified by `grep -q "/about" src/components/design-skill/Header.jsx`. The 5 valid values are `'/' | '/gallery' | '/popups' | '/about' | '/say-hi'`.
     - `src/components/design-skill/Hero.jsx` does NOT contain `<Button onClick=` for the two CTAs (decision #3 — CTAs are now `<a>`)
@@ -810,6 +910,11 @@ All PASS lines must print. Any grep that finds a violation must be fixed before 
     - **NEW (checker BLOCKER #5):** `src/components/design-skill/PopupStrip.jsx` does NOT contain `onAppointment` (the original handler-prop is replaced; a real `<a href="/say-hi">` is used instead)
     - **NEW (checker BLOCKER #5):** `src/components/design-skill/About.jsx` does NOT contain `useState` and has no cross-skill imports (verified by reading the synced file)
     - `src/components/design-skill/Button.jsx` does NOT contain `onMouseEnter`, `onMouseLeave`, `onPointerDown`, or `onPointerUp` (decision #7 — converted to CSS)
+    - **NEW (REVIEW FIX H2):** `src/components/design-skill/Header.jsx` does NOT carry an inline `style={{` attribute on its `<nav>` element: `! grep -nE '<nav[^>]*style=\{\{' src/components/design-skill/Header.jsx` exits 0. (The previous version had an inline `display: 'flex'` on `<nav>` that overrode the mobile collapse rule — Codex caught this. The new `<details>/<summary>` version drives ALL responsive display behavior on `<nav>` from CSS classes only.)
+    - **NEW (REVIEW FIX H2):** `src/components/design-skill/Header.jsx` contains the strings `<details` and `<summary`: `grep -q "<details" src/components/design-skill/Header.jsx && grep -q "<summary" src/components/design-skill/Header.jsx` exits 0
+    - **NEW (REVIEW FIX H2):** `src/components/design-skill/Header.jsx` does NOT contain a static `aria-expanded="true"` or `aria-expanded="false"` attribute (the native `<details>` widget computes aria-expanded from the `open` attribute automatically): `! grep -E 'aria-expanded="(true|false)"' src/components/design-skill/Header.jsx` exits 0
+    - **NEW (REVIEW FIX M4):** `src/styles/colors_and_type.css` does NOT contain any component selectors at the start of a line: `! grep -E '^\.btn-primary|^\.site-nav|^\.nav-hamburger|^\.hero-cta|^\.skip-link' src/styles/colors_and_type.css` exits 0
+    - **NEW (REVIEW FIX M4):** `src/styles/components.css` exists and contains `.btn-primary`: `test -f src/styles/components.css && grep -q "\.btn-primary" src/styles/components.css` exits 0
     - No 1px borders anywhere in `src/components/design-skill/`: `grep -rE "border(-top|-bottom|-left|-right)?:\s*1px" src/components/design-skill/` exits 1
     - No flower vocabulary in components: `grep -rEni '\b(flower|petal|floral|bloom|blossom)\b' --include="*.jsx" src/components/design-skill/` exits 1
     - No gradients: `grep -rEn "gradient" --include="*.jsx" src/components/design-skill/` exits 1
@@ -864,7 +969,7 @@ After all three tasks complete:
 After completion, create `.planning/phases/01-foundations-brand-system/01-02-SUMMARY.md` with:
 - List of 11 components copied and their post-sync edits applied (including: Header CSS-only hamburger pattern chosen, PopupStrip refactored to `popup` prop, About required no post-sync edits)
 - Confirmation that `colors_and_type.css` `@import url(fonts.googleapis.com)` line is stripped
-- The CSS-only hamburger mechanism chosen: **checkbox-hack** (hidden `<input type="checkbox" id="nav-toggle">` + `<label htmlFor="nav-toggle" role="button" aria-label="Open navigation menu" aria-controls="primary-nav">` + `.nav-toggle:checked ~ .site-nav { display: flex }` at `max-width: 640px`)
+- The mobile hamburger mechanism chosen: **native `<details>/<summary>`** (REVIEW FIX H2). `<summary aria-controls="mobile-nav-panel">` wraps the `.nav-hamburger-button` icon and toggles a sibling `<nav id="mobile-nav-panel">`; the platform derives `aria-expanded` from the `[open]` attribute on `<details>` (do NOT add a static `aria-expanded`); `summary::-webkit-details-marker { display: none }` + `summary::marker { content: '' }` suppress the disclosure triangle; 44px min touch target preserved via `.nav-hamburger-button`; `:focus-visible` styling preserved. The earlier checkbox-hack draft was replaced because Codex caught two bugs (inline `display: flex` on `<nav>` overriding mobile collapse + a static `aria-expanded` that never updated).
 - Verified PopupStrip prop name: `popup` (data prop, not the original `onAppointment` handler)
 - Verified About has no post-sync edits required (no useState, no cross-skill imports, only `Mark.Heart` and CSS vars)
 - The exact `pieces` prop shape that `GalleryGrid` expects (Plan 04 needs to match it in `src/sample-data.ts`)

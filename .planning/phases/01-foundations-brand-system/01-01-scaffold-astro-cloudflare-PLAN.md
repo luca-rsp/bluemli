@@ -32,7 +32,7 @@ must_haves:
     - "D-13: No custom domain in Phase 1 — DNS cutover deferred to Phase 5 SC1; deploys live only on *.workers.dev"
     - "D-14: Caveat Brush (display) + Nunito (body) self-hosted via Astro Fonts API, not loaded from fonts.googleapis.com at runtime"
     - "D-15: font-display swap is set on every @font-face entry in astro.config.mjs"
-    - "D-16: Wordmark is Bagel Fat One via Astro Fonts API; --font-hand (Caveat) is OPTIONAL and omitted unless a component references it"
+    - "D-16: Wordmark is Bagel Fat One via Astro Fonts API; Caveat is loaded as --font-hand-loaded (D-16 — required because About.jsx references --font-hand for the signature close; REVIEW FIX M5)"
     - "D-17: Real-hand-font swap path is a one-file change in Astro Fonts config + drop file in public/fonts/; SWAP PATH comment exists in astro.config.mjs"
   artifacts:
     - path: "package.json"
@@ -95,6 +95,7 @@ Required dependency versions:
 - pnpm: ^10.0.0
 
 Required dev dependency versions:
+- @astrojs/check: ^0.9.0 (required by `astro check` — without this dev dep, `pnpm exec astro check` exits non-zero with "Cannot find @astrojs/check")
 - @types/react: ^19.0.0
 - @types/react-dom: ^19.0.0
 - wrangler: ^4.0.0
@@ -176,6 +177,7 @@ Required wrangler.jsonc shape (from RESEARCH.md lines 852-870, exactly):
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "icon-gen": "^5.0.0",
@@ -254,7 +256,7 @@ pnpm list astro @astrojs/cloudflare @astrojs/react react react-dom 2>&1 | grep -
 Confirm astro is 6.2.x, @astrojs/cloudflare is 13.5.x, @astrojs/react is 5.0.x, react and react-dom are 19.x.
   </action>
   <verify>
-    <automated>node --version | grep -E "^v(22\.1[2-9]|22\.[2-9][0-9]|2[3-9])" && pnpm --version | grep -E "^(10|[1-9][0-9])" && test -f package.json && test -f pnpm-lock.yaml && test -f .nvmrc && test -f tsconfig.json && test -f .gitignore && test -f .prettierrc.mjs && test -f src/env.d.ts && grep -q '"astro": "\^6.2.0"' package.json && grep -q '"@astrojs/cloudflare": "\^13.5.0"' package.json && grep -q '"@astrojs/react": "\^5.0.4"' package.json && grep -q '"react": "\^19.0.0"' package.json && grep -q '"node": ">=22.12.0"' package.json && grep -q "22.12" .nvmrc && grep -q "astro/tsconfigs/strict" tsconfig.json && grep -q ".wrangler/" .gitignore && grep -q "prettier-plugin-astro" .prettierrc.mjs && grep -q "astro/client" src/env.d.ts</automated>
+    <automated>node --version | grep -E "^v(22\.1[2-9]|22\.[2-9][0-9]|2[3-9])" && pnpm --version | grep -E "^(10|[1-9][0-9])" && test -f package.json && test -f pnpm-lock.yaml && test -f .nvmrc && test -f tsconfig.json && test -f .gitignore && test -f .prettierrc.mjs && test -f src/env.d.ts && grep -q '"astro": "\^6.2.0"' package.json && grep -q '"@astrojs/cloudflare": "\^13.5.0"' package.json && grep -q '"@astrojs/react": "\^5.0.4"' package.json && grep -q '"react": "\^19.0.0"' package.json && grep -q '"@astrojs/check"' package.json && grep -q '"node": ">=22.12.0"' package.json && grep -q "22.12" .nvmrc && grep -q "astro/tsconfigs/strict" tsconfig.json && grep -q ".wrangler/" .gitignore && grep -q "prettier-plugin-astro" .prettierrc.mjs && grep -q "astro/client" src/env.d.ts</automated>
   </verify>
   <acceptance_criteria>
     - File `package.json` exists at repo root
@@ -270,6 +272,7 @@ Confirm astro is 6.2.x, @astrojs/cloudflare is 13.5.x, @astrojs/react is 5.0.x, 
     - `grep -q '"react": "\^19.0.0"' package.json` exits 0
     - `grep -q '"react-dom": "\^19.0.0"' package.json` exits 0
     - `grep -q '"icon-gen": "\^5.0.0"' package.json` exits 0
+    - `grep -q '"@astrojs/check"' package.json` exits 0 (REVIEW FIX H1: required by `astro check`; without this dep typecheck exits non-zero)
     - `grep -q '"wrangler": "\^4.0.0"' package.json` exits 0
     - `grep -q '"node": ">=22.12.0"' package.json` exits 0
     - `pnpm list astro 2>&1 | grep -E '6\.[2-9]\.'` exits 0 (resolves to 6.2.x or later 6.x)
@@ -343,14 +346,17 @@ export default defineConfig({
       weights: [400, 700],
       display: 'swap',
     },
-    // --font-hand (Caveat) is OPTIONAL per D-16 — uncomment only if a component references it:
-    // {
-    //   provider: fontProviders.google(),
-    //   name: 'Caveat',
-    //   cssVariable: '--font-hand-loaded',
-    //   weights: [400],
-    //   display: 'swap',
-    // },
+    // --font-hand (Caveat) — REQUIRED per D-16 (the lock is binary: load it or remove all
+    // --font-hand references). About.jsx references --font-hand for the signature close, so
+    // we load it here. Plan 04's BaseLayout.astro consumes this via <Font cssVariable="--font-hand-loaded" preload />.
+    // REVIEW FIX M5 (Codex review): no "fallback acceptable" middle path.
+    {
+      provider: fontProviders.google(),
+      name: 'Caveat',
+      cssVariable: '--font-hand-loaded',
+      weights: [400],
+      display: 'swap',
+    },
   ],
 });
 ```
@@ -439,7 +445,7 @@ Then rerun `pnpm exec astro build` and confirm `dist/_worker.js/index.js` exists
 **If the build failed with "no pages" / "No pages found",** that's acceptable at this stage — the full verification runs in Plan 04 Task 3 when pages exist. The acceptance criterion below only requires the entrypoint check WHEN the build succeeds.
   </action>
   <verify>
-    <automated>test -f astro.config.mjs && test -f wrangler.jsonc && grep -q "passthroughImageService" astro.config.mjs && grep -q "fontProviders.google" astro.config.mjs && grep -q "'Bagel Fat One'" astro.config.mjs && grep -q "'Caveat Brush'" astro.config.mjs && grep -q "'Nunito'" astro.config.mjs && grep -c "display: 'swap'" astro.config.mjs | grep -E "^[3-9]$|^[1-9][0-9]+$" && grep -q "SWAP PATH" astro.config.mjs && grep -qE "output: '(static|server)'" astro.config.mjs && grep -q '"name": "studio-bluemli"' wrangler.jsonc && grep -q '"main": "@astrojs/cloudflare/entrypoints/server"' wrangler.jsonc && grep -q '"run_worker_first": \["/api/\*"\]' wrangler.jsonc && grep -q '"binding": "ASSETS"' wrangler.jsonc && grep -q '"directory": "./dist"' wrangler.jsonc && ! grep -q "pages_build_output_dir" wrangler.jsonc && pnpm exec astro check</automated>
+    <automated>test -f astro.config.mjs && test -f wrangler.jsonc && grep -q "passthroughImageService" astro.config.mjs && grep -q "fontProviders.google" astro.config.mjs && grep -q "'Bagel Fat One'" astro.config.mjs && grep -q "'Caveat Brush'" astro.config.mjs && grep -q "'Nunito'" astro.config.mjs && grep -c "display: 'swap'" astro.config.mjs | grep -E "^[4-9]$|^[1-9][0-9]+$" && grep -q "SWAP PATH" astro.config.mjs && grep -qE "output: '(static|server)'" astro.config.mjs && grep -q '"name": "studio-bluemli"' wrangler.jsonc && grep -q '"main": "@astrojs/cloudflare/entrypoints/server"' wrangler.jsonc && grep -q '"run_worker_first": \["/api/\*"\]' wrangler.jsonc && grep -q '"binding": "ASSETS"' wrangler.jsonc && grep -q '"directory": "./dist"' wrangler.jsonc && ! grep -q "pages_build_output_dir" wrangler.jsonc && pnpm exec astro check</automated>
   </verify>
   <acceptance_criteria>
     - File `astro.config.mjs` exists at repo root
@@ -449,7 +455,9 @@ Then rerun `pnpm exec astro build` and confirm `dist/_worker.js/index.js` exists
     - `grep -q "'Bagel Fat One'" astro.config.mjs` exits 0 (wordmark — D-16)
     - `grep -q "'Caveat Brush'" astro.config.mjs` exits 0 (display — D-14)
     - `grep -q "'Nunito'" astro.config.mjs` exits 0 (body — D-14)
-    - `grep -c "display: 'swap'" astro.config.mjs` returns ≥ 3 (one per active font — D-15)
+    - `grep -c "display: 'swap'" astro.config.mjs` returns ≥ 4 (one per active font: Bagel Fat One + Caveat Brush + Nunito + Caveat — D-15; Caveat added per REVIEW FIX M5)
+    - `grep -q "'Caveat'" astro.config.mjs` exits 0 (Caveat loaded as --font-hand-loaded per D-16 / REVIEW FIX M5)
+    - `grep -q "\-\-font-hand-loaded" astro.config.mjs` exits 0 (the cssVariable that BaseLayout will preload)
     - `grep -q "SWAP PATH" astro.config.mjs` exits 0 (D-17 swap-path comment present)
     - `grep -qE "output: '(static|server)'" astro.config.mjs` exits 0 (default is 'static' per RESEARCH.md A8; allowed to be 'server' if Step 3 build verification mandated the switch — the plan's SUMMARY MUST record which mode was chosen and WHY)
     - `grep -q '"name": "studio-bluemli"' wrangler.jsonc` exits 0 (D-12)
@@ -565,7 +573,7 @@ After all three tasks complete:
 After completion, create `.planning/phases/01-foundations-brand-system/01-01-SUMMARY.md` with:
 - The exact pnpm-resolved versions of astro, @astrojs/cloudflare, @astrojs/react, react, wrangler (from `pnpm list`)
 - The verified `wrangler.jsonc` `name` value (`studio-bluemli`) — Plan 05 needs this for the founder-facing Cloudflare connect step
-- The four Fonts API `cssVariable` values (`--font-wordmark-loaded`, `--font-display-loaded`, `--font-body-loaded`; `--font-hand-loaded` is OPTIONAL/commented) — Plan 04 needs these for BaseLayout `<Font cssVariable="..." preload />` tags
+- The four Fonts API `cssVariable` values (`--font-wordmark-loaded`, `--font-display-loaded`, `--font-body-loaded`, `--font-hand-loaded`) — Plan 04 needs these for BaseLayout `<Font cssVariable="..." preload />` tags. REVIEW FIX M5: `--font-hand-loaded` is now an active font load (was commented-out)
 - **NEW (checker WARNING #7):** The chosen `output:` mode and the build-verification outcome. One of:
   - "output: 'static' — Task 2 build succeeded; `dist/_worker.js/index.js` emitted by @astrojs/cloudflare@13."
   - "output: 'server' — switched from 'static' after Task 2 build did not emit Worker entrypoint."

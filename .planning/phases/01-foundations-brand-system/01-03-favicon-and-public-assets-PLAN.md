@@ -17,9 +17,9 @@ files_modified:
   - public/apple-touch-icon.png
   - public/mark.svg
   - public/favicon/README.md
-  - public/sample/piece-a.webp
-  - public/sample/piece-b.webp
-  - public/sample/piece-c.webp
+  - public/sample/cluster-coral.svg
+  - public/sample/cluster-sage.svg
+  - public/sample/cluster-lemon.svg
 tags: [favicons, public-assets, sample-data, icon-gen]
 must_haves:
   truths:
@@ -27,7 +27,7 @@ must_haves:
     - "public/apple-touch-icon.png is a byte-identical copy of assets/logo/mark-favicon-180.png (D-19 — do NOT regenerate)"
     - "public/mark.svg is a copy of assets/logo/mark.svg so Header.jsx can reference <img src=\"/mark.svg\">"
     - "public/favicon/README.md documents the single-command regen path (D-20)"
-    - "public/sample/piece-{a,b,c}.webp exist as placeholder cream-colored 4:5 images that GalleryGrid can render in Phase 1 shell"
+    - "public/sample/cluster-{coral,sage,lemon}.svg exist as SVG placeholder cards (cream background + single coral/sage/lemon dot motif + 'Cluster · <color>' label) that GalleryGrid can render in Phase 1 shell (REVIEW FIX M3: SVG, not WebP — avoids the unpinned sharp dep)"
   artifacts:
     - path: "scripts/generate-favicons.mjs"
       provides: "one-shot favicon generation script using icon-gen@5"
@@ -50,13 +50,13 @@ must_haves:
       via: "<link rel=\"icon\" href=\"/favicon.ico\"> etc."
       pattern: "rel=\"icon\""
     - from: "src/sample-data.ts (Plan 04)"
-      to: "public/sample/piece-{a,b,c}.webp"
-      via: "{ photo: '/sample/piece-a.webp' } in sampleGallery"
-      pattern: "/sample/piece-"
+      to: "public/sample/cluster-{coral,sage,lemon}.svg"
+      via: "{ photo: '/sample/cluster-coral.svg' } in sampleGallery"
+      pattern: "/sample/cluster-"
 ---
 
 <objective>
-Write `scripts/generate-favicons.mjs` and run it once to produce the full Phase 1 favicon set + the `public/mark.svg` copy that the synced Header/Footer reference. Also ship 3 placeholder WebPs under `public/sample/` so Plan 04's sample-data can render placeholder gallery cards without 404s.
+Write `scripts/generate-favicons.mjs` and run it once to produce the full Phase 1 favicon set + the `public/mark.svg` copy that the synced Header/Footer reference. Also ship 3 SVG placeholder cards under `public/sample/` (REVIEW FIX M3 — SVG instead of WebP, no sharp dep needed) so Plan 04's sample-data can render placeholder gallery cards without 404s.
 
 Purpose: Ship FND-08 satisfaction (favicon visible in desktop browser tab + iOS home-screen) entirely from automation, no founder action. The `public/` directory is the "static asset web root" that Cloudflare Workers Static Assets serves directly via the ASSETS binding configured in Plan 01.
 
@@ -92,9 +92,14 @@ Output: 8 static files in `public/` plus 1 script + 1 README, all committed to g
 <!-- icon-gen emits `favicon16.png`/`favicon32.png` (no hyphen); script renames to `favicon-16.png`/`favicon-32.png` to match UI-SPEC <link> tag references -->
 
 <!-- Phase 1 placeholder gallery samples (Plan 04's src/sample-data.ts will reference these paths): -->
-<!-- /sample/piece-a.webp — flat-color WebP placeholder (cream/coral) -->
-<!-- /sample/piece-b.webp — flat-color WebP placeholder (cream/indigo) -->
-<!-- /sample/piece-c.webp — flat-color WebP placeholder (cream/olive) -->
+<!-- REVIEW FIX M3 (Codex review): switched from WebP to SVG. The WebP path required `sharp`,
+     which was either an unpinned transitive dep of icon-gen (not guaranteed by pnpm) or
+     would require `pnpm add -D sharp` that mutates package.json/lockfile outside Plan 03's
+     declared files_modified. SVG placeholders ship the visual intent (cream card + single
+     dot motif + label) without any runtime image library. -->
+<!-- /sample/cluster-coral.svg — cream card with a coral cluster dot + "Cluster · Coral" label -->
+<!-- /sample/cluster-sage.svg  — cream card with a sage cluster dot + "Cluster · Sage" label -->
+<!-- /sample/cluster-lemon.svg — cream card with a lemon cluster dot + "Cluster · Lemon" label -->
 </interfaces>
 </context>
 
@@ -228,103 +233,105 @@ Empty diff = identical = PASS.
 </task>
 
 <task type="auto">
-  <name>Task 2: Create 3 placeholder sample WebPs for the Phase 1 gallery shell</name>
-  <files>public/sample/piece-a.webp, public/sample/piece-b.webp, public/sample/piece-c.webp</files>
+  <name>Task 2: Write 3 SVG placeholder cards for the Phase 1 gallery shell (REVIEW FIX M3 — no sharp dep)</name>
+  <files>public/sample/cluster-coral.svg, public/sample/cluster-sage.svg, public/sample/cluster-lemon.svg</files>
   <read_first>
-    - /Users/lucacanonica/Documents/projects/bluemli/.planning/phases/01-foundations-brand-system/01-PATTERNS.md (line 672 — "ship 3 small flat-color WebPs"; Decisions the Planner Needs to Make #9; sample-data file references paths `/sample/piece-{a,b,c}.webp`)
-    - /Users/lucacanonica/Documents/projects/bluemli/.planning/phases/01-foundations-brand-system/01-UI-SPEC.md (§"Demo-Loaded Page Shells" line 327 — gallery shows "3 cards"; Sample piece price `$0`; alt text must follow Accessibility Floor pattern e.g. "Confetti earrings — colorful beaded cluster with mixed bead sizes")
+    - /Users/lucacanonica/Documents/projects/bluemli/.planning/phases/01-foundations-brand-system/01-PATTERNS.md (line 672 — "ship 3 small flat-color placeholders"; Decisions the Planner Needs to Make #9; sample-data file will reference these paths)
+    - /Users/lucacanonica/Documents/projects/bluemli/.planning/phases/01-foundations-brand-system/01-UI-SPEC.md (§"Demo-Loaded Page Shells" line 327 — gallery shows "3 cards"; Sample piece price `$0`; alt text follows Accessibility Floor pattern)
     - /Users/lucacanonica/Documents/projects/bluemli/.planning/phases/01-foundations-brand-system/01-CONTEXT.md (D-03: sample data marked obviously — names start with "Sample", prices $0 — so the placeholder images should also look obviously sample-like)
+    - /Users/lucacanonica/Documents/projects/bluemli/.planning/phases/01-foundations-brand-system/01-REVIEWS.md (§"Concerns" MEDIUM bullet — Codex flagged sharp as unpinned)
   </read_first>
   <action>
-**Goal:** Create 3 small placeholder WebPs at `public/sample/piece-{a,b,c}.webp`, each ~400×500px (4:5 aspect — matches the GalleryGrid card aspect ratio from Plan 02), with a flat brand-palette color so they look obviously "placeholder" but still on-brand. These are throwaways — Phase 2 deletes them when real photos arrive.
+**REVIEW FIX M3 (Codex review):** The prior version used `sharp` to generate WebPs. Codex flagged that `sharp` is either an unpinned transitive dep of `icon-gen` (not guaranteed by pnpm to be resolvable at the top level) or would require `pnpm add -D sharp` — which mutates `package.json`/`pnpm-lock.yaml` outside this plan's declared `files_modified`. **The fix: ship three plain SVG placeholder cards, committed verbatim into `public/sample/`. No image library, no scripts, no dep.**
+
+**Goal:** Create 3 SVG placeholder cards at `public/sample/cluster-{coral,sage,lemon}.svg`, each ~400×500px viewBox (4:5 aspect — matches the GalleryGrid card aspect ratio from Plan 02), each with a cream background + a single 3-bead cluster motif in the accent color + an embedded text label `Cluster · <Color>` so the founder instantly sees it's a placeholder (not an empty box). These are throwaways — Phase 2 deletes them when real photos arrive.
 
 **Step 1 — Create `public/sample/` directory.**
 ```bash
 mkdir -p public/sample
 ```
 
-**Step 2 — Generate 3 placeholder WebPs using `sharp` directly** (no need for a committed script — this is one-time scaffold work; the sharp CLI is available via `npx sharp-cli` if installed, or use a one-liner Node script). Use one of these two approaches:
+**Step 2 — Write the three SVG files.** Use the Write tool. Each file is committed verbatim — no runtime processing.
 
-**Approach A (preferred — small Node script, single run, do not commit the script):**
-Write a tiny throwaway Node script `scripts/_gen-sample-images.mjs` (the underscore prefix marks it as not-for-CI), run it, then delete the script:
-
-```js
-// scripts/_gen-sample-images.mjs — one-time placeholder generator; delete after run
-// Run via: node scripts/_gen-sample-images.mjs
-import { promises as fs } from 'node:fs';
-
-// Plain 400x500 flat-color WebP via on-the-fly SVG → WebP using sharp.
-// sharp is already an indirect dep via icon-gen; if not resolvable, install: pnpm add -D sharp
-import sharp from 'sharp';
-
-const PIECES = [
-  { file: 'piece-a.webp', bg: '#F5DCC7', fg: '#D6553B', label: 'A' }, // cream + coral
-  { file: 'piece-b.webp', bg: '#F5DCC7', fg: '#3E4E8B', label: 'B' }, // cream + indigo
-  { file: 'piece-c.webp', bg: '#F5DCC7', fg: '#6E7438', label: 'C' }, // cream + olive
-];
-
-await fs.mkdir('public/sample', { recursive: true });
-
-for (const { file, bg, fg, label } of PIECES) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500" viewBox="0 0 400 500">
-    <rect width="400" height="500" fill="${bg}"/>
-    <circle cx="200" cy="220" r="60" fill="${fg}" opacity="0.85"/>
-    <circle cx="160" cy="200" r="22" fill="${fg}" opacity="0.6"/>
-    <circle cx="240" cy="240" r="22" fill="${fg}" opacity="0.6"/>
-    <text x="200" y="380" font-family="sans-serif" font-size="38" font-weight="700" fill="${fg}" text-anchor="middle">Sample ${label}</text>
-  </svg>`;
-  await sharp(Buffer.from(svg)).webp({ quality: 80 }).toFile(`public/sample/${file}`);
-  console.log(`Wrote public/sample/${file}`);
-}
+**File `public/sample/cluster-coral.svg`** (cream background + coral cluster):
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500" viewBox="0 0 400 500" role="img" aria-label="Sample placeholder — coral bead cluster">
+  <title>Sample placeholder — coral bead cluster</title>
+  <rect width="400" height="500" fill="#F5DCC7"/>
+  <!-- 3-bead cluster motif in coral -->
+  <circle cx="200" cy="210" r="56" fill="#D6553B" opacity="0.85"/>
+  <circle cx="156" cy="184" r="22" fill="#D6553B" opacity="0.65"/>
+  <circle cx="246" cy="234" r="22" fill="#D6553B" opacity="0.65"/>
+  <circle cx="208" cy="266" r="14" fill="#D6553B" opacity="0.5"/>
+  <text x="200" y="380" font-family="ui-sans-serif, system-ui, sans-serif" font-size="32" font-weight="700" fill="#D6553B" text-anchor="middle">Cluster · Coral</text>
+  <text x="200" y="416" font-family="ui-sans-serif, system-ui, sans-serif" font-size="16" font-weight="400" fill="#4A4A4A" text-anchor="middle" opacity="0.7">sample placeholder</text>
+</svg>
 ```
 
-Run it:
-```bash
-# If sharp isn't installed: pnpm add -D sharp
-node scripts/_gen-sample-images.mjs
+**File `public/sample/cluster-sage.svg`** (cream background + sage/olive cluster):
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500" viewBox="0 0 400 500" role="img" aria-label="Sample placeholder — sage bead cluster">
+  <title>Sample placeholder — sage bead cluster</title>
+  <rect width="400" height="500" fill="#F5DCC7"/>
+  <circle cx="200" cy="210" r="56" fill="#6E7438" opacity="0.85"/>
+  <circle cx="156" cy="184" r="22" fill="#6E7438" opacity="0.65"/>
+  <circle cx="246" cy="234" r="22" fill="#6E7438" opacity="0.65"/>
+  <circle cx="208" cy="266" r="14" fill="#6E7438" opacity="0.5"/>
+  <text x="200" y="380" font-family="ui-sans-serif, system-ui, sans-serif" font-size="32" font-weight="700" fill="#6E7438" text-anchor="middle">Cluster · Sage</text>
+  <text x="200" y="416" font-family="ui-sans-serif, system-ui, sans-serif" font-size="16" font-weight="400" fill="#4A4A4A" text-anchor="middle" opacity="0.7">sample placeholder</text>
+</svg>
 ```
 
-Then DELETE the script:
-```bash
-rm scripts/_gen-sample-images.mjs
+**File `public/sample/cluster-lemon.svg`** (cream background + mustard/lemon cluster):
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500" viewBox="0 0 400 500" role="img" aria-label="Sample placeholder — lemon bead cluster">
+  <title>Sample placeholder — lemon bead cluster</title>
+  <rect width="400" height="500" fill="#F5DCC7"/>
+  <circle cx="200" cy="210" r="56" fill="#C99A2E" opacity="0.85"/>
+  <circle cx="156" cy="184" r="22" fill="#C99A2E" opacity="0.65"/>
+  <circle cx="246" cy="234" r="22" fill="#C99A2E" opacity="0.65"/>
+  <circle cx="208" cy="266" r="14" fill="#C99A2E" opacity="0.5"/>
+  <text x="200" y="380" font-family="ui-sans-serif, system-ui, sans-serif" font-size="32" font-weight="700" fill="#C99A2E" text-anchor="middle">Cluster · Lemon</text>
+  <text x="200" y="416" font-family="ui-sans-serif, system-ui, sans-serif" font-size="16" font-weight="400" fill="#4A4A4A" text-anchor="middle" opacity="0.7">sample placeholder</text>
+</svg>
 ```
 
-(Sharp running on the developer's local machine is fine — Pitfall #9 only forbids Sharp inside `workerd` at build/request time on Cloudflare. This is a local one-shot.)
-
-**Approach B (fallback if sharp install fails — copy any existing 4:5 product photo from the design skill, three times):**
+**Step 3 — Verify all three files exist and are valid SVGs.**
 ```bash
-mkdir -p public/sample
-# Look for any existing photo in .claude/skills/studio-bluemli-design/uploads/ that's roughly 4:5 aspect.
-ls .claude/skills/studio-bluemli-design/uploads/ 2>/dev/null || echo "No skill uploads dir"
-# If a suitable photo exists, copy it three times. Otherwise fall back to creating empty-but-valid WebPs:
-# (Empty WebPs are NOT acceptable — they will appear broken. Prefer Approach A.)
-```
-
-**Step 3 — Verify all three files exist and are valid WebPs.**
-
-```bash
-file public/sample/piece-a.webp public/sample/piece-b.webp public/sample/piece-c.webp
-# Expected: each line ends with "Web/P image"
+ls -la public/sample/cluster-coral.svg public/sample/cluster-sage.svg public/sample/cluster-lemon.svg
+file public/sample/cluster-coral.svg public/sample/cluster-sage.svg public/sample/cluster-lemon.svg
+# Expected: each line ends with "SVG Scalable Vector Graphics image" or "XML"
 ```
 
 Each file must:
 - exist
-- have size > 100 bytes (i.e. not empty)
-- have the WebP magic bytes (`file` reports "Web/P image" or similar)
+- have size > 200 bytes
+- contain the literal string `<svg` at the start (valid SVG root element)
+- contain the brand hex colors as written above (`#F5DCC7` for the cream background)
+
+**Step 4 — Verify package.json was NOT modified by this task** (REVIEW FIX M3 — Codex's specific concern):
+```bash
+# This task must NOT touch package.json or pnpm-lock.yaml. The only file changes
+# are the three new SVGs under public/sample/. If git status shows package.json
+# modified, something went wrong.
+git status --porcelain package.json pnpm-lock.yaml
+# Expected output: empty (no modifications)
+```
   </action>
   <verify>
-    <automated>test -d public/sample && test -f public/sample/piece-a.webp && test -f public/sample/piece-b.webp && test -f public/sample/piece-c.webp && test "$(wc -c < public/sample/piece-a.webp)" -gt 100 && test "$(wc -c < public/sample/piece-b.webp)" -gt 100 && test "$(wc -c < public/sample/piece-c.webp)" -gt 100 && file public/sample/piece-a.webp | grep -qi "webp\|Web/P\|RIFF" && ! test -f scripts/_gen-sample-images.mjs</automated>
+    <automated>test -d public/sample && test -f public/sample/cluster-coral.svg && test -f public/sample/cluster-sage.svg && test -f public/sample/cluster-lemon.svg && test "$(wc -c < public/sample/cluster-coral.svg)" -gt 200 && test "$(wc -c < public/sample/cluster-sage.svg)" -gt 200 && test "$(wc -c < public/sample/cluster-lemon.svg)" -gt 200 && grep -q "<svg" public/sample/cluster-coral.svg && grep -q "<svg" public/sample/cluster-sage.svg && grep -q "<svg" public/sample/cluster-lemon.svg && grep -q "#F5DCC7" public/sample/cluster-coral.svg && grep -q "Cluster · Coral" public/sample/cluster-coral.svg && grep -q "Cluster · Sage" public/sample/cluster-sage.svg && grep -q "Cluster · Lemon" public/sample/cluster-lemon.svg && ! ls public/sample/ | grep -Ei "flower|petal|floral|bloom|blossom"</automated>
   </verify>
   <acceptance_criteria>
     - Directory `public/sample/` exists
-    - File `public/sample/piece-a.webp` exists with size > 100 bytes
-    - File `public/sample/piece-b.webp` exists with size > 100 bytes
-    - File `public/sample/piece-c.webp` exists with size > 100 bytes
-    - `file public/sample/piece-a.webp` output contains "webp" or "Web/P" or "RIFF" (valid WebP magic bytes)
-    - The throwaway generator script `scripts/_gen-sample-images.mjs` is DELETED (it's one-time scaffold; should not be committed): `test -f scripts/_gen-sample-images.mjs` exits 1
+    - File `public/sample/cluster-coral.svg` exists with size > 200 bytes and contains `<svg`, `#F5DCC7`, and `Cluster · Coral`
+    - File `public/sample/cluster-sage.svg` exists with size > 200 bytes and contains `<svg`, `#F5DCC7`, and `Cluster · Sage`
+    - File `public/sample/cluster-lemon.svg` exists with size > 200 bytes and contains `<svg`, `#F5DCC7`, and `Cluster · Lemon`
     - No flower vocabulary in filenames: `ls public/sample/ | grep -Ei "flower|petal|floral|bloom|blossom"` exits 1
+    - **NEW (REVIEW FIX M3):** This task does NOT modify `package.json` or `pnpm-lock.yaml`: `test -z "$(git status --porcelain package.json pnpm-lock.yaml)"` exits 0 (no `sharp` install was needed)
+    - **NEW (REVIEW FIX M3):** No `_gen-sample-images.mjs` or similar throwaway script is committed under `scripts/`: `test -f scripts/_gen-sample-images.mjs` exits 1
+    - **NEW (REVIEW FIX M3):** No `.webp` files appear under `public/sample/`: `ls public/sample/ | grep -E '\.webp$'` exits 1 (legacy WebP path is gone)
   </acceptance_criteria>
-  <done>3 placeholder WebPs render in the Phase 1 GalleryGrid shell when Plan 04 wires sample-data.ts. Phase 2 deletes these the moment real photos land in `src/content/gallery/<slug>/`.</done>
+  <done>3 SVG placeholder cards render in the Phase 1 GalleryGrid shell when Plan 04 wires sample-data.ts. Phase 2 deletes these the moment real photos land in `src/content/gallery/<slug>/`. No runtime image library was needed (REVIEW FIX M3).</done>
 </task>
 
 </tasks>
@@ -341,7 +348,7 @@ Each file must:
 
 | Threat ID | Category | Component | Disposition | Mitigation Plan |
 |-----------|----------|-----------|-------------|-----------------|
-| T-03-01 | Information Disclosure | sample WebPs accidentally contain real product photos with watermark metadata or unintended visual content | mitigate | Generator script (Approach A) creates SVG-derived flat-color placeholders programmatically — the only inputs are the brand palette hex values. No external images. Visually obvious that they're samples (large "Sample A/B/C" text). |
+| T-03-01 | Information Disclosure | sample placeholder SVGs accidentally contain real product photos or unintended visual content | mitigate | The 3 SVGs are committed verbatim with the only color inputs being brand palette hex values (`#F5DCC7`, `#D6553B`, `#6E7438`, `#C99A2E`). No external images. Visually obvious that they're samples (`Cluster · <Color>` + `sample placeholder` text). REVIEW FIX M3: no runtime image library (sharp) needed — eliminates supply-chain surface. |
 | T-03-02 | Tampering | favicon generator script modified to ship a malicious .ico containing a polyglot or unexpected payload | accept | `icon-gen@5` is a widely-used npm package pinned in package.json from Plan 01. Lockfile prevents drift. Generated favicons are committed and reviewable. No code execution surface from a .ico file in modern browsers. |
 | T-03-03 | Information Disclosure | path traversal in dev when serving public/ via astro dev | accept | Astro's dev server enforces the public/ boundary; static-asset paths cannot escape with `..` segments. Standard framework behavior; no custom serving logic in Phase 1. Phase 4 will introduce a Worker handler for /api/* but with its own sandbox. |
 </threat_model>
@@ -349,7 +356,7 @@ Each file must:
 <verification>
 After both tasks complete:
 1. `ls public/favicon.ico public/favicon-16.png public/favicon-32.png public/favicon.svg public/apple-touch-icon.png public/mark.svg public/favicon/README.md` — all 7 files exist
-2. `ls public/sample/piece-a.webp public/sample/piece-b.webp public/sample/piece-c.webp` — all 3 sample WebPs exist
+2. `ls public/sample/cluster-coral.svg public/sample/cluster-sage.svg public/sample/cluster-lemon.svg` — all 3 sample SVGs exist (REVIEW FIX M3)
 3. `shasum assets/logo/mark-favicon-180.png public/apple-touch-icon.png` shows identical hashes (D-19 reuse, no regen)
 4. `shasum assets/logo/mark.svg public/mark.svg public/favicon.svg` shows the latter two are byte-identical to the source
 5. `pnpm run favicons` is rerunnable and idempotent (re-running produces the same output set)
@@ -360,13 +367,13 @@ After both tasks complete:
 - D-19 honored — apple-touch-icon is a byte-identical copy of the existing 180px PNG
 - D-20 honored — regen documented in `public/favicon/README.md`
 - Header.jsx and Footer.jsx have a real `/mark.svg` to reference
-- Plan 04 has 3 placeholder gallery photos to render in the shell
+- Plan 04 has 3 SVG placeholder gallery cards to render in the shell (REVIEW FIX M3: SVG instead of WebP, no sharp dep)
 </success_criteria>
 
 <output>
 After completion, create `.planning/phases/01-foundations-brand-system/01-03-SUMMARY.md` with:
-- The 6 favicon files + 3 sample WebPs created (sizes for each)
+- The 6 favicon files + 3 sample SVGs created (sizes for each) — REVIEW FIX M3 applied
 - Confirmation that `public/apple-touch-icon.png` is unmodified from `assets/logo/mark-favicon-180.png` (shasum equality)
 - Confirmation that `public/mark.svg` is unmodified from `assets/logo/mark.svg` (shasum equality)
-- The 3 sample piece slugs (`sample-piece-a`, `sample-piece-b`, `sample-piece-c`) that Plan 04's `src/sample-data.ts` will reference
+- The 3 sample piece slugs (`sample-cluster-coral`, `sample-cluster-sage`, `sample-cluster-lemon`) that Plan 04's `src/sample-data.ts` will reference; photo paths are `/sample/cluster-coral.svg`, `/sample/cluster-sage.svg`, `/sample/cluster-lemon.svg`
 </output>

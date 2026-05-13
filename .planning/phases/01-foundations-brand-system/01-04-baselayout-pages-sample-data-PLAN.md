@@ -16,6 +16,7 @@ files_modified:
   - src/pages/about.astro
   - src/pages/say-hi.astro
   - src/sample-data.ts
+  - scripts/write-assetsignore.mjs
 tags: [astro-layout, fonts-api, accessibility, sample-data, page-routes]
 must_haves:
   truths:
@@ -27,9 +28,13 @@ must_haves:
     - "Skip-to-content link is the first focusable <body> element, targets #main-content (FND-13)"
     - "<meta name=\"color-scheme\" content=\"light\"> is in <head> (FND-13)"
     - "body background is cream (--color-bg, never white) because colors_and_type.css is imported once via <style is:global>"
+    - "BaseLayout.astro <style is:global> imports BOTH src/styles/colors_and_type.css AND src/styles/components.css (the latter AFTER the former so component rules win the cascade) per checker iteration 2 BLOCKER 3 — without components.css, the .btn-primary :hover/:active and .nav-list/.nav-item display:contents rules from Plan 02 are dead at runtime"
     - "src/sample-data.ts exports sampleGallery (3 pieces named \"Sample Piece A/B/C\", price 0) and sampleNextPopup (D-02, D-03)"
     - "pnpm exec astro check exits 0 and pnpm exec astro build produces a dist/ with one HTML file per route AND emits the @astrojs/cloudflare Worker entrypoint (dist/_worker.js/index.js)"
     - "No large React JS bundles shipped to dist (find dist -name '*.js' -size +5k filtered to non-Astro chunks must be empty — confirms 'no `client:` directive' contract)"
+    - "After astro build, dist/.assetsignore exists and lists _worker.js, _worker.js/**, _routes.json so Cloudflare does NOT upload the server-side Worker output as a public static asset (REVIEW FIX M2)"
+    - "scripts/write-assetsignore.mjs is invoked after `astro build` (postbuild) to emit dist/.assetsignore deterministically — every build re-emits the file (REVIEW FIX M2)"
+    - "BaseLayout.astro emits a 4th <Font cssVariable=\"--font-hand-loaded\" preload /> tag because Caveat is now an active font load per D-16 / REVIEW FIX M5; About.jsx renders its --font-hand text in Caveat (verified by a quick computed-style sanity check)"
     - "D-01: All 5 pages render with the design-skill's actual React components (Hero, GalleryGrid, PopupStrip, About body, AppointmentForm) wired to fake/sample data — demo-loaded from day 1"
     - "D-18: All five routes exist after Phase 1 (/, /gallery, /popups, /about, /say-hi); filenames lowercase; each uses BaseLayout.astro"
   artifacts:
@@ -51,11 +56,18 @@ must_haves:
     - path: "src/sample-data.ts"
       provides: "placeholder sampleGallery + sampleNextPopup; Phase 2 deletes"
       contains: "Sample Piece"
+    - path: "scripts/write-assetsignore.mjs"
+      provides: "Postbuild script that writes dist/.assetsignore so Cloudflare excludes _worker.js from static-asset upload (REVIEW FIX M2)"
+      contains: "_worker.js"
   key_links:
     - from: "src/layouts/BaseLayout.astro"
       to: "src/styles/colors_and_type.css"
       via: "<style is:global>@import '../styles/colors_and_type.css';</style>"
       pattern: "@import.*colors_and_type"
+    - from: "src/layouts/BaseLayout.astro"
+      to: "src/styles/components.css"
+      via: "<style is:global>@import '../styles/components.css';</style> AFTER colors_and_type.css (REVIEW FIX iteration 2 BLOCKER 3)"
+      pattern: "@import.*components"
     - from: "src/layouts/BaseLayout.astro"
       to: "public/favicon.ico, favicon.svg, favicon-16.png, favicon-32.png, apple-touch-icon.png"
       via: "<link rel='icon|apple-touch-icon' href='/...'>"
@@ -68,6 +80,10 @@ must_haves:
       to: "src/sample-data.ts"
       via: "import { sampleGallery, sampleNextPopup } from '../sample-data'"
       pattern: "from '\\.\\./sample-data'"
+    - from: "scripts/write-assetsignore.mjs"
+      to: "dist/.assetsignore"
+      via: "Postbuild emits .assetsignore with _worker.js + _routes.json entries (REVIEW FIX M2)"
+      pattern: "_worker.js"
 ---
 
 <objective>
@@ -120,7 +136,7 @@ Output: `dist/index.html`, `dist/gallery/index.html`, `dist/popups/index.html`, 
 <!-- From Plan 03 (public/ files): -->
 <!-- /favicon.ico, /favicon.svg, /favicon-16.png, /favicon-32.png, /apple-touch-icon.png -->
 <!-- /mark.svg (referenced by Header.jsx) -->
-<!-- /sample/piece-a.webp, /sample/piece-b.webp, /sample/piece-c.webp -->
+<!-- /sample/cluster-coral.svg, /sample/cluster-sage.svg, /sample/cluster-lemon.svg (REVIEW FIX M3: SVG not WebP — no sharp dep) -->
 
 <!-- From src/styles/colors_and_type.css (synced from design skill in Plan 02 Task 2):
      `--color-focus-ring: var(--coral-500)` is defined at ~line 100. The global :focus-visible
@@ -136,7 +152,7 @@ type GalleryPiece = {
   name: string;            // "Sample Piece A", "Sample Piece B", "Sample Piece C"
   price: number;           // 0 (D-03 marker)
   status: 'available' | 'sold' | 'one-of-one' | 'reserved';
-  photo: string;           // "/sample/piece-a.webp" etc.
+  photo: string;           // "/sample/cluster-coral.svg" etc. (REVIEW FIX M3)
 };
 
 type Popup = {
@@ -190,9 +206,11 @@ export type Popup = {
 };
 
 export const sampleGallery: GalleryPiece[] = [
-  { slug: 'sample-piece-a', name: 'Sample Piece A', price: 0, status: 'available',  photo: '/sample/piece-a.webp' },
-  { slug: 'sample-piece-b', name: 'Sample Piece B', price: 0, status: 'sold',       photo: '/sample/piece-b.webp' },
-  { slug: 'sample-piece-c', name: 'Sample Piece C', price: 0, status: 'one-of-one', photo: '/sample/piece-c.webp' },
+  // REVIEW FIX M3: photo paths point at SVG placeholders (not WebPs).
+  // Plan 03 ships public/sample/cluster-{coral,sage,lemon}.svg — no sharp dep needed.
+  { slug: 'sample-cluster-coral', name: 'Sample Piece A', price: 0, status: 'available',  photo: '/sample/cluster-coral.svg' },
+  { slug: 'sample-cluster-sage',  name: 'Sample Piece B', price: 0, status: 'sold',       photo: '/sample/cluster-sage.svg'  },
+  { slug: 'sample-cluster-lemon', name: 'Sample Piece C', price: 0, status: 'one-of-one', photo: '/sample/cluster-lemon.svg' },
 ];
 
 export const sampleNextPopup: Popup = {
@@ -215,13 +233,13 @@ Critical constraints:
 - Description fields are absent — the Phase 1 GalleryGrid shell doesn't need them; Phase 2's real schema will add them
   </action>
   <verify>
-    <automated>test -f src/sample-data.ts && grep -q "Sample Piece A" src/sample-data.ts && grep -q "Sample Piece B" src/sample-data.ts && grep -q "Sample Piece C" src/sample-data.ts && grep -c "price: 0" src/sample-data.ts | grep -E "^[3-9]$|^[1-9][0-9]+$" && grep -q "/sample/piece-a.webp" src/sample-data.ts && grep -q "/sample/piece-b.webp" src/sample-data.ts && grep -q "/sample/piece-c.webp" src/sample-data.ts && grep -q "America/Los_Angeles" src/sample-data.ts && grep -q "export const sampleGallery" src/sample-data.ts && grep -q "export const sampleNextPopup" src/sample-data.ts && grep -q "export type GalleryPiece" src/sample-data.ts && ! grep -iEn '\b(flower|petal|floral|bloom|blossom)\b' src/sample-data.ts</automated>
+    <automated>test -f src/sample-data.ts && grep -q "Sample Piece A" src/sample-data.ts && grep -q "Sample Piece B" src/sample-data.ts && grep -q "Sample Piece C" src/sample-data.ts && grep -c "price: 0" src/sample-data.ts | grep -E "^[3-9]$|^[1-9][0-9]+$" && grep -q "/sample/cluster-coral.svg" src/sample-data.ts && grep -q "/sample/cluster-sage.svg" src/sample-data.ts && grep -q "/sample/cluster-lemon.svg" src/sample-data.ts && grep -q "America/Los_Angeles" src/sample-data.ts && grep -q "export const sampleGallery" src/sample-data.ts && grep -q "export const sampleNextPopup" src/sample-data.ts && grep -q "export type GalleryPiece" src/sample-data.ts && ! grep -iEn '\b(flower|petal|floral|bloom|blossom)\b' src/sample-data.ts</automated>
   </verify>
   <acceptance_criteria>
     - File `src/sample-data.ts` exists
     - Contains exactly the strings `Sample Piece A`, `Sample Piece B`, `Sample Piece C`
     - Every gallery price is `0`: `grep -c "price: 0" src/sample-data.ts` returns ≥ 3
-    - Photo paths reference all three WebPs from Plan 03: `/sample/piece-a.webp`, `/sample/piece-b.webp`, `/sample/piece-c.webp`
+    - Photo paths reference all three SVGs from Plan 03 (REVIEW FIX M3): `/sample/cluster-coral.svg`, `/sample/cluster-sage.svg`, `/sample/cluster-lemon.svg`
     - Contains `tz: 'America/Los_Angeles'` (or equivalent — confirms timezone-aware popup; Phase 3 popup logic will rely on this)
     - Exports `sampleGallery` and `sampleNextPopup` constants
     - Exports `GalleryPiece` and `Popup` type aliases
@@ -277,6 +295,11 @@ const { title } = Astro.props;
     <Font cssVariable="--font-wordmark-loaded" preload />
     <Font cssVariable="--font-display-loaded" preload />
     <Font cssVariable="--font-body-loaded" preload />
+    {/* REVIEW FIX M5: Caveat is loaded as --font-hand-loaded because About.jsx
+        references --font-hand for the signature close. Plan 01 added the
+        Caveat entry to astro.config.mjs Fonts API; this <Font /> tag wires
+        the preload + @font-face emission for the BaseLayout. */}
+    <Font cssVariable="--font-hand-loaded" preload />
 
     {/* Global brand tokens — the ONLY place colors_and_type.css is imported.
         Also defines the global :focus-visible rule (FND-13) — applies to EVERY
@@ -284,6 +307,13 @@ const { title } = Astro.props;
         none may suppress with `outline: none` (Plan 02 Task 3 Edit 4 strips it). */}
     <style is:global>
       @import '../styles/colors_and_type.css';
+      /* REVIEW FIX (checker iteration 2 BLOCKER 3): import components.css AFTER
+         colors_and_type.css so the brand tokens (--coral-*, --indigo-*, --cream-*)
+         are in scope when components.css's .btn-primary :hover/:active rules
+         resolve, AND so component-specific overrides win the cascade. Plan 02
+         Edit 7 (REVIEW FIX M4) created src/styles/components.css to keep
+         colors_and_type.css locked as a verbatim copy of the design-skill source. */
+      @import '../styles/components.css';
 
       /* FND-13: every interactive element MUST show a visible focus ring on keyboard
          focus. We use a 2px outline (NOT 1px — CI Rule 5) at 2px offset.
@@ -360,17 +390,19 @@ Critical constraints (PATTERNS.md lines 249-254):
 - `title` prop is passed through; pages set `<BaseLayout title="...">`. UI-SPEC Copywriting Contract: titles follow `{Page Name} — Studio Bluemli` (e.g. `Gallery — Studio Bluemli`); home uses the full `Studio Bluemli — handmade beaded earrings, NoPa San Francisco`.
   </action>
   <verify>
-    <automated>test -f src/layouts/BaseLayout.astro && grep -q "from 'astro:assets'" src/layouts/BaseLayout.astro && grep -q "Font cssVariable=\"--font-wordmark-loaded\"" src/layouts/BaseLayout.astro && grep -q "Font cssVariable=\"--font-display-loaded\"" src/layouts/BaseLayout.astro && grep -q "Font cssVariable=\"--font-body-loaded\"" src/layouts/BaseLayout.astro && grep -q "rel=\"icon\".*\"/favicon.ico\"" src/layouts/BaseLayout.astro && grep -q "rel=\"icon\".*\"/favicon-16.png\"" src/layouts/BaseLayout.astro && grep -q "rel=\"icon\".*\"/favicon-32.png\"" src/layouts/BaseLayout.astro && grep -q "rel=\"icon\".*type=\"image/svg+xml\"" src/layouts/BaseLayout.astro && grep -q "rel=\"apple-touch-icon\"" src/layouts/BaseLayout.astro && grep -q "color-scheme.*light" src/layouts/BaseLayout.astro && grep -q "Skip to main content" src/layouts/BaseLayout.astro && grep -q "#main-content" src/layouts/BaseLayout.astro && grep -q "is:global" src/layouts/BaseLayout.astro && grep -q "colors_and_type.css" src/layouts/BaseLayout.astro && grep -q ":focus-visible" src/layouts/BaseLayout.astro && grep -q "color-focus-ring" src/layouts/BaseLayout.astro && grep -q "slot name=\"header\"" src/layouts/BaseLayout.astro && grep -q "slot name=\"footer\"" src/layouts/BaseLayout.astro && grep -q "max-width: 1200px" src/layouts/BaseLayout.astro && grep -q "html lang=\"en\"" src/layouts/BaseLayout.astro && ! grep -qE "border:\s*1px" src/layouts/BaseLayout.astro && ! grep -qE "outline:\s*['\"]?none" src/layouts/BaseLayout.astro</automated>
+    <automated>test -f src/layouts/BaseLayout.astro && grep -q "from 'astro:assets'" src/layouts/BaseLayout.astro && grep -q "Font cssVariable=\"--font-wordmark-loaded\"" src/layouts/BaseLayout.astro && grep -q "Font cssVariable=\"--font-display-loaded\"" src/layouts/BaseLayout.astro && grep -q "Font cssVariable=\"--font-body-loaded\"" src/layouts/BaseLayout.astro && grep -q "rel=\"icon\".*\"/favicon.ico\"" src/layouts/BaseLayout.astro && grep -q "rel=\"icon\".*\"/favicon-16.png\"" src/layouts/BaseLayout.astro && grep -q "rel=\"icon\".*\"/favicon-32.png\"" src/layouts/BaseLayout.astro && grep -q "rel=\"icon\".*type=\"image/svg+xml\"" src/layouts/BaseLayout.astro && grep -q "rel=\"apple-touch-icon\"" src/layouts/BaseLayout.astro && grep -q "color-scheme.*light" src/layouts/BaseLayout.astro && grep -q "Skip to main content" src/layouts/BaseLayout.astro && grep -q "#main-content" src/layouts/BaseLayout.astro && grep -q "is:global" src/layouts/BaseLayout.astro && grep -q "colors_and_type.css" src/layouts/BaseLayout.astro && grep -q "components.css" src/layouts/BaseLayout.astro && grep -q ":focus-visible" src/layouts/BaseLayout.astro && grep -q "color-focus-ring" src/layouts/BaseLayout.astro && grep -q "slot name=\"header\"" src/layouts/BaseLayout.astro && grep -q "slot name=\"footer\"" src/layouts/BaseLayout.astro && grep -q "max-width: 1200px" src/layouts/BaseLayout.astro && grep -q "html lang=\"en\"" src/layouts/BaseLayout.astro && ! grep -qE "border:\s*1px" src/layouts/BaseLayout.astro && ! grep -qE "outline:\s*['\"]?none" src/layouts/BaseLayout.astro</automated>
   </verify>
   <acceptance_criteria>
     - File `src/layouts/BaseLayout.astro` exists
     - Imports `Font` from `astro:assets` (NOT `astro/components` — Pitfall #8): `grep -q "from 'astro:assets'" src/layouts/BaseLayout.astro` exits 0
-    - All three Fonts API cssVariables emitted with `preload`: `--font-wordmark-loaded`, `--font-display-loaded`, `--font-body-loaded`
+    - All four Fonts API cssVariables emitted with `preload`: `--font-wordmark-loaded`, `--font-display-loaded`, `--font-body-loaded`, `--font-hand-loaded` (REVIEW FIX M5: Caveat loaded for About.jsx signature close)
+    - **NEW (REVIEW FIX M5):** `grep -q "Font cssVariable=\"--font-hand-loaded\"" src/layouts/BaseLayout.astro` exits 0
     - All 5 favicon `<link>` tags present (FND-08): `/favicon.svg`, `/favicon.ico`, `/favicon-16.png`, `/favicon-32.png`, `/apple-touch-icon.png`
     - `<meta name="color-scheme" content="light">` present (FND-13)
     - Skip-to-content link with copy `Skip to main content` present (FND-13)
     - `<main id="main-content">` present (skip-link target)
     - Global CSS import via `<style is:global>@import '../styles/colors_and_type.css';</style>` (FND-06)
+    - **NEW (checker iteration 2 BLOCKER 3):** Global CSS ALSO imports `src/styles/components.css` AFTER colors_and_type.css: `grep -q "components.css" src/layouts/BaseLayout.astro` exits 0. Without this import, the `.btn-primary :hover/:active` rules (Plan 02 Edit 7 / REVIEW FIX M4) and the `.nav-list { display: contents }` / `.nav-item { display: contents }` rules (Plan 02 Edit 1 / REVIEW FIX iteration 2 BLOCKER 1) are dead at runtime.
     - **NEW (checker BLOCKER #4):** Global `:focus-visible` rule present inside the `<style is:global>` block: `grep -q ":focus-visible" src/layouts/BaseLayout.astro` exits 0
     - **NEW (checker BLOCKER #4):** The `:focus-visible` rule references `--color-focus-ring` (defined in colors_and_type.css with var(--indigo-500) fallback): `grep -q "color-focus-ring" src/layouts/BaseLayout.astro` exits 0
     - **NEW (checker BLOCKER #4):** No `outline: none` (or its quoted-string CSS-in-JS variants) anywhere in the file: `! grep -qE "outline:\\s*['\"]?none" src/layouts/BaseLayout.astro` exits 0
@@ -382,6 +414,94 @@ Critical constraints (PATTERNS.md lines 249-254):
     - No `bg-white|background:\s*white|#fff(?!8)` in this file (CI Rule 1): `! grep -qE "bg-white|background:\s*white|#fff[^8]" src/layouts/BaseLayout.astro` exits 0
   </acceptance_criteria>
   <done>BaseLayout.astro is the canonical shell. Pages wrap in it, slot `<Header>` and `<Footer>`, and inherit cream background + favicon set + Fonts API preload + skip-link + main landmark + a SITE-WIDE :focus-visible rule (FND-13).</done>
+</task>
+
+<task type="auto">
+  <name>Task 2b: Write scripts/write-assetsignore.mjs (REVIEW FIX M2 — exclude _worker.js from static-asset upload)</name>
+  <files>scripts/write-assetsignore.mjs</files>
+  <read_first>
+    - /Users/lucacanonica/Documents/projects/bluemli/.planning/phases/01-foundations-brand-system/01-REVIEWS.md (§"Concerns" MEDIUM — Cloudflare docs require `.assetsignore` in the assets directory to prevent `_worker.js` from being uploaded as a public static asset; reference: https://developers.cloudflare.com/workers/static-assets/binding/)
+    - /Users/lucacanonica/Documents/projects/bluemli/wrangler.jsonc (assets.directory is `./dist` — so `.assetsignore` must live at `dist/.assetsignore`, written post-build because dist/ is regenerated by every astro build)
+    - /Users/lucacanonica/Documents/projects/bluemli/package.json (confirm `build` script — Plan 01 set it to `astro check && astro build`; this task adds a postbuild step that runs this Node script after the build)
+  </read_first>
+  <action>
+**REVIEW FIX M2 (Codex review):** Cloudflare Static Assets serves everything in `assets.directory` as public web content unless excluded by `.assetsignore`. The `@astrojs/cloudflare` adapter emits `dist/_worker.js/index.js` (the SSR Worker entrypoint) into the SAME directory. Without `.assetsignore`, the Worker source could be uploaded as a downloadable file at `/_worker.js`. This task writes a deterministic postbuild script that emits `dist/.assetsignore` every build.
+
+**Step 1 — Write `scripts/write-assetsignore.mjs`** with this exact content:
+
+```js
+// scripts/write-assetsignore.mjs — REVIEW FIX M2 (Codex review)
+//
+// Cloudflare Static Assets uploads everything in `assets.directory` (set to ./dist
+// in wrangler.jsonc) UNLESS .assetsignore tells it to skip a path. The
+// @astrojs/cloudflare adapter emits dist/_worker.js (the SSR Worker entrypoint)
+// into the SAME dist/ tree. Without this file, _worker.js could be served as
+// a downloadable public asset. This script writes dist/.assetsignore every
+// build so that:
+//   - _worker.js              (the Worker entrypoint file or directory)
+//   - _worker.js/**           (everything under it if it's a directory)
+//   - _routes.json            (Cloudflare routing config, server-side only)
+// are excluded from the public static-asset upload.
+//
+// Reference: https://developers.cloudflare.com/workers/static-assets/binding/
+//   "Use .assetsignore in the assets directory to exclude files from being
+//    uploaded as static assets."
+
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
+
+const DIST = 'dist';
+const TARGET = path.join(DIST, '.assetsignore');
+
+const CONTENTS = `# Generated by scripts/write-assetsignore.mjs — DO NOT EDIT BY HAND.
+# Phase 1 of Studio Bluemli site. REVIEW FIX M2 (Codex review).
+# Cloudflare Static Assets uses this file to skip uploading server-side Worker
+# output as public static assets. See:
+# https://developers.cloudflare.com/workers/static-assets/binding/
+
+_worker.js
+_worker.js/**
+_routes.json
+`;
+
+// Confirm dist/ exists — if not, astro build hasn't run yet.
+try {
+  const stat = await fs.stat(DIST);
+  if (!stat.isDirectory()) throw new Error(`${DIST} exists but is not a directory`);
+} catch (err) {
+  console.error(`FAIL: ${DIST}/ not found. Run 'astro build' first.`);
+  process.exit(1);
+}
+
+await fs.writeFile(TARGET, CONTENTS);
+console.log(`Wrote ${TARGET}`);
+```
+
+**Step 2 — Run the script after the build.** This is invoked manually from Task 3's build step; Plan 05's CI will also invoke it. There's no package.json change needed in this task — Task 3's verification block calls `node scripts/write-assetsignore.mjs` after `astro build`.
+
+**Step 3 — Verify the script writes a valid `.assetsignore`** (smoke test):
+```bash
+# After astro build runs and dist/ exists:
+node scripts/write-assetsignore.mjs
+# Expected: "Wrote dist/.assetsignore"
+test -f dist/.assetsignore
+grep -q "_worker.js" dist/.assetsignore
+grep -q "_routes.json" dist/.assetsignore
+```
+  </action>
+  <verify>
+    <automated>test -f scripts/write-assetsignore.mjs && grep -q "_worker.js" scripts/write-assetsignore.mjs && grep -q "_routes.json" scripts/write-assetsignore.mjs && grep -q "DIST = 'dist'" scripts/write-assetsignore.mjs && grep -q ".assetsignore" scripts/write-assetsignore.mjs</automated>
+  </verify>
+  <acceptance_criteria>
+    - File `scripts/write-assetsignore.mjs` exists
+    - Contains the constant `_worker.js` (the entrypoint exclusion)
+    - Contains the constant `_worker.js/**` (covers the directory form Astro may emit)
+    - Contains the constant `_routes.json` (the server-side routing file)
+    - Contains the target path `dist/.assetsignore` (or composed via `path.join(DIST, '.assetsignore')`)
+    - Running the script in a state where `dist/` exists writes a file at `dist/.assetsignore` containing the three entries above (verified manually in Task 3 after `astro build` runs)
+    - Running the script when `dist/` does NOT exist exits non-zero with a clear error message
+  </acceptance_criteria>
+  <done>The postbuild script is committed. Task 3 invokes it after `astro build` and asserts `dist/.assetsignore` contains the required entries. Plan 05 wires the same invocation into CI so every deploy ships the assetsignore.</done>
 </task>
 
 <task type="auto">
@@ -530,12 +650,29 @@ echo "Build return code: $BUILD_RC"
 test "$BUILD_RC" -eq 0   # Build must succeed
 ```
 
-Then scan the log for non-benign warnings/errors (deprecation warnings about Browserslist and similar third-party noise are tolerated; everything else is a failure):
+Then assert the build succeeded on its return code (REVIEW FIX checker iteration 2 WARNING 6 — simplified to a single-pass inline scan; the file-based `.planning/allowed-build-log.txt` allowlist that earlier iterations referenced has been removed because it duplicated what an inline pattern already does):
 
 ```bash
-# Exit non-zero if any unmasked "warn"/"error" lines appear, ignoring known-benign noise.
-! grep -iE "(^|\s)(warn|error)" /tmp/astro-build.log | grep -vE "Browserslist|deprecation|^\s*$"
+# Step A: build must exit 0.
+test "$BUILD_RC" -eq 0
+
+# Step B: scan the full log for unexpected warning/error lines using a single
+# INLINE allowlist. Benign third-party noise (Browserslist updates, generic
+# deprecation notices, blank lines, Node internal stack frames) is excluded
+# directly in the grep. Anything that survives the filter is a real signal
+# and fails the build.
+LEAKED=$(grep -iE "(^|\s)(warn|error)" /tmp/astro-build.log \
+         | grep -vE "(Browserslist|deprecat|^\s*\$|at .*node:internal)" \
+         || true)
+if [ -n "$LEAKED" ]; then
+  echo "FAIL: build produced unexpected warning/error lines:"
+  echo "$LEAKED"
+  exit 1
+fi
+echo "PASS: build log clean (only allowlisted noise found)."
 ```
+
+Critical: do NOT extend this allowlist by blanket-matching `.*` — that defeats the gate. If a real new benign pattern emerges on a later build, extend the inline `grep -vE` pattern explicitly. Do NOT reintroduce a file-based allowlist (`.planning/allowed-build-log.txt`) — the inline pattern is the single source of truth.
 
 Then verify HTML output exists for all 5 routes:
 
@@ -560,6 +697,19 @@ else
   exit 1
 fi
 ```
+
+**Step — Write `dist/.assetsignore` (REVIEW FIX M2).** Immediately after the build succeeds, invoke the postbuild script written in Task 2b so Cloudflare's static-asset upload excludes the Worker entrypoint and the server-side routing file:
+
+```bash
+node scripts/write-assetsignore.mjs
+# Expected output: "Wrote dist/.assetsignore"
+test -f dist/.assetsignore
+grep -q "_worker.js" dist/.assetsignore
+grep -q "_routes.json" dist/.assetsignore
+echo "PASS: dist/.assetsignore generated and contains the required exclusions."
+```
+
+If `scripts/write-assetsignore.mjs` is missing (Task 2b not done), this step fails — stop and complete Task 2b first.
 
 **Step — Verify NO React JS bundles ship to dist/ (NEW — checker WARNING #6).** The "no `client:` directive" contract means no React runtime should be served to browsers. Any JS file > 5KB in `dist/` is a strong signal that React snuck in via a `client:` directive or a misconfigured hydration:
 
@@ -607,7 +757,7 @@ find src/pages -type f | grep -E '[A-Z]' || echo "PASS: lowercase filenames"
 Every PASS line must print.
   </action>
   <verify>
-    <automated>test -f src/pages/index.astro && test -f src/pages/gallery.astro && test -f src/pages/popups.astro && test -f src/pages/about.astro && test -f src/pages/say-hi.astro && ! find src/pages -type f | grep -qE '[A-Z]' && grep -q "BaseLayout title=\"Studio Bluemli" src/pages/index.astro && grep -q "Hero" src/pages/index.astro && grep -q "PopupStrip" src/pages/index.astro && grep -q "GalleryGrid" src/pages/index.astro && grep -q "BaseLayout title=\"Gallery" src/pages/gallery.astro && grep -q "active=\"/gallery\"" src/pages/gallery.astro && grep -q "BaseLayout title=\"Pop-ups" src/pages/popups.astro && grep -q "active=\"/popups\"" src/pages/popups.astro && grep -q "BaseLayout title=\"About" src/pages/about.astro && grep -q "active=\"/about\"" src/pages/about.astro && grep -q "BaseLayout title=\"Say Hi" src/pages/say-hi.astro && grep -q "active=\"/say-hi\"" src/pages/say-hi.astro && grep -q "AppointmentForm" src/pages/say-hi.astro && ! grep -rqE 'client:(load|idle|visible|media|only)' src/pages/ && ! grep -rqEni '\b(flower|petal|floral|bloom|blossom)\b' --include='*.astro' src/pages/ && ! grep -rqEn 'gradient' --include='*.astro' src/pages/ && pnpm exec astro check && pnpm exec astro build 2>&1 | tee /tmp/astro-build.log && test ${PIPESTATUS[0]} -eq 0 && ! grep -iE "(^|\s)(warn|error)" /tmp/astro-build.log | grep -vE "Browserslist|deprecation|^\s*$" | head -1 | grep -q "." && test "$(find dist -name '*.html' | wc -l)" -ge 5 && { test -f dist/_worker.js/index.js || test -f dist/_worker.js; } && test -z "$(find dist -name '*.js' -size +5k 2>/dev/null | grep -v '_worker.js')"</automated>
+    <automated>test -f src/pages/index.astro && test -f src/pages/gallery.astro && test -f src/pages/popups.astro && test -f src/pages/about.astro && test -f src/pages/say-hi.astro && ! find src/pages -type f | grep -qE '[A-Z]' && grep -q "BaseLayout title=\"Studio Bluemli" src/pages/index.astro && grep -q "Hero" src/pages/index.astro && grep -q "PopupStrip" src/pages/index.astro && grep -q "GalleryGrid" src/pages/index.astro && grep -q "BaseLayout title=\"Gallery" src/pages/gallery.astro && grep -q "active=\"/gallery\"" src/pages/gallery.astro && grep -q "BaseLayout title=\"Pop-ups" src/pages/popups.astro && grep -q "active=\"/popups\"" src/pages/popups.astro && grep -q "BaseLayout title=\"About" src/pages/about.astro && grep -q "active=\"/about\"" src/pages/about.astro && grep -q "BaseLayout title=\"Say Hi" src/pages/say-hi.astro && grep -q "active=\"/say-hi\"" src/pages/say-hi.astro && grep -q "AppointmentForm" src/pages/say-hi.astro && ! grep -rqE 'client:(load|idle|visible|media|only)' src/pages/ && ! grep -rqEni '\b(flower|petal|floral|bloom|blossom)\b' --include='*.astro' src/pages/ && ! grep -rqEn 'gradient' --include='*.astro' src/pages/ && pnpm exec astro check && pnpm exec astro build 2>&1 | tee /tmp/astro-build.log && test ${PIPESTATUS[0]} -eq 0 && ! grep -iE "(^|\s)(warn|error)" /tmp/astro-build.log | grep -vE "(Browserslist|deprecat|^\s*$|at .*node:internal)" | head -1 | grep -q "." && test "$(find dist -name '*.html' | wc -l)" -ge 5 && { test -f dist/_worker.js/index.js || test -f dist/_worker.js; } && test -z "$(find dist -name '*.js' -size +5k 2>/dev/null | grep -v '_worker.js')" && node scripts/write-assetsignore.mjs && test -f dist/.assetsignore && grep -q "_worker.js" dist/.assetsignore && grep -q "_routes.json" dist/.assetsignore</automated>
   </verify>
   <acceptance_criteria>
     - All 5 page files exist with lowercase names: `src/pages/index.astro`, `src/pages/gallery.astro`, `src/pages/popups.astro`, `src/pages/about.astro`, `src/pages/say-hi.astro`
@@ -616,18 +766,21 @@ Every PASS line must print.
     - `src/pages/index.astro` imports and renders `Hero`, `PopupStrip`, `GalleryGrid` (the demo-loaded composition per D-01)
     - `src/pages/gallery.astro` contains `BaseLayout title="Gallery — Studio Bluemli"` and `active="/gallery"`
     - `src/pages/popups.astro` contains `BaseLayout title="Pop-ups — Studio Bluemli"` and `active="/popups"` (with hyphen — UI-SPEC nav copy)
-    - `src/pages/about.astro` contains `BaseLayout title="About — Studio Bluemli"` and `active="/about"` (typechecks because HeaderProps.active union now includes `/about` per Plan 02 Task 3 Edit 1 — checker BLOCKER #2 fix)
+    - `src/pages/about.astro` contains `BaseLayout title="About — Studio Bluemli"` and `active="/about"` (the HeaderProps.active union in Header.jsx includes `/about` per Plan 02 Task 3 Edit 1; REVIEW FIX L1 note: this union is a JSDoc typedef in `.jsx`, so `astro check` will only enforce it if Astro's checkJs/JSDoc inference picks it up — the value `"/about"` is correct regardless, and if the type narrowing matters for future strictness, the file can be renamed to `Header.tsx` in a follow-up phase)
     - `src/pages/say-hi.astro` contains `BaseLayout title="Say Hi — Studio Bluemli"` and `active="/say-hi"` and renders `AppointmentForm`
     - NO `client:` directives anywhere in any page or design-skill component: `! grep -rE 'client:(load|idle|visible|media|only)' src/pages/ src/components/design-skill/` exits 0
     - No flower vocabulary in pages: `grep -rEni '\b(flower|petal|floral|bloom|blossom)\b' --include='*.astro' src/pages/` exits 1
     - **NEW (checker BLOCKER #4):** No `outline: none` anywhere in src: `grep -rEn "outline:\\s*['\"]?none" --include='*.{astro,jsx,tsx,css}' src/` exits 1
     - `pnpm exec astro check` exits 0
     - **NEW (checker WARNING #9):** `pnpm exec astro build` exits 0 AND the captured log contains NO unmasked `warn` or `error` lines outside the Browserslist/deprecation allowlist
-    - **NEW (checker WARNING #9):** Verification command `! grep -iE "(^|\s)(warn|error)" /tmp/astro-build.log | grep -vE "Browserslist|deprecation"` exits 0
+    - **NEW (checker WARNING #9 + REVIEW FIX checker iteration 2 WARNING 6):** Build log inline-allowlist scan exits 0: `LEAKED=$(grep -iE "(^|\s)(warn|error)" /tmp/astro-build.log | grep -vE "(Browserslist|deprecat|^\s*\$|at .*node:internal)") && test -z "$LEAKED"` passes. No file-based allowlist (`.planning/allowed-build-log.txt`) is used or referenced.
     - `dist/` directory exists after build and contains ≥ 5 HTML files (one per route): `find dist -name "*.html" | wc -l` returns ≥ 5
     - **NEW (checker WARNING #7):** Cloudflare Worker entrypoint exists at `dist/_worker.js/index.js` OR `dist/_worker.js`: `test -f dist/_worker.js/index.js || test -f dist/_worker.js` exits 0. If missing, Plan 01 `astro.config.mjs` `output:` mode must be switched from `'static'` to `'server'` and the build re-run.
     - **NEW (checker WARNING #6):** No browser-served JS bundle in `dist/` exceeds 5KB (excluding `_worker.js`): `find dist -name '*.js' -size +5k | grep -v '_worker.js' | wc -l` returns `0`. This confirms the "no `client:` directive → zero React in the browser" contract.
     - **NEW (checker WARNING #6):** No React production/development runtime in browser-served JS bundles: `grep -rli "react.development\|react.production" dist/ --include='*.js' | grep -v '_worker.js'` produces empty output.
+    - **NEW (REVIEW FIX M2):** `dist/.assetsignore` exists after build: `test -f dist/.assetsignore` exits 0
+    - **NEW (REVIEW FIX M2):** `dist/.assetsignore` contains `_worker.js`: `grep -q "_worker.js" dist/.assetsignore` exits 0
+    - **NEW (REVIEW FIX M2):** `dist/.assetsignore` contains `_routes.json`: `grep -q "_routes.json" dist/.assetsignore` exits 0
     - All CI brand rules pass on the full `src/` tree (every grep noted in the action's final block prints PASS or returns no matches)
   </acceptance_criteria>
   <done>All 5 routes render. `pnpm exec astro build` produces a deployable `dist/` with the @astrojs/cloudflare Worker entrypoint AND zero browser-served React. No build warnings/errors slip through (no `tail -5` masking). Plan 05 can now wire CI + the Cloudflare git integration knowing the build pipeline is green AND the worker entrypoint is in place for `wrangler deploy`.</done>
@@ -661,6 +814,7 @@ After all three tasks complete:
 3. `find dist -name "*.html"` returns at least 5 HTML files
 4. `dist/_worker.js/index.js` (or `dist/_worker.js`) exists (Cloudflare Worker entrypoint emitted)
 5. `find dist -name "*.js" -size +5k | grep -v '_worker.js'` returns empty (no React shipped to browser)
+5a. `dist/.assetsignore` exists (REVIEW FIX M2) and contains `_worker.js` + `_routes.json`
 6. `grep -rE 'client:(load|idle|visible|media|only)' dist/` exits 1 (no client directives leaked)
 7. Cat any built HTML file (e.g., `cat dist/index.html | head -50`) and confirm: presence of cream-300 hex `#F5DCC7` referenced via CSS variable somewhere in the bundled CSS, presence of the `mark.svg` reference, presence of `Studio Bluemli` text
 8. All Phase 1 CI grep rules pass on `src/` (run each rule manually; Plan 05 will codify in CI), INCLUDING `! grep -rE "outline:\\s*['\"]?none" src/` (FND-13)
@@ -671,13 +825,14 @@ After all three tasks complete:
 - BaseLayout emits favicon set + Fonts API preload + skip-link + cream background + `color-scheme: light` + a SITE-WIDE `:focus-visible` rule (FND-13)
 - Every page uses Header + Footer + the one designated body component (Hero/GalleryGrid/PopupStrip/About/AppointmentForm)
 - `src/sample-data.ts` exports placeholder content with D-03 markers
-- `pnpm exec astro build` produces `dist/` ready for Cloudflare Workers Static Assets to serve, with the Worker entrypoint emitted AND zero browser-served React bundles
+- `pnpm exec astro build` produces `dist/` ready for Cloudflare Workers Static Assets to serve, with the Worker entrypoint emitted AND zero browser-served React bundles AND a `.assetsignore` excluding `_worker.js`/`_routes.json` from public upload (REVIEW FIX M2)
 - Build verification is honest: no `tail -5` masking — full log is captured and scanned for warning/error lines
 </success_criteria>
 
 <output>
 After completion, create `.planning/phases/01-foundations-brand-system/01-04-SUMMARY.md` with:
 - The 7 files written (BaseLayout + 5 pages + sample-data)
+- **NEW (checker iteration 2 BLOCKER 3):** Confirmation that BaseLayout.astro's `<style is:global>` block imports BOTH `colors_and_type.css` AND `components.css` (in that order), so Plan 02's `.btn-primary :hover/:active` and `.nav-list`/`.nav-item` rules are loaded at runtime
 - Confirmation `pnpm exec astro build` produces `dist/` with the 5 HTML files
 - **NEW (checker WARNING #7):** Confirmation `dist/_worker.js/index.js` (or `dist/_worker.js`) exists, AND the chosen `output:` mode (`'static'` or `'server'`). If a switch from `'static'` to `'server'` was required at this step, document the reason so Plan 01 SUMMARY can be retroactively annotated.
 - **NEW (checker WARNING #6):** Confirmation that no browser-served JS bundle in `dist/` exceeds 5KB (excluding `_worker.js`). List the JS files emitted by the build, with their sizes.

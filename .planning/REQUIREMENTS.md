@@ -115,7 +115,7 @@
 |-------------|-------|-------------------|
 | FND-01 | Phase 1: Foundations & Brand System | SC1 (cream/font shell renders on preview), SC2 (push-to-deploy + PR previews) |
 | FND-02 | Phase 1: Foundations & Brand System | SC1 (preview at *.workers.dev), SC2 (push-to-deploy + PR previews), SC5 (PROJECT.md updated to Workers wording) |
-| FND-03 | Phase 1: Foundations & Brand System | SC2 (production deploy on push to main) — full apex/www cutover verified in Phase 5 SC1 |
+| FND-03 | Phase 5: Analytics, Polish & Launch | SC1 (apex `https://studiobluemli.com` resolves; `www.` 301-redirects to apex) |
 | FND-04 | Phase 1: Foundations & Brand System | SC2 (push to main = production deploy; PR = unique preview URL) |
 | FND-05 | Phase 1: Foundations & Brand System | SC1 (header + footer chrome render on the placeholder page) |
 | FND-06 | Phase 1: Foundations & Brand System | SC1 (cream background), SC3 (CI fails on bg-white/#fff) |

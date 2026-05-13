@@ -7,11 +7,13 @@ type: execute
 wave: 3
 depends_on: ["01-01", "01-02", "01-04"]
 autonomous: false
-requirements: [FND-03, FND-04, FND-10, FND-11]
+requirements: [FND-04, FND-10, FND-11, FND-12]
 files_modified:
   - .github/workflows/ci.yml
+  - lighthouserc.json
   - scripts/check-brand-rules.sh
   - scripts/check-lowercase-filenames.sh
+  - scripts/check-no-hydration.sh
   - SETUP.md
 tags: [ci, github-actions, brand-enforcement, cloudflare-workers-builds, founder-setup]
 user_setup:
@@ -30,6 +32,8 @@ must_haves:
     - ".github/workflows/ci.yml exists and runs on PR + push to main"
     - "CI job is named exactly 'Build & brand check' so the founder/engineer can register it in GitHub branch protection"
     - "scripts/check-brand-rules.sh enforces all 5 active brand grep rules (Rule 7 sample-data leak is COMMENTED for Phase 1 with a TODO marker)"
+    - "scripts/check-no-hydration.sh enforces the 'no `client:` directives + no large browser JS bundle' contract every CI run (REVIEW FIX M1)"
+    - "CI runs Lighthouse CI (mobile preset) against the *.workers.dev preview URL after deploy and asserts Performance/Accessibility/Best Practices/SEO each ≥ 90 on the landing route `/` (orchestrator decision FND-12 — replaces deferred Phase 5 work)"
     - "scripts/check-lowercase-filenames.sh fails when any src/pages/ filename contains an uppercase letter (FND-11)"
     - "A deliberate violation (`bg-white` added to a temp file in src/) makes CI fail; reverting makes it pass"
     - "SETUP.md walks the engineer through the 5 founder-facing setup steps that cannot live in code"
@@ -46,6 +50,8 @@ must_haves:
       contains: "backdrop-filter"
     - path: "scripts/check-lowercase-filenames.sh"
       provides: "fail-on-uppercase check for src/pages/"
+    - path: "scripts/check-no-hydration.sh"
+      provides: "fails CI if any client: directive appears in src/ OR if dist/ ships a browser JS bundle larger than the size budget (REVIEW FIX M1)"
     - path: "SETUP.md"
       provides: "founder-facing setup steps for Cloudflare git connect + GitHub status check + verification loop"
   key_links:
@@ -62,7 +68,7 @@ must_haves:
 <objective>
 Wire the GitHub Actions CI workflow that runs `astro check` + `astro build` + the brand-rule grep + the lowercase-filename check on every PR and push to `main`. Write the two shell scripts the workflow invokes (`scripts/check-brand-rules.sh`, `scripts/check-lowercase-filenames.sh`) with the exact pinned regex patterns from RESEARCH.md. Then write a `SETUP.md` that walks the engineer through the 5 founder-facing setup steps Claude cannot do via CLI (Cloudflare git integration, GitHub branch protection, etc.).
 
-Purpose: Ship FND-10 (CI grep enforcement), FND-11 (lowercase filenames), and document the dashboard-only steps that complete FND-03 (push-to-main production deploy) and FND-04 (per-PR preview URLs). After this plan, every Phase 1 success criterion is either met automatically (1, 4, 5) or has a documented manual verification path (2, 3).
+Purpose: Ship FND-10 (CI grep enforcement), FND-11 (lowercase filenames), FND-12 (Lighthouse mobile ≥ 90 on `/` in CI — orchestrator decision moves this from Phase 5 to Phase 1), and the no-hydration/no-browser-JS CI gate (REVIEW FIX M1). Also document the dashboard-only steps that complete FND-04 (push-to-main production deploy + per-PR preview URLs). FND-03 (apex + www → apex 301) was removed from Phase 1 per orchestrator decision and is now Phase 5 work. After this plan, every Phase 1 success criterion is either met automatically (1, 3, 4, 5) or has a documented manual verification path (2).
 
 Output: GitHub Actions ready to run; the founder/engineer can complete the Cloudflare connect + GitHub branch protection steps from SETUP.md and verify the loop (deliberate violation → CI fails → revert → CI passes).
 </objective>
@@ -83,11 +89,14 @@ Output: GitHub Actions ready to run; the founder/engineer can complete the Cloud
 @wrangler.jsonc
 
 <interfaces>
-<!-- CI workflow contract (RESEARCH.md "GitHub Actions workflow" lines 1115-1158): -->
+<!-- CI workflow contract (RESEARCH.md "GitHub Actions workflow" lines 1115-1158; UPDATED for review-replan): -->
 <!-- - Job name: "Build & brand check" (exact — engineer registers this string in branch protection) -->
 <!-- - Triggers: pull_request on main, push on main -->
-<!-- - Steps order: checkout → pnpm setup → Node setup (reads .nvmrc) → install --frozen-lockfile → astro check → astro build → brand-check.sh → lowercase-check.sh -->
+<!-- - Steps order: checkout → pnpm setup → Node setup (reads .nvmrc) → install --frozen-lockfile → astro check → astro build → write-assetsignore (Plan 04's postbuild) → brand-check.sh → lowercase-check.sh → no-hydration-check.sh → Cloudflare deploy preview → Lighthouse CI on preview URL -->
 <!-- - Runner: ubuntu-latest (GNU grep available — required for PCRE -P flag in Rule 1) -->
+<!-- - REVIEW FIX M1: no-hydration-check enforces 'no client: directives + no large browser JS' as a permanent CI gate, not just a one-time local check -->
+<!-- - Orchestrator decision FND-12: Lighthouse CI runs against the *.workers.dev preview URL captured from the Cloudflare deploy step. Mobile-only audit. Block on Performance / Accessibility / Best Practices / SEO ≥ 90 for the landing route `/`. Tooling: treosh/lighthouse-ci-action (preferred) or `lhci autorun` against `astro preview` as fallback -->
+<!-- - Orchestrator decision FND-03 removed: FND-03 (apex studiobluemli.com + www → apex redirect) is now Phase 5 work; this plan does NOT claim FND-03 in `requirements` and SETUP.md no longer wires DNS or 301 redirects -->
 
 <!-- Pinned grep patterns (RESEARCH.md "CI Grep Rules — Pinned" lines 371-526): -->
 <!-- Rule 1 (whites): (bg-white|background:\s*white|#fff(?![0-9a-fA-F])|#[fF]{6}) — PCRE — grep -rEnP -->
@@ -111,8 +120,8 @@ Output: GitHub Actions ready to run; the founder/engineer can complete the Cloud
 <tasks>
 
 <task type="auto">
-  <name>Task 1: Write the two CI scripts (brand-rules + lowercase-filenames)</name>
-  <files>scripts/check-brand-rules.sh, scripts/check-lowercase-filenames.sh</files>
+  <name>Task 1: Write the three CI scripts (brand-rules + lowercase-filenames + no-hydration)</name>
+  <files>scripts/check-brand-rules.sh, scripts/check-lowercase-filenames.sh, scripts/check-no-hydration.sh</files>
   <read_first>
     - /Users/lucacanonica/Documents/projects/bluemli/.planning/phases/01-foundations-brand-system/01-RESEARCH.md (§"Brand-check shell script" lines 1166-1237 — copy verbatim; §"check-lowercase-filenames.sh" lines 1240-1257)
     - /Users/lucacanonica/Documents/projects/bluemli/.planning/phases/01-foundations-brand-system/01-PATTERNS.md (lines 783-831 — verified shape + critical constraints)
@@ -271,47 +280,162 @@ exit 0
 chmod +x scripts/check-lowercase-filenames.sh
 ```
 
-**Step 5 — Smoke-test both scripts locally** against the real `src/` from Plans 02 + 04:
-```bash
-bash scripts/check-brand-rules.sh
-# Expected: "All brand rules pass."
-# Exit: 0
+**Step 4b — Write `scripts/check-no-hydration.sh`** (REVIEW FIX M1 — Codex review). This is a NEW Phase 1 CI gate. Two checks, both run on every PR/push:
 
-bash scripts/check-lowercase-filenames.sh
-# Expected: "All src/pages/ filenames are lowercase."
-# Exit: 0
+1. **Source-level grep**: fail if any `client:(load|idle|visible|media|only)` directive appears anywhere under `src/`. The "no `client:` directive" invariant was previously verified only once locally in Plan 04 Task 3 — now it's permanent CI.
+2. **Build-output size budget**: fail if the post-build `dist/` ships browser-served JS bundles larger than the threshold. Excludes `_worker.js` (the SSR Worker entrypoint, not browser code).
+
+Write the file at `scripts/check-no-hydration.sh`:
+
+```bash
+#!/usr/bin/env bash
+# scripts/check-no-hydration.sh — REVIEW FIX M1 (Codex review)
+#
+# Enforces the "Astro renders React server-side only" contract in CI:
+#   (1) No client:load|idle|visible|media|only directives anywhere in src/
+#   (2) No large browser-served JS bundles in dist/ (the post-build output)
+#
+# Without this gate, a future PR could add `client:load` to one of the
+# design-skill components and silently ship React (~40KB gz) to every browser
+# — tanking mobile Lighthouse and violating the FND-01 "React server-rendered
+# only" requirement. Codex flagged this as a missing invariant.
+#
+# This script runs AFTER `astro build` so dist/ exists.
+set -uo pipefail
+
+failed=0
+
+# ---- Check 1: no client: directives in src/ ----
+# Skip comments in *.md files via --include filter; we only care about code.
+if grep -rEn 'client:(load|idle|visible|media|only)' \
+     --include='*.astro' --include='*.jsx' --include='*.tsx' --include='*.ts' \
+     --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=.git \
+     --exclude-dir=.planning --exclude-dir=.claude \
+     src/ ; then
+  echo ""
+  echo "FAIL: Found a client: directive in src/."
+  echo "  Phase 1 requires zero React in the browser — every JSX component must"
+  echo "  render server-side as static HTML. The design-skill components were"
+  echo "  refactored (Plan 02) to drop useState/onClick so they DON'T need hydration."
+  echo "  If you really need client interactivity, surface it via plain HTML/CSS"
+  echo "  patterns (e.g., <details>/<summary> for disclosure, <form> for submission)"
+  echo "  before reaching for a client: directive."
+  failed=1
+fi
+
+# ---- Check 2: size budget on dist/ browser JS ----
+# Astro 6 + @astrojs/cloudflare emits dist/_worker.js (SSR entry; NOT browser JS)
+# plus, optionally, a tiny micro-runtime if any directive shipped. The
+# zero-hydration contract means no large browser bundles should exist.
+#
+# Budget: any single browser-served .js file > 10240 bytes (10 KB) is a fail.
+# Excludes _worker.js (and anything inside the _worker.js directory).
+BUDGET_BYTES=10240
+if [ -d dist ]; then
+  LARGE=$(find dist -name '*.js' -size +"${BUDGET_BYTES}c" 2>/dev/null \
+          | grep -v '/_worker.js' \
+          || true)
+  if [ -n "$LARGE" ]; then
+    echo ""
+    echo "FAIL: Found browser-served JS bundle(s) > ${BUDGET_BYTES} bytes in dist/:"
+    echo "$LARGE" | sed 's/^/    /'
+    echo "  The 'no client: directive' contract should yield zero (or near-zero)"
+    echo "  browser JS. A bundle this size strongly suggests React (or another"
+    echo "  framework runtime) accidentally shipped via a client: directive or"
+    echo "  a hydration misconfiguration."
+    echo "  Re-run check 1 above; if no client: directives are present, inspect"
+    echo "  the build for unexpected hydration via 'astro check --verbose'."
+    failed=1
+  fi
+
+  # Belt-and-suspenders: even if a small bundle exists, it must not include
+  # the React production/development runtime.
+  if grep -rlE 'react\.development|react\.production|react-dom\.development|react-dom\.production' \
+       dist/ --include='*.js' 2>/dev/null \
+       | grep -v '/_worker.js' \
+       | head -5 | grep -q '.' ; then
+    echo ""
+    echo "FAIL: Browser-served JS in dist/ contains the React runtime."
+    echo "  This violates the 'no client: directive' contract — React must not ship to the browser."
+    failed=1
+  fi
+else
+  echo "WARN: dist/ does not exist — has 'astro build' run? (skipping browser-JS check)"
+  # Not a failure in isolation — CI runs astro build BEFORE this script, so by
+  # the time this runs in the real pipeline, dist/ exists. In local dev or unit
+  # tests, dist/ may be absent.
+fi
+
+if [ "$failed" -eq 0 ]; then
+  echo "All hydration/bundle checks pass."
+fi
+exit "$failed"
 ```
 
-**Step 6 — Smoke-test a deliberate violation** to prove the script catches it:
+Make it executable:
 ```bash
-# Add a temporary file with a violation
+chmod +x scripts/check-no-hydration.sh
+```
+
+**Step 5 — Smoke-test all three scripts locally** against the real `src/` from Plans 02 + 04 (after `astro build` has produced `dist/`):
+```bash
+# 1) Brand-rule scan
+bash scripts/check-brand-rules.sh
+# Expected: "All brand rules pass." — exit 0
+
+# 2) Lowercase filename scan
+bash scripts/check-lowercase-filenames.sh
+# Expected: "All src/pages/ filenames are lowercase." — exit 0
+
+# 3) No-hydration / no-browser-JS scan
+pnpm exec astro build   # ensure dist/ exists
+node scripts/write-assetsignore.mjs  # Plan 04 postbuild (so dist/.assetsignore is in place)
+bash scripts/check-no-hydration.sh
+# Expected: "All hydration/bundle checks pass." — exit 0
+```
+
+**Step 6 — Smoke-test deliberate violations** to prove each script catches them:
+```bash
+# Brand-rule violation
 echo 'div { background: white; }' > src/__test-violation.css
 bash scripts/check-brand-rules.sh
-# Expected: prints "FAIL: The site background must be cream..."
-# Exit: 1
+# Expected: prints "FAIL: The site background must be cream..." — exit 1
 
-# Now an uppercase filename violation
+# Uppercase filename violation
 touch src/pages/__TestViolation.astro
 bash scripts/check-lowercase-filenames.sh
-# Expected: prints "FAIL: src/pages/ filenames must be lowercase-only..."
-# Exit: 1
+# Expected: prints "FAIL: src/pages/ filenames must be lowercase-only..." — exit 1
+
+# REVIEW FIX M1: client: directive violation
+# Inject a fake client:load directive into a temp .jsx file under src/.
+# (Using .jsx avoids embedding bare YAML-style triple-dashes that collide
+# with the gsd-sdk plan-parser frontmatter regex when this plan is parsed.)
+mkdir -p src/__test-hydration
+printf 'import Hero from "../components/design-skill/Hero";\nexport default function Test() { return <Hero client:load />; }\n' > src/__test-hydration/leak.jsx
+bash scripts/check-no-hydration.sh
+# Expected: prints "FAIL: Found a client: directive in src/." — exit 1
 
 # Clean up
-rm src/__test-violation.css src/pages/__TestViolation.astro
+rm -rf src/__test-violation.css src/pages/__TestViolation.astro src/__test-hydration/
 
-# Re-run both — should pass again
-bash scripts/check-brand-rules.sh && bash scripts/check-lowercase-filenames.sh
-# Both exit 0
+# Re-run all three — should all pass again
+bash scripts/check-brand-rules.sh && bash scripts/check-lowercase-filenames.sh && bash scripts/check-no-hydration.sh
+# All three exit 0
 ```
 
 This smoke-test sequence proves the scripts work both ways (pass on clean code, fail on violations). If a violation does NOT trigger the failure, inspect the grep flags and regex — the most common bug is forgetting `-P` for PCRE lookahead in Rule 1.
   </action>
   <verify>
-    <automated>test -x scripts/check-brand-rules.sh && test -x scripts/check-lowercase-filenames.sh && grep -q "set -uo pipefail" scripts/check-brand-rules.sh && grep -q "bg-white" scripts/check-brand-rules.sh && grep -q "background:\\\\s\\*white" scripts/check-brand-rules.sh && grep -q "fff(?\\!" scripts/check-brand-rules.sh && grep -q "flower" scripts/check-brand-rules.sh && grep -q "petal" scripts/check-brand-rules.sh && grep -q "gradient" scripts/check-brand-rules.sh && grep -q "backdrop-filter" scripts/check-brand-rules.sh && grep -q "border" scripts/check-brand-rules.sh && grep -q "1px" scripts/check-brand-rules.sh && grep -q "beaded clusters, not flowers" scripts/check-brand-rules.sh && grep -q "cream" scripts/check-brand-rules.sh && grep -q "TODO: enable in Phase 2" scripts/check-brand-rules.sh && grep -q "find src/pages" scripts/check-lowercase-filenames.sh && grep -q "macOS is case-insensitive" scripts/check-lowercase-filenames.sh && bash scripts/check-brand-rules.sh && bash scripts/check-lowercase-filenames.sh</automated>
+    <automated>test -x scripts/check-brand-rules.sh && test -x scripts/check-lowercase-filenames.sh && test -x scripts/check-no-hydration.sh && grep -q "set -uo pipefail" scripts/check-brand-rules.sh && grep -q "client:(load|idle|visible|media|only)" scripts/check-no-hydration.sh && grep -q "BUDGET_BYTES" scripts/check-no-hydration.sh && grep -q "bg-white" scripts/check-brand-rules.sh && grep -q "background:\\\\s\\*white" scripts/check-brand-rules.sh && grep -q "fff(?\\!" scripts/check-brand-rules.sh && grep -q "flower" scripts/check-brand-rules.sh && grep -q "petal" scripts/check-brand-rules.sh && grep -q "gradient" scripts/check-brand-rules.sh && grep -q "backdrop-filter" scripts/check-brand-rules.sh && grep -q "border" scripts/check-brand-rules.sh && grep -q "1px" scripts/check-brand-rules.sh && grep -q "beaded clusters, not flowers" scripts/check-brand-rules.sh && grep -q "cream" scripts/check-brand-rules.sh && grep -q "TODO: enable in Phase 2" scripts/check-brand-rules.sh && grep -q "find src/pages" scripts/check-lowercase-filenames.sh && grep -q "macOS is case-insensitive" scripts/check-lowercase-filenames.sh && bash scripts/check-brand-rules.sh && bash scripts/check-lowercase-filenames.sh</automated>
   </verify>
   <acceptance_criteria>
     - File `scripts/check-brand-rules.sh` exists and is executable: `test -x scripts/check-brand-rules.sh` exits 0
     - File `scripts/check-lowercase-filenames.sh` exists and is executable
+    - **NEW (REVIEW FIX M1):** File `scripts/check-no-hydration.sh` exists and is executable: `test -x scripts/check-no-hydration.sh` exits 0
+    - **NEW (REVIEW FIX M1):** `scripts/check-no-hydration.sh` contains the grep pattern `client:(load|idle|visible|media|only)` (Check 1: source-level no-client-directive scan)
+    - **NEW (REVIEW FIX M1):** `scripts/check-no-hydration.sh` contains a `BUDGET_BYTES=10240` (or similar named threshold) AND a `find dist -name '*.js' -size +` pattern excluding `_worker.js` (Check 2: build-output size budget)
+    - **NEW (REVIEW FIX M1):** Running `bash scripts/check-no-hydration.sh` against a clean post-build state exits 0 with output "All hydration/bundle checks pass."
+    - **NEW (REVIEW FIX M1):** Deliberate-violation smoke test: writing a temp page with `<Hero client:load />` and running the script exits 1 with the documented FAIL message
     - `scripts/check-brand-rules.sh` uses `set -uo pipefail` (NOT `set -e` — collects all violations)
     - Contains all 5 active grep patterns:
       - `bg-white` and `background:\s*white` (Rule 1)
@@ -332,7 +456,7 @@ This smoke-test sequence proves the scripts work both ways (pass on clean code, 
 
 <task type="auto">
   <name>Task 2: Write .github/workflows/ci.yml + SETUP.md</name>
-  <files>.github/workflows/ci.yml, SETUP.md</files>
+  <files>.github/workflows/ci.yml, SETUP.md, lighthouserc.json</files>
   <read_first>
     - /Users/lucacanonica/Documents/projects/bluemli/.planning/phases/01-foundations-brand-system/01-RESEARCH.md (§"GitHub Actions workflow" lines 1115-1158 — copy verbatim; §"Founder-Facing Setup Checklist" lines 1306-1341 — the 5 manual steps SETUP.md must document)
     - /Users/lucacanonica/Documents/projects/bluemli/.planning/phases/01-foundations-brand-system/01-PATTERNS.md (lines 833-845 — ci.yml critical constraints)
@@ -351,12 +475,22 @@ mkdir -p .github/workflows
 
 ```yaml
 # .github/workflows/ci.yml
-# Required status check for Phase 1 foundations (FND-04, FND-10, FND-11).
+# Required status check for Phase 1 foundations (FND-04, FND-10, FND-11, FND-12).
 #
 # After this file is merged once, the engineer adds "Build & brand check"
 # as a required status check in GitHub branch protection. See SETUP.md.
 #
-# Phase 5 will append a Lighthouse-on-preview step (LCH-05).
+# REVIEW FIX M1: includes scripts/check-no-hydration.sh (no client: directives
+# + browser JS size budget) — enforced on every PR, not just one local check.
+#
+# Orchestrator decision FND-12: Lighthouse CI runs against the *.workers.dev
+# preview URL after deploy. Mobile-only audit. Asserts Performance / Accessibility
+# / Best Practices / SEO ≥ 90 on the landing route `/`. Tooling:
+# treosh/lighthouse-ci-action (preferred) against the deployed preview URL
+# (`${{ steps.deploy.outputs.deployment-url }}` if using cloudflare/wrangler-action),
+# OR `lhci autorun` against `astro preview` if preview-URL plumbing is too complex
+# in the engineer's GitHub setup (acceptable fallback per orchestrator).
+
 name: CI
 
 on:
@@ -369,7 +503,7 @@ jobs:
   build-and-check:
     name: Build & brand check
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -391,14 +525,86 @@ jobs:
       - name: Build
         run: pnpm exec astro build
 
+      - name: Write .assetsignore (Plan 04 postbuild — REVIEW FIX M2)
+        run: node scripts/write-assetsignore.mjs
+
       - name: Brand-rule grep (FND-10)
         run: bash scripts/check-brand-rules.sh
 
       - name: Lowercase filename check (FND-11)
         run: bash scripts/check-lowercase-filenames.sh
 
-      # Phase 5 will add: Lighthouse CI against preview URL (LCH-05)
+      - name: No-hydration / no-browser-JS check (FND-01 — REVIEW FIX M1)
+        run: bash scripts/check-no-hydration.sh
+
+      # Lighthouse CI (FND-12 — orchestrator decision, replaces deferred Phase 5 step).
+      # Runs against `astro preview` to avoid coupling CI to Cloudflare deploy timing.
+      # (If the engineer later prefers running against the live *.workers.dev preview
+      # URL, swap `astro preview` for the deployment URL via `cloudflare/wrangler-action`
+      # output — see lighthouserc.json `url` field.)
+      - name: Lighthouse CI (mobile, ≥ 90 on /) — FND-12
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+        env:
+          # REVIEW FIX (checker iteration 2 WARNING 5): no explicit `urls:` here.
+          # lighthouserc.json declares `staticDistDir: "./dist"`, and the action
+          # serves dist/ over a local HTTP server it spawns. The Lighthouse run
+          # is driven entirely by `staticDistDir` + the assertions in
+          # lighthouserc.json — no `astro preview` background step, no urls list.
+          # If a future iteration needs to audit the live *.workers.dev preview
+          # URL instead, swap to: drop staticDistDir from lighthouserc.json and
+          # set `urls:` here to the deployment URL (e.g., via cloudflare/wrangler-action
+          # output). Pick one path; do not ship both.
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 ```
+
+**Companion file — `lighthouserc.json`** at the repo root (REVIEW FIX FND-12). Asserts mobile audit on `/` for the four categories:
+
+```json
+{
+  "ci": {
+    "collect": {
+      "staticDistDir": "./dist",
+      "numberOfRuns": 1,
+      "settings": {
+        "formFactor": "mobile",
+        "screenEmulation": {
+          "mobile": true,
+          "width": 360,
+          "height": 640,
+          "deviceScaleFactor": 2,
+          "disabled": false
+        },
+        "throttling": {
+          "rttMs": 150,
+          "throughputKbps": 1638.4,
+          "cpuSlowdownMultiplier": 4
+        }
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance":   ["error", { "minScore": 0.9 }],
+        "categories:accessibility": ["error", { "minScore": 0.9 }],
+        "categories:best-practices":["error", { "minScore": 0.9 }],
+        "categories:seo":           ["error", { "minScore": 0.9 }]
+      }
+    }
+  }
+}
+```
+
+**Note on Lighthouse server bootstrapping** (REVIEW FIX checker iteration 2 WARNING 5): the canonical bootstrapping strategy is `staticDistDir: "./dist"` in `lighthouserc.json` — `treosh/lighthouse-ci-action@v12` serves `./dist` over a local HTTP server it spawns internally, audits `/` (the index), and reports back. The ci.yml step ABOVE does NOT pass an explicit `urls:` argument, and `lighthouserc.json` does NOT declare a `url:` field — those are the two competing bootstrappers, and shipping both is ambiguous and was failing at runtime. Pick ONE path.
+
+If `staticDistDir` does not work for Astro 6's clean-URL routing in the actual CI run, the FALLBACK is (executor decision, document in SUMMARY):
+1. Remove `"staticDistDir": "./dist"` from `lighthouserc.json`
+2. Add a previous CI step: `pnpm exec astro preview &` + `npx wait-on http://localhost:4321/`
+3. Add back to the workflow step's `with:` block: `urls: http://localhost:4321/`
+
+Do NOT ship both `staticDistDir` AND `urls:` simultaneously — pick one, commit it, document it in the plan SUMMARY.
 
 Critical constraints (PATTERNS.md lines 839-844):
 - Job name `Build & brand check` MUST match exactly — this is the string the engineer enters into GitHub branch protection
@@ -456,7 +662,7 @@ After step 2 fires once:
 - **Per-branch (stable alias):** `<branch-name>-studio-bluemli.<account-subdomain>.workers.dev`
 - **Per-commit (immutable):** `<version-prefix>-studio-bluemli.<account-subdomain>.workers.dev`
 
-The full apex `studiobluemli.com` does NOT resolve to this Worker yet — DNS cutover is Phase 5.
+Phase 1 ships on `*.workers.dev` only. The apex `studiobluemli.com` resolves to this Worker in Phase 5 (FND-03, which is mapped to Phase 5 per the updated REQUIREMENTS.md).
 
 ## 4. Enable the GitHub required status check
 
@@ -504,6 +710,7 @@ After all steps above:
 - [ ] **SC3** (CI blocks brand violations): the deliberate-violation test in step 5 fails, the revert passes.
 - [ ] **SC4** (favicon): visit the preview URL on desktop and add to home-screen on iOS; both show the mark.
 - [ ] **SC5** (PROJECT.md corrected): `grep -c "Cloudflare Pages" .planning/PROJECT.md` shows only the explanatory parenthetical(s), not the target-hosting bullets.
+- [ ] **FND-12 (Lighthouse, mobile, ≥ 90 on `/`)**: CI's `Lighthouse CI` step is green on the latest run. If it fails, click through to the artifact and inspect which category dropped below 0.9 — most common Phase 1 failure is Accessibility (missing focus-visible) or Performance (font payload above 100KB).
 ```
 
 Critical content requirements for SETUP.md:
@@ -515,7 +722,7 @@ Critical content requirements for SETUP.md:
 - No founder action is required — this is engineer-only setup
   </action>
   <verify>
-    <automated>test -d .github/workflows && test -f .github/workflows/ci.yml && test -f SETUP.md && grep -q "name: Build & brand check" .github/workflows/ci.yml && grep -q "pull_request:" .github/workflows/ci.yml && grep -q "push:" .github/workflows/ci.yml && grep -q "ubuntu-latest" .github/workflows/ci.yml && grep -q "pnpm/action-setup" .github/workflows/ci.yml && grep -q "node-version-file: .nvmrc" .github/workflows/ci.yml && grep -q "pnpm install --frozen-lockfile" .github/workflows/ci.yml && grep -q "astro check" .github/workflows/ci.yml && grep -q "astro build" .github/workflows/ci.yml && grep -q "scripts/check-brand-rules.sh" .github/workflows/ci.yml && grep -q "scripts/check-lowercase-filenames.sh" .github/workflows/ci.yml && grep -q "LCH-05" .github/workflows/ci.yml && grep -q "studio-bluemli" SETUP.md && grep -q "Build & brand check" SETUP.md && grep -q "Non-production branch builds" SETUP.md && grep -q "workers.dev" SETUP.md && grep -q "background: white" SETUP.md && grep -q "wrangler.*deploy" SETUP.md</automated>
+    <automated>test -d .github/workflows && test -f .github/workflows/ci.yml && test -f SETUP.md && grep -q "name: Build & brand check" .github/workflows/ci.yml && grep -q "pull_request:" .github/workflows/ci.yml && grep -q "push:" .github/workflows/ci.yml && grep -q "ubuntu-latest" .github/workflows/ci.yml && grep -q "pnpm/action-setup" .github/workflows/ci.yml && grep -q "node-version-file: .nvmrc" .github/workflows/ci.yml && grep -q "pnpm install --frozen-lockfile" .github/workflows/ci.yml && grep -q "astro check" .github/workflows/ci.yml && grep -q "astro build" .github/workflows/ci.yml && grep -q "scripts/check-brand-rules.sh" .github/workflows/ci.yml && grep -q "scripts/check-lowercase-filenames.sh" .github/workflows/ci.yml && grep -q "scripts/check-no-hydration.sh" .github/workflows/ci.yml && grep -q "write-assetsignore.mjs" .github/workflows/ci.yml && grep -qE "lighthouse-ci-action|lhci" .github/workflows/ci.yml && test -f lighthouserc.json && grep -q "minScore" lighthouserc.json && grep -q "studio-bluemli" SETUP.md && grep -q "Build & brand check" SETUP.md && grep -q "Non-production branch builds" SETUP.md && grep -q "workers.dev" SETUP.md && grep -q "background: white" SETUP.md && grep -q "wrangler.*deploy" SETUP.md</automated>
   </verify>
   <acceptance_criteria>
     - File `.github/workflows/ci.yml` exists
@@ -524,9 +731,13 @@ Critical content requirements for SETUP.md:
     - CI triggers on both `pull_request` and `push` to main
     - CI runs on `ubuntu-latest` (needed for GNU grep `-P` PCRE flag)
     - CI uses `pnpm install --frozen-lockfile` (reproduces locked deps from Plan 01)
-    - CI runs `astro check` AND `astro build` AND the two brand-check shell scripts
+    - CI runs `astro check` AND `astro build` AND the THREE check shell scripts (brand-rules, lowercase-filenames, no-hydration — REVIEW FIX M1)
+    - **NEW (REVIEW FIX M1):** CI invokes `scripts/check-no-hydration.sh` as a step named "No-hydration / no-browser-JS check" — `grep -q "check-no-hydration.sh" .github/workflows/ci.yml` exits 0
+    - **NEW (Orchestrator decision FND-12):** CI invokes a Lighthouse step using `treosh/lighthouse-ci-action` (or an `lhci autorun` fallback) — `grep -q "lighthouse-ci-action\|lhci" .github/workflows/ci.yml` exits 0
+    - **NEW (Orchestrator decision FND-12):** A `lighthouserc.json` file exists at the repo root with mobile-form-factor settings and minScore 0.9 assertions on performance/accessibility/best-practices/seo — `test -f lighthouserc.json && grep -q '"minScore": 0.9' lighthouserc.json` exits 0
+    - CI also invokes the Plan 04 postbuild script: `grep -q "write-assetsignore.mjs" .github/workflows/ci.yml` exits 0 (REVIEW FIX M2)
     - CI references `.nvmrc` via `node-version-file: .nvmrc`
-    - CI has the Phase 5 marker comment for Lighthouse: `grep -q "LCH-05" .github/workflows/ci.yml` exits 0
+    - CI has an FND-12 reference for Lighthouse: `grep -q "FND-12" .github/workflows/ci.yml` exits 0 (orchestrator decision: Lighthouse moved from Phase 5 to Phase 1; the Phase 5 LCH-05 step extends/replaces this with a full-route audit at production cutover)
     - SETUP.md documents the worker name `studio-bluemli` (matches D-12 / wrangler.jsonc)
     - SETUP.md quotes the CI job name `Build & brand check` (engineer types this into branch protection)
     - SETUP.md calls out "Non-production branch builds" toggle (most-commonly-missed setup step)
@@ -655,7 +866,9 @@ After all three tasks complete:
 - FND-10 enforced: 5 brand grep rules fail the CI build on violation
 - FND-11 enforced: lowercase filename check fails the CI build on any uppercase letter in `src/pages/`
 - FND-04 enabled: every push to main produces a Cloudflare production deploy; every PR produces a preview URL (after the engineer completes SETUP.md §2)
-- FND-03 partially satisfied: production deploy at `studio-bluemli.<account>.workers.dev` (full apex cutover is Phase 5)
+- FND-12 enforced in CI (orchestrator decision): Lighthouse mobile audit asserts Performance/Accessibility/Best Practices/SEO ≥ 90 on the landing route `/` every CI run
+- REVIEW FIX M1: `scripts/check-no-hydration.sh` enforces "no `client:` directive + no large browser JS bundle" as a permanent CI gate
+- (FND-03 is no longer claimed by this plan — orchestrator removed it from Phase 1 and re-mapped to Phase 5)
 - SETUP.md gives the engineer everything needed to complete the dashboard-only steps
 - Phase 1 Success Criteria 1-5 are all achievable after the engineer walks SETUP.md
 </success_criteria>
@@ -667,4 +880,7 @@ After completion, create `.planning/phases/01-foundations-brand-system/01-05-SUM
 - The Cloudflare preview URL the founder/engineer should bookmark (`studio-bluemli.<account>.workers.dev` once setup is done)
 - A list of any deferred items the engineer should note for Phase 2+ (e.g., "Force-push protection not enabled — recommend adding")
 - Phase 1 SC status: which were verified automatically, which required the engineer to walk SETUP.md
+- Lighthouse CI tooling choice (REVIEW FIX iteration 2 WARNING 5): canonical path is `staticDistDir: "./dist"` in lighthouserc.json + no explicit `urls:` in ci.yml. If the executor had to fall back to the `astro preview` background-server path because `staticDistDir` failed for Astro 6 clean-URL routing, document the fallback decision and the first Lighthouse score recorded for `/`.
+- Confirmation that `scripts/check-no-hydration.sh` passes against the post-build `dist/` (REVIEW FIX M1)
+- REVIEW FIX status: FND-03 removed from this plan's `requirements`; FND-12 added; M1 (no-hydration gate) wired into CI
 </output>
