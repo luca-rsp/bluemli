@@ -17,9 +17,13 @@
     "ci:lowercase-check": "bash scripts/check-lowercase-filenames.sh"
   },
   "dependencies": {
-    "astro": "^6.2.0",
     "@astrojs/cloudflare": "^13.5.0",
     "@astrojs/react": "^5.0.4",
+    "@fontsource/bagel-fat-one": "^5.2.7",
+    "@fontsource/caveat": "^5.2.8",
+    "@fontsource/caveat-brush": "^5.2.8",
+    "@fontsource/nunito": "^5.2.7",
+    "astro": "^6.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

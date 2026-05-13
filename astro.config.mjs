@@ -28,14 +28,14 @@ export default defineConfig({
   // `display: 'swap'` is required on every face (FND-07, Pitfall #10, D-15).
   fonts: [
     {
-      provider: fontProviders.google(),
+      provider: fontProviders.fontsource(),
       name: 'Bagel Fat One',
       cssVariable: '--font-wordmark-loaded',
       weights: [400],
       display: 'swap',
     },
     {
-      provider: fontProviders.google(),
+      provider: fontProviders.fontsource(),
       name: 'Caveat Brush',
       cssVariable: '--font-display-loaded',
       weights: [400],
@@ -45,7 +45,7 @@ export default defineConfig({
       // public/fonts/<file>.woff2. This is the only file that needs to change.
     },
     {
-      provider: fontProviders.google(),
+      provider: fontProviders.fontsource(),
       name: 'Nunito',
       cssVariable: '--font-body-loaded',
       weights: [400, 700],
@@ -56,7 +56,7 @@ export default defineConfig({
     // we load it here. Plan 04's BaseLayout.astro consumes this via <Font cssVariable="--font-hand-loaded" preload />.
     // REVIEW FIX M5 (Codex review): no "fallback acceptable" middle path.
     {
-      provider: fontProviders.google(),
+      provider: fontProviders.fontsource(),
       name: 'Caveat',
       cssVariable: '--font-hand-loaded',
       weights: [400],
