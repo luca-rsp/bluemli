@@ -74,7 +74,7 @@ Plans:
 - [x] 02-04-PLAN.md — Wire schema into /gallery + /gallery/<slug> + delete sample-data + activate Rule 7 (CNT-02, CNT-07, CNT-08, CNT-09, CNT-10, CNT-11, PAG-09)
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 02-05-PLAN.md — CONTENT_EDITING.md + REQUIREMENTS/ROADMAP narrative sync (CNT-12)
+- [x] 02-05-PLAN.md — CONTENT_EDITING.md + REQUIREMENTS/ROADMAP narrative sync (CNT-12)
 
 **Key risks / pitfalls:**
 - Schema design is one-shot: every `.strict()` enum, every required field, and the per-slug image co-location pattern must be baked in now (Pitfalls #6, #11, #12) — migrating later means rewriting every existing file.
