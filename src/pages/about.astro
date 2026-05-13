@@ -1,0 +1,19 @@
+---
+// src/pages/about.astro — About shell (D-18).
+// Phase 1: design-skill About component renders with placeholder copy.
+// Phase 3: About renders the real first-person founder portrait + process shots.
+// Note: HeaderProps.active union INCLUDES '/about' (Plan 02 Task 3 Edit 1 — checker BLOCKER #2 fix).
+//
+// prerender = true: required under Plan 01's `output: 'server'` mode.
+export const prerender = true;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/design-skill/Header';
+import About from '../components/design-skill/About';
+import Footer from '../components/design-skill/Footer';
+---
+<BaseLayout title="About — Studio Bluemli">
+  <Header slot="header" active="/about" />
+  <About />
+  <Footer slot="footer" />
+</BaseLayout>

@@ -1,0 +1,19 @@
+---
+// src/pages/popups.astro — Pop-ups shell (D-18).
+// Phase 1: PopupStrip renders one upcoming sample.
+// Phase 3: timezone-correct past/upcoming split from popups collection.
+//
+// prerender = true: required under Plan 01's `output: 'server'` mode.
+export const prerender = true;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/design-skill/Header';
+import PopupStrip from '../components/design-skill/PopupStrip';
+import Footer from '../components/design-skill/Footer';
+import { sampleNextPopup } from '../sample-data';
+---
+<BaseLayout title="Pop-ups — Studio Bluemli">
+  <Header slot="header" active="/popups" />
+  <PopupStrip popup={sampleNextPopup} />
+  <Footer slot="footer" />
+</BaseLayout>

@@ -1,0 +1,29 @@
+---
+// src/pages/index.astro — Landing page shell (D-18, FND-05).
+// Phase 1 demo-loaded: Hero + PopupStrip + GalleryGrid (3 cards).
+// Phase 2 swaps sample-data for real Content Collections.
+//
+// prerender = true is required because Plan 01 chose `output: 'server'`
+// (modern @astrojs/cloudflare adapter pattern — Worker entrypoint emitted at
+// dist/server/entry.mjs). In server mode, pages are SSR-only by default; this
+// directive opts each Phase 1 page back into static prerendering so dist/client/
+// receives the .html file. The Worker entrypoint persists for Phase 4's
+// /api/contact route. See Astro routing-reference "Enable Prerendering in
+// Server Mode" and Plan 01-01 SUMMARY's "Output Mode Verification" section.
+export const prerender = true;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/design-skill/Header';
+import Hero from '../components/design-skill/Hero';
+import PopupStrip from '../components/design-skill/PopupStrip';
+import GalleryGrid from '../components/design-skill/GalleryGrid';
+import Footer from '../components/design-skill/Footer';
+import { sampleGallery, sampleNextPopup } from '../sample-data';
+---
+<BaseLayout title="Studio Bluemli — handmade beaded earrings, NoPa San Francisco">
+  <Header slot="header" active="/" />
+  <Hero />
+  <PopupStrip popup={sampleNextPopup} />
+  <GalleryGrid pieces={sampleGallery.slice(0, 3)} />
+  <Footer slot="footer" />
+</BaseLayout>

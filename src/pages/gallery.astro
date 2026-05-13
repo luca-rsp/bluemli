@@ -1,0 +1,21 @@
+---
+// src/pages/gallery.astro — Gallery shell (D-18).
+// Phase 1: GalleryGrid renders 3 sample pieces from sample-data.
+// Phase 2: GalleryGrid renders the real `gallery` content collection.
+//
+// prerender = true: required under Plan 01's `output: 'server'` mode so the
+// adapter emits HTML at dist/client/gallery/index.html. Phase 2 may flip this
+// to false if the gallery becomes runtime-driven, but Phase 1 is static.
+export const prerender = true;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/design-skill/Header';
+import GalleryGrid from '../components/design-skill/GalleryGrid';
+import Footer from '../components/design-skill/Footer';
+import { sampleGallery } from '../sample-data';
+---
+<BaseLayout title="Gallery — Studio Bluemli">
+  <Header slot="header" active="/gallery" />
+  <GalleryGrid pieces={sampleGallery} />
+  <Footer slot="footer" />
+</BaseLayout>
