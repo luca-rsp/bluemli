@@ -13,13 +13,15 @@ files_modified:
   - src/components/design-skill/Footer.jsx
   - src/content/site/config.yaml
   - CLAUDE.md
+  - package.json
+  - package-lock.json
 autonomous: true
-requirements: [PAG-05]
+requirements: [PAG-01]
 must_haves:
   truths:
     - "The site no longer downloads or references the Bagel Fat One WOFF2 — only one Caveat Brush WOFF2 is loaded (per D-24)."
     - "The 'Studio Bluemli' wordmark in the Header (top-left) and Footer renders in Caveat Brush (alias of --font-display-loaded), visually matching the Caveat Brush display headlines (per D-24)."
-    - "Every user-facing instance of 'NoPa' in the 4 enumerated source files reads 'NOPA' after this plan; .planning/ and .claude/skills/ are untouched (per D-25)."
+    - "Every user-facing instance of 'NoPa' in the 4 enumerated source files reads 'NOPA' after this plan; .planning/, .claude/skills/, and CLAUDE.md are untouched for NoPa (per D-25 + reviews-mode Concern 11)."
     - "Building the site (`npm run build`) succeeds with no missing-font preload errors and no Bagel Fat One @font-face emitted."
   artifacts:
     - path: "astro.config.mjs"
@@ -49,12 +51,14 @@ Two small, contained brand-system tweaks that surface naturally during Phase 3 p
 
 2. **NoPa → NOPA casing fix (D-25):** Apply project-wide to user-facing site copy only, per the explicit D-25 enumeration. Do NOT use a blanket sed — the exclusion list (`.planning/`, `.claude/skills/`, code comments, `CLAUDE.md` planning prose, commit messages) is binding per Pitfall 7 in RESEARCH.md.
 
+**REVIEWS-MODE FIX (Concern 11):** Plan 01's success-criteria grep originally listed `CLAUDE.md` in the NoPa zero-match check, contradicting D-25's explicit exclusion. Verified at planning time that `CLAUDE.md` currently contains 2 occurrences of `NoPa` in planning prose (lines 5 + 177 — the project blurb + the design-skill description). Per D-25, those stay. The corrected approach: **CLAUDE.md is excluded from the NoPa grep targets entirely**. Bagel Fat One verification on CLAUDE.md is still required (separate concern); CLAUDE.md currently has zero `Bagel` matches — the existing grep already passes, so Task 3's CLAUDE.md edit is a no-op cleanliness check.
+
 Purpose: Settle the contained, surface-level brand changes BEFORE any new page-composition work so that:
 - Plan 02 (`<SEO />` + sitemap) inherits the corrected `og_title`/`og_description` casing from `site/config.yaml`.
 - Plan 04 (`/about` rewrite) inherits the corrected `About.jsx` body copy as the baseline (the rewrite is additive on top of this NOPA-corrected text).
 - Plan 03 (`/popups` + landing) sees the correct casing in `Hero.jsx` strings flowing into the prerendered landing HTML.
 
-Output: An updated `astro.config.mjs` (no Bagel Fat One entry), updated `colors_and_type.css` (new `--font-wordmark` cascade), updated `BaseLayout.astro` (no wordmark preload), 3 JSX components with NOPA casing fixes, the site config YAML with NOPA casing, and a CLAUDE.md without Bagel Fat One references.
+Output: An updated `astro.config.mjs` (no Bagel Fat One entry), updated `colors_and_type.css` (new `--font-wordmark` cascade), updated `BaseLayout.astro` (no wordmark preload), 3 JSX components with NOPA casing fixes, the site config YAML with NOPA casing, a CLAUDE.md (Bagel-only check, no NoPa edits), an updated `package.json` (Bagel Fat One dep removed), and a regenerated `package-lock.json`.
 </objective>
 
 <execution_context>
@@ -70,6 +74,7 @@ Output: An updated `astro.config.mjs` (no Bagel Fat One entry), updated `colors_
 @.planning/phases/03-page-composition-pop-ups/03-RESEARCH.md
 @.planning/phases/03-page-composition-pop-ups/03-PATTERNS.md
 @.planning/phases/03-page-composition-pop-ups/03-UI-SPEC.md
+@.planning/phases/03-page-composition-pop-ups/03-REVIEWS.md
 @.claude/skills/studio-bluemli-design/SKILL.md
 @astro.config.mjs
 @src/styles/colors_and_type.css
@@ -133,8 +138,10 @@ Total `NoPa` occurrences to flip (verified via grep -c, before edits):
 - About.jsx: 1
 - Footer.jsx: 2
 - site/config.yaml: 3
-- CLAUDE.md: 2 (these are PROJECT prose lines — keep, see Task 4 below)
+- CLAUDE.md: 2 (these are PROJECT prose lines — STAY UNTOUCHED per D-25 + Concern 11; CLAUDE.md is a Claude-only doc, not user-facing site copy)
 - .planning/: 0 already (good)
+
+CLAUDE.md Bagel verification (verified at planning time): `grep -c Bagel CLAUDE.md` → 0 currently. Task 3's CLAUDE.md edit is a defensive no-op — the file is already clean of Bagel references; the grep is a safety check that nothing changed before this plan executes.
 </interfaces>
 </context>
 
@@ -190,17 +197,17 @@ Preserve the indentation (the current file uses 2 spaces for property indentatio
 **Anti-pattern to avoid:** Do NOT add a second `name: 'Caveat Brush'` entry to `astro.config.mjs`'s `fonts: []` array. That would emit duplicate `@font-face` rules and is visible in network audits.
   </action>
   <verify>
-    <automated>npm run build 2>&1 | tail -40 && grep -c "Bagel" astro.config.mjs src/styles/colors_and_type.css src/layouts/BaseLayout.astro && grep -c "font-wordmark-loaded" src/layouts/BaseLayout.astro && grep "var(--font-display-loaded)" src/styles/colors_and_type.css</automated>
+    <automated>npm run build 2>&1 | tail -40 && (grep -c "Bagel" astro.config.mjs src/styles/colors_and_type.css src/layouts/BaseLayout.astro || true) && (grep -c "font-wordmark-loaded" src/layouts/BaseLayout.astro || true) && grep "var(--font-display-loaded)" src/styles/colors_and_type.css</automated>
   </verify>
   <acceptance_criteria>
-    - `grep -c "Bagel" astro.config.mjs` → 0
-    - `grep -c "Bagel" src/styles/colors_and_type.css` → 0
-    - `grep -c "Bagel" src/layouts/BaseLayout.astro` → 0
-    - `grep -c 'font-wordmark-loaded' src/layouts/BaseLayout.astro` → 0
-    - `grep -c 'font-display-loaded' src/layouts/BaseLayout.astro` → 1 (the `<Font cssVariable="--font-display-loaded" preload />` line MUST remain)
+    - `! grep -q 'Bagel' astro.config.mjs` exits 0 (zero Bagel matches in astro.config.mjs)
+    - `! grep -q 'Bagel' src/styles/colors_and_type.css` exits 0
+    - `! grep -q 'Bagel' src/layouts/BaseLayout.astro` exits 0
+    - `! grep -q 'font-wordmark-loaded' src/layouts/BaseLayout.astro` exits 0
+    - `grep -c 'font-display-loaded' src/layouts/BaseLayout.astro` returns 1 (the `<Font cssVariable="--font-display-loaded" preload />` line MUST remain)
     - `grep "var(--font-display-loaded)" src/styles/colors_and_type.css` returns exactly one match on the `--font-wordmark` line
     - `npm run build` exits with code 0 (no missing-font errors, no 404 on preload)
-    - After build, `find dist/client/_astro -name "*.css" -exec grep -l "Bagel" {} \;` returns no results (no Bagel @font-face emitted in production CSS)
+    - After build: `find dist/client/_astro -name "*.css" -exec grep -l "Bagel" {} \;` returns no results (no Bagel @font-face emitted in production CSS)
   </acceptance_criteria>
   <done>
     `astro.config.mjs` has 3 Fonts API entries (Caveat Brush, Nunito, Caveat), no Bagel Fat One; `colors_and_type.css` `--font-wordmark` cascade reads `var(--font-display-loaded), "Caveat Brush", cursive`; `BaseLayout.astro` has 3 `<Font>` preload tags (display, body, hand), wordmark preload removed; production build succeeds and emits no Bagel Fat One CSS.
@@ -215,6 +222,7 @@ Preserve the indentation (the current file uses 2 spaces for property indentatio
     - src/components/design-skill/Footer.jsx (lines 19 + 27 — the only two NoPa strings)
     - src/content/site/config.yaml (lines 2, 6, 8 — the three NoPa strings; line 7 og_title does NOT have NoPa, leave it alone)
     - .planning/phases/03-page-composition-pop-ups/03-RESEARCH.md §Pitfall 7 (the "do not use blanket sed" warning)
+    - .planning/phases/03-page-composition-pop-ups/03-REVIEWS.md (Concern 11: CLAUDE.md is OUT OF SCOPE for NoPa edits — it is a Claude-only doc, planning prose, not user-facing site copy)
   </read_first>
   <behavior>
     - Each enumerated user-facing string flips `NoPa` → `NOPA`. Counts: 2 in Hero.jsx, 1 in About.jsx, 2 in Footer.jsx, 3 in site/config.yaml.
@@ -258,78 +266,89 @@ Replace each `NoPa` with `NOPA` in the three lines that contain it (`tagline`, `
 - Any file under `.planning/` (audit trail; D-25 explicit exclusion)
 - Any file under `.claude/skills/studio-bluemli-design/` (canonical brand reference; D-25 + Phase 1 D-04 lock)
 - Code comments anywhere in `src/` (D-25 explicit exclusion — none of the 4 target files have NoPa in comments anyway, confirmed by manual inspection)
-- `CLAUDE.md` planning prose (handled separately in Task 4, and per D-25 the planning prose itself stays)
+- `CLAUDE.md` planning prose (D-25 explicit exclusion + Concern 11 reconciliation — CLAUDE.md is a Claude-only documentation file, not user-facing site copy; the 2 existing NoPa occurrences in CLAUDE.md stay as-is)
 - Commit messages (will be handled at commit time; the commit message text is owned by the executor and uses NOPA naturally)
 
 Pitfall 7 from RESEARCH.md: do NOT run `sed -i 's/NoPa/NOPA/g' src/**` or `grep -r NoPa | xargs sed ...`. The 8 edits above are exhaustive for D-25's scope.
   </action>
   <verify>
-    <automated>grep -c 'NoPa' src/components/design-skill/Hero.jsx src/components/design-skill/About.jsx src/components/design-skill/Footer.jsx src/content/site/config.yaml && grep -c 'NOPA' src/components/design-skill/Hero.jsx src/components/design-skill/About.jsx src/components/design-skill/Footer.jsx src/content/site/config.yaml && grep -rc 'NoPa' .planning/ .claude/skills/studio-bluemli-design/</automated>
+    <automated>(grep -c 'NoPa' src/components/design-skill/Hero.jsx src/components/design-skill/About.jsx src/components/design-skill/Footer.jsx src/content/site/config.yaml || true) && grep -c 'NOPA' src/components/design-skill/Hero.jsx src/components/design-skill/About.jsx src/components/design-skill/Footer.jsx src/content/site/config.yaml && (grep -rc 'NoPa' .planning/ .claude/skills/studio-bluemli-design/ || true)</automated>
   </verify>
   <acceptance_criteria>
-    - `grep -c 'NoPa' src/components/design-skill/Hero.jsx` → 0
-    - `grep -c 'NoPa' src/components/design-skill/About.jsx` → 0
-    - `grep -c 'NoPa' src/components/design-skill/Footer.jsx` → 0
-    - `grep -c 'NoPa' src/content/site/config.yaml` → 0
-    - `grep -c 'NOPA' src/components/design-skill/Hero.jsx` → ≥2 (the eyebrow and sub-tagline strings)
-    - `grep -c 'NOPA' src/components/design-skill/About.jsx` → ≥1 (the body paragraph)
-    - `grep -c 'NOPA' src/components/design-skill/Footer.jsx` → ≥2 (the two location strings)
-    - `grep -c 'NOPA' src/content/site/config.yaml` → ≥3 (tagline, footer_text, og_description)
-    - `grep -rc 'NoPa' .planning/` returns 0 changed files (the audit trail is unchanged from before this task)
-    - `grep -rc 'NoPa' .claude/skills/studio-bluemli-design/` returns 0 changed files
-    - `npm run build` (run at end of plan via Task 3) exits with code 0 and does not surface flower/petal/floral/bloom/blossom (Phase 1 CI grep) — the casing fix introduces none of these
+    - `! grep -q 'NoPa' src/components/design-skill/Hero.jsx` exits 0
+    - `! grep -q 'NoPa' src/components/design-skill/About.jsx` exits 0
+    - `! grep -q 'NoPa' src/components/design-skill/Footer.jsx` exits 0
+    - `! grep -q 'NoPa' src/content/site/config.yaml` exits 0
+    - `grep -c 'NOPA' src/components/design-skill/Hero.jsx` returns ≥2 (the eyebrow and sub-tagline strings)
+    - `grep -c 'NOPA' src/components/design-skill/About.jsx` returns ≥1 (the body paragraph)
+    - `grep -c 'NOPA' src/components/design-skill/Footer.jsx` returns ≥2 (the two location strings)
+    - `grep -c 'NOPA' src/content/site/config.yaml` returns ≥3 (tagline, footer_text, og_description)
+    - `.planning/` is unchanged: `git diff --stat .planning/ | grep -c '\.md'` returns 0 from this task's edits (audit trail untouched)
+    - `.claude/skills/studio-bluemli-design/` is unchanged: `git diff --stat .claude/skills/studio-bluemli-design/ | wc -l` returns 0 from this task's edits
+    - `CLAUDE.md` NoPa count is unchanged from baseline (currently 2 — D-25 + Concern 11 explicit preservation): `grep -c 'NoPa' CLAUDE.md` returns 2
+    - `npm run build` (run at end of plan via Task 4) exits with code 0 and does not surface flower/petal/floral/bloom/blossom (Phase 1 CI grep) — the casing fix introduces none of these
   </acceptance_criteria>
   <done>
-    All 8 NoPa occurrences in the 4 enumerated source files are flipped to NOPA. `.planning/` and `.claude/skills/` are untouched. Phase 1 CI brand-check grep still passes on these files.
+    All 8 NoPa occurrences in the 4 enumerated source files are flipped to NOPA. `.planning/`, `.claude/skills/`, and `CLAUDE.md` are untouched for NoPa. Phase 1 CI brand-check grep still passes on these files.
   </done>
 </task>
 
 <task type="auto" tdd="false">
-  <name>Task 3: Drop Bagel Fat One references from CLAUDE.md (D-24 follow-up + cleanliness)</name>
+  <name>Task 3: Defensive Bagel Fat One check on CLAUDE.md + drop the package.json dep (D-24 follow-up)</name>
   <read_first>
-    - CLAUDE.md (the project instructions file at repo root — look at the technology-stack section, the "Supporting Libraries" + "What NOT to Use" tables, and any Confidence Notes / Sources rows that mention `Bagel Fat One`)
+    - CLAUDE.md (the project instructions file at repo root — verify there are zero `Bagel` references; planning-time check confirmed `grep -c Bagel CLAUDE.md` → 0 currently)
+    - package.json (the dependencies block — confirm `@fontsource/bagel-fat-one` entry exists)
     - .planning/phases/03-page-composition-pop-ups/03-CONTEXT.md §D-24 (the planner's-discretion note: "delete or comment-out — Claude picks; deletion is preferable for cleanliness")
+    - .planning/phases/03-page-composition-pop-ups/03-REVIEWS.md (Concern 11: CLAUDE.md NoPa references stay; only Bagel references would need removal — but per planning-time grep, none exist)
   </read_first>
   <behavior>
-    - CLAUDE.md no longer references Bagel Fat One as part of the wordmark stack.
+    - CLAUDE.md is verified to have zero Bagel Fat One references (defensive check; the file currently has zero, so this task is a no-op for CLAUDE.md unless the executor finds Bagel references — in which case the editor MUST delete those rows or rewrite those sentences exactly per the original D-24 guidance).
     - The factual statements about Astro Fonts API + `@fontsource-variable/nunito` fallback are preserved (those are general stack guidance, unrelated to the wordmark swap).
-    - The `package.json` `@fontsource/bagel-fat-one` dependency entry is also dropped (it is no longer consumed after Task 1 removes the Fonts API entry; leaving it inflates `node_modules` and node-module-typing churn).
+    - The `package.json` `@fontsource/bagel-fat-one` dependency entry IS dropped (it is no longer consumed after Task 1 removes the Fonts API entry; leaving it inflates `node_modules` and node-module-typing churn).
+    - `package-lock.json` is regenerated by Task 4's `npm install` step.
   </behavior>
   <action>
-**Edit 1 — `CLAUDE.md`:** Open the file and search for `Bagel Fat One` (case-sensitive). Each match should be evaluated:
+**Edit 1 — `CLAUDE.md` (defensive check):** Run `grep -c "Bagel" CLAUDE.md`. Expected: 0 (planning-time verification confirmed this).
 
-1. If the match is inside a row of the "Supporting Libraries" table or any prose that lists Bagel Fat One as the wordmark font choice → delete the row or rewrite the sentence to remove the Bagel-Fat-One-specific reference. The wordmark is now Caveat Brush; if the prose says "wordmark uses Bagel Fat One", change it to "wordmark uses Caveat Brush (aliased via `--font-wordmark` to the already-loaded `--font-display-loaded` face)".
+If grep returns 0: this edit is complete; no file change needed. CLAUDE.md is already clean of Bagel references.
+
+If grep returns >0 (unexpected — file changed between planning and execution): for each match, evaluate:
+1. If the match is inside a row of a "Supporting Libraries" table or any prose that lists Bagel Fat One as the wordmark font choice → delete the row or rewrite the sentence to remove the Bagel-Fat-One-specific reference. The wordmark is now Caveat Brush; if the prose says "wordmark uses Bagel Fat One", change it to "wordmark uses Caveat Brush (aliased via `--font-wordmark` to the already-loaded `--font-display-loaded` face)".
 2. If the match is inside a "Confidence Notes" or "Sources" row referencing `@fontsource/bagel-fat-one` package version research, simply delete that row — it is no longer relevant to the project.
 3. Do NOT touch general Astro Fonts API guidance, the `@fontsource-variable/nunito` fallback note, or any other font-related row that doesn't name Bagel Fat One.
 
-After the edits, `grep -c "Bagel" CLAUDE.md` MUST return 0.
+**Critical scope discipline (Concern 11):** Do NOT touch any `NoPa` references in CLAUDE.md during this task. CLAUDE.md is excluded from the NoPa scope per D-25. This task is exclusively about Bagel Fat One.
+
+After the edits (or no-op confirmation), `! grep -q "Bagel" CLAUDE.md` MUST succeed.
 
 **Edit 2 — `package.json`:** Open the file. In the `"dependencies"` block, delete the line `"@fontsource/bagel-fat-one": "^5.2.7",` (currently line 24 in the file). Preserve the trailing comma rules of JSON: the line above (`"@astrojs/react": "^5.0.4",`) keeps its trailing comma; the line below (`"@fontsource/caveat": "^5.2.8",`) keeps its trailing comma. No other dependency entries change in this task.
 
-Do NOT run `npm install` as part of this task — the lockfile reconciliation happens automatically on the next `npm run build` invocation (Task 4 below). If a `package-lock.json` exists, it will be regenerated; do not pre-emptively delete it.
+Do NOT run `npm install` as part of this task — the lockfile reconciliation happens automatically via Task 4 below. If a `package-lock.json` exists, it will be regenerated by Task 4; do not pre-emptively delete it.
   </action>
   <verify>
-    <automated>grep -c "Bagel" CLAUDE.md && grep -c '@fontsource/bagel-fat-one' package.json</automated>
+    <automated>(grep -c "Bagel" CLAUDE.md || true) && (grep -c '@fontsource/bagel-fat-one' package.json || true) && grep -c 'NoPa' CLAUDE.md</automated>
   </verify>
   <acceptance_criteria>
-    - `grep -c "Bagel" CLAUDE.md` → 0
-    - `grep -c '@fontsource/bagel-fat-one' package.json` → 0
+    - `! grep -q "Bagel" CLAUDE.md` exits 0 (zero Bagel matches in CLAUDE.md after this task)
+    - `! grep -q '@fontsource/bagel-fat-one' package.json` exits 0
     - JSON validity preserved: `node -e "JSON.parse(require('fs').readFileSync('package.json', 'utf8'))"` exits 0
-    - `grep -c '@fontsource/caveat-brush' package.json` → 1 (Caveat Brush dep retained, this is the wordmark's new family)
-    - `grep -c '@fontsource/caveat' package.json` → 2 (one match each for caveat and caveat-brush — sanity check that we did not accidentally remove the Caveat dep)
+    - `grep -c '@fontsource/caveat-brush' package.json` returns 1 (Caveat Brush dep retained, this is the wordmark's new family)
+    - `grep -c '@fontsource/caveat' package.json` returns 2 (one match each for caveat and caveat-brush — sanity check that we did not accidentally remove the Caveat dep)
+    - `grep -c 'NoPa' CLAUDE.md` returns 2 (D-25 + Concern 11 explicit preservation — CLAUDE.md NoPa references untouched)
   </acceptance_criteria>
   <done>
-    CLAUDE.md no longer mentions Bagel Fat One; `package.json` no longer lists the Bagel Fat One Fontsource dependency. No other CLAUDE.md or package.json content changed.
+    CLAUDE.md is verified clean of Bagel Fat One references; `package.json` no longer lists the Bagel Fat One Fontsource dependency; CLAUDE.md NoPa references preserved per D-25 + Concern 11. No other CLAUDE.md or package.json content changed.
   </done>
 </task>
 
 <task type="auto" tdd="false">
-  <name>Task 4: Final build + CI brand-grep gate</name>
+  <name>Task 4: Final install + build + CI brand-grep gate</name>
   <read_first>
     - scripts/check-brand-rules.sh (Phase 1 CI brand-rule gate — verifies no bg-white, no #fff except #fff8, no gradient, no backdrop-filter, no border:1px, no flower vocab)
     - package.json `scripts.ci:brand-check` entry to confirm the gate name
   </read_first>
   <behavior>
+    - `npm install` regenerates `package-lock.json` after the Bagel Fat One dep was removed.
     - `npm run build` succeeds end-to-end with the wordmark and casing changes in place.
     - `npm run ci:brand-check` exits 0 — the casing fix and the wordmark-cascade change introduce no brand-rule violations.
     - The Phase 1 lowercase-filenames gate (`npm run ci:lowercase-check`) also exits 0 — this plan adds no files under `src/pages/`.
@@ -348,24 +367,24 @@ Run the install + build + brand-check sequence in order. Treat any non-zero exit
 
 5. Confirm no Bagel Fat One CSS leaked: `find dist/client/_astro -name '*.css' -exec grep -l 'Bagel' {} \;` MUST return no output.
 
-6. Confirm no `--font-wordmark-loaded` reference in the built HTML: `grep -rc 'font-wordmark-loaded' dist/client/` should return 0 (or report only the absence of the string across all .html and .css output files).
+6. Confirm no `--font-wordmark-loaded` reference in the built HTML: `grep -rl 'font-wordmark-loaded' dist/client/ 2>/dev/null` should return no output (no .html or .css file references the removed CSS variable).
 
 If any step fails, do not proceed to a commit — investigate the root cause (most likely a stale `node_modules/.cache` or an Astro Fonts API entry left dangling — re-read Task 1 Edit 2 carefully).
   </action>
   <verify>
-    <automated>npm install --silent && npm run build 2>&1 | tail -30 && npm run ci:brand-check && npm run ci:lowercase-check && find dist/client/_astro -name '*.css' -exec grep -l 'Bagel' {} \; ; echo "GREP_BAGEL_EXIT=$?"</automated>
+    <automated>npm install --silent && npm run build 2>&1 | tail -30 && npm run ci:brand-check && npm run ci:lowercase-check && find dist/client/_astro -name '*.css' -exec grep -l 'Bagel' {} \; 2>/dev/null ; echo "GREP_BAGEL_EXIT=$?"</automated>
   </verify>
   <acceptance_criteria>
-    - `npm install` exits 0
+    - `npm install` exits 0 and updates `package-lock.json`
     - `npm run build` exits 0 with no errors mentioning `--font-wordmark-loaded`, `Bagel Fat One`, or `Font` preload 404s
     - `npm run ci:brand-check` exits 0
     - `npm run ci:lowercase-check` exits 0
     - `find dist/client/_astro -name '*.css' -exec grep -l 'Bagel' {} \;` produces no output (no .css file contains `Bagel`)
-    - `grep -rc 'font-wordmark-loaded' dist/client/ | grep -v ':0$'` produces no output (no built file references the removed CSS variable)
-    - `grep -rc 'NoPa' src/components/design-skill/ src/content/site/` produces no non-zero match
+    - `! grep -rq 'font-wordmark-loaded' dist/client/` exits 0 (no built file references the removed CSS variable)
+    - `! grep -rq 'NoPa' src/components/design-skill/ src/content/site/` exits 0 (NoPa fully gone from user-facing source files)
   </acceptance_criteria>
   <done>
-    Full build pipeline green. The site builds without Bagel Fat One, with the new wordmark cascade live, with all NOPA casing applied, with all Phase 1 brand-rule + lowercase-filename CI gates still passing.
+    Full build pipeline green. The site builds without Bagel Fat One, with the new wordmark cascade live, with all NOPA casing applied, with all Phase 1 brand-rule + lowercase-filename CI gates still passing. `package-lock.json` regenerated by `npm install`.
   </done>
 </task>
 
@@ -391,29 +410,37 @@ If any step fails, do not proceed to a commit — investigate the root cause (mo
 End-to-end verification for the plan (run after all 4 tasks complete):
 
 ```bash
-# 1) All 4 source files free of NoPa:
-grep -c 'NoPa' src/components/design-skill/Hero.jsx src/components/design-skill/About.jsx src/components/design-skill/Footer.jsx src/content/site/config.yaml CLAUDE.md
-# Expect: every line ends with :0
+# 1) The 4 user-facing source files free of NoPa (CLAUDE.md NOT in this list per Concern 11):
+! grep -q 'NoPa' src/components/design-skill/Hero.jsx
+! grep -q 'NoPa' src/components/design-skill/About.jsx
+! grep -q 'NoPa' src/components/design-skill/Footer.jsx
+! grep -q 'NoPa' src/content/site/config.yaml
 
-# 2) All NOPA targets present:
+# 2) CLAUDE.md NoPa preserved per D-25 + Concern 11:
+[ "$(grep -c 'NoPa' CLAUDE.md)" -eq 2 ] && echo "CLAUDE.md NoPa preserved (planning prose untouched)"
+
+# 3) All NOPA targets present:
 grep -c 'NOPA' src/components/design-skill/Hero.jsx
 # Expect: ≥ 2
 grep -c 'NOPA' src/content/site/config.yaml
 # Expect: ≥ 3
 
-# 3) No Bagel Fat One anywhere in source or built output:
-grep -rc 'Bagel' astro.config.mjs src/styles/colors_and_type.css src/layouts/BaseLayout.astro CLAUDE.md package.json
-# Expect: every line ends with :0
+# 4) No Bagel Fat One anywhere in source or built output:
+! grep -q 'Bagel' astro.config.mjs
+! grep -q 'Bagel' src/styles/colors_and_type.css
+! grep -q 'Bagel' src/layouts/BaseLayout.astro
+! grep -q 'Bagel' CLAUDE.md
+! grep -q 'Bagel' package.json
 
-# 4) Wordmark cascade points to display-loaded:
+# 5) Wordmark cascade points to display-loaded:
 grep 'var(--font-display-loaded)' src/styles/colors_and_type.css
 # Expect: one line matching the --font-wordmark cascade
 
-# 5) BaseLayout has 3 Font preload tags (display, body, hand) — wordmark dropped:
+# 6) BaseLayout has 3 Font preload tags (display, body, hand) — wordmark dropped:
 grep -c '<Font cssVariable' src/layouts/BaseLayout.astro
 # Expect: 3
 
-# 6) Build succeeds and CI gates pass:
+# 7) Build succeeds and CI gates pass:
 npm install --silent && npm run build && npm run ci:brand-check && npm run ci:lowercase-check
 # Expect: all four commands exit 0
 ```
@@ -425,11 +452,12 @@ Visual sanity (founder-style, optional; not part of automated gate):
 
 <success_criteria>
 Plan 01 is complete when:
-1. `grep -c 'NoPa'` returns 0 on every one of the 4 enumerated source files plus CLAUDE.md.
-2. `grep -c 'Bagel'` returns 0 on `astro.config.mjs`, `src/styles/colors_and_type.css`, `src/layouts/BaseLayout.astro`, `CLAUDE.md`, and `package.json`.
+1. NoPa is gone from the 4 user-facing source files (`Hero.jsx`, `About.jsx`, `Footer.jsx`, `site/config.yaml`). CLAUDE.md NoPa preserved (D-25 + Concern 11 — planning prose, not user-facing).
+2. Bagel Fat One is gone from `astro.config.mjs`, `src/styles/colors_and_type.css`, `src/layouts/BaseLayout.astro`, `CLAUDE.md`, and `package.json`.
 3. `npm run build` exits 0 with no missing-preload errors and no Bagel Fat One @font-face in `dist/client/_astro/`.
 4. `npm run ci:brand-check` and `npm run ci:lowercase-check` both exit 0.
 5. `src/styles/colors_and_type.css` `--font-wordmark` declaration reads `var(--font-display-loaded), "Caveat Brush", cursive`.
+6. `package-lock.json` regenerated by `npm install` (Task 4).
 </success_criteria>
 
 <output>
@@ -438,4 +466,5 @@ After completion, create `.planning/phases/03-page-composition-pop-ups/03-01-SUM
 - A grep-count snapshot before/after (the 8 NoPa flips + the 0 Bagel matches).
 - Confirmation that Plan 02's `<SEO />` and Plan 04's About rewrite will inherit the NOPA-corrected copy.
 - A one-line note that Pitfall 6 from RESEARCH.md was honored (the `--font-display-loaded` preload tag stayed in BaseLayout.astro).
+- A one-line note that CLAUDE.md NoPa references were preserved per D-25 + reviews-mode Concern 11 (CLAUDE.md is planning prose, not user-facing site copy).
 </output>
