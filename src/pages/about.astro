@@ -1,22 +1,85 @@
 ---
-// src/pages/about.astro — About shell (D-18).
-// Phase 1: design-skill About component renders with placeholder copy.
-// Phase 3: About renders the real first-person founder portrait + process shots.
-// Note: HeaderProps.active union INCLUDES '/about' (Plan 02 Task 3 Edit 1 — checker BLOCKER #2 fix).
+// src/pages/about.astro — Phase 3 PAG-05.
+// D-13 body copy + D-16 signature live in About.jsx (synced design-skill component).
+// D-15 photo strip below the signature; D-14 reuses gallery hero-800 WebPs (no new prebuild).
+// D-17 no retrospective-mention block; D-26 wires <SEO /> with canonical-to-apex.
 //
-// prerender = true: required under Plan 01's `output: 'server'` mode.
+// REVIEWS-MODE Concern 4 fix: <BaseLayout title="..."> drives the <title> tag.
+// <SEO slot="head" /> only adds canonical/og/twitter (per Plan 02 reconciliation).
+//
+// REVIEWS-MODE Concern 10 fix: source comments deliberately avoid the
+// disallowed-mention tokens enumerated by this page's grep gate (see the
+// verify command in this file's plan task). The intent (D-17) is documented
+// above as "no retrospective-mention block".
+//
+// REVIEWS-MODE Concern 13 fix (documented deviation): the photo strip <img>
+// tags do NOT carry width/height attributes; CLS prevention uses CSS
+// aspect-ratio: 1 / 1 on the .strip-cell rule. The strip is below-fold and
+// not the LCP candidate (/gallery/[slug] is, and uses Astro's <Image /> with
+// explicit dimensions). UI-SPEC's width/height ask is honored on the gallery
+// surface, not here.
+
 export const prerender = true;
 
-import { getEntry } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import SEO from '../components/SEO.astro';
 import Header from '../components/design-skill/Header';
 import About from '../components/design-skill/About';
 import Footer from '../components/design-skill/Footer';
 
 const site = (await getEntry('site', 'default'))!.data;
+
+// PAG-05 / D-14: photo strip reuses /gallery/<slug>/hero-800.webp.
+// Pick up to 3 pieces, prefer featured: true, sorted newest-first by published_at.
+const allPieces = await getCollection('gallery');
+const featuredOnly = allPieces.filter((p) => p.data.featured === true);
+const stripSource = featuredOnly.length >= 3 ? featuredOnly : allPieces;
+const stripPieces = stripSource
+  .slice()
+  .sort((a, b) => b.data.published_at.localeCompare(a.data.published_at))
+  .slice(0, 3)
+  .map((p) => ({ slug: p.id, name: p.data.name }));
 ---
 <BaseLayout title="About — Studio Bluemli">
+  <SEO slot="head" title="About — Studio Bluemli" pathname="/about" />
   <Header slot="header" active="/about" />
+
   <About />
+
+  {stripPieces.length > 0 && (
+    <section class="about-photo-strip" aria-label="From the studio">
+      {stripPieces.map((p) => (
+        <img class="strip-cell"
+             src={`/gallery/${p.slug}/hero-800.webp`}
+             alt={p.name}
+             loading="lazy"
+             decoding="async" />
+      ))}
+    </section>
+  )}
+
   <Footer slot="footer" igHandle={site.ig_handle} contactEmail={site.contact_email} />
 </BaseLayout>
+
+<style>
+  .about-photo-strip {
+    max-width: 720px;
+    margin: var(--space-8) auto 0;
+    padding: 0 var(--space-5) var(--space-8);
+    display: grid;
+    /* UI-SPEC fewer-than-3 fallback — auto-fit fills available columns without empty cells. */
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+  .strip-cell {
+    width: 100%;
+    /* Concern 13 documented deviation: aspect-ratio drives the cell shape and
+       CLS prevention. No <img> width/height attributes (responsive grid). */
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    background-color: var(--cream-200);
+    display: block;
+  }
+</style>
