@@ -2,6 +2,7 @@
 import { defineConfig, passthroughImageService, fontProviders } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import react from '@astrojs/react';
+import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   site: 'https://studiobluemli.com',
@@ -16,7 +17,7 @@ export default defineConfig({
 
   adapter: cloudflare({}),
 
-  integrations: [react()],
+  integrations: [react(), sitemap()],
 
   image: {
     // Sharp doesn't run in workerd (Pitfall #9). Use passthrough — no transforms

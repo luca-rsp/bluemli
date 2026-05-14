@@ -11,6 +11,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/design-skill/Header';
 import GalleryGrid from '../components/design-skill/GalleryGrid';
 import Footer from '../components/design-skill/Footer';
+import SEO from '../components/SEO.astro';
 
 const site = (await getEntry('site', 'default'))!.data;
 const allPieces = await getCollection('gallery');
@@ -27,6 +28,7 @@ const pieces = allPieces
   }));
 ---
 <BaseLayout title="Gallery — Studio Bluemli">
+  <SEO slot="head" title="Gallery — Studio Bluemli" pathname="/gallery" />
   <Header slot="header" active="/gallery" />
   {pieces.length === 0 ? (
     <p style={{
