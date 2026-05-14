@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sketch 005 — /about photo strip · Studio Bluemli</title>
+  <link rel="stylesheet" href="../themes/default.css" />
+  <style>
+    /* ============================================================
+       Sketch chrome
+       ============================================================ */
+    .sketch-tabs {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--cream-50);
+      border-bottom: 1px solid var(--color-border-soft);
+      padding: var(--space-3) var(--space-4);
+      display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap;
+      font-family: var(--font-body); font-size: var(--fs-xs);
+    }
+    .sketch-tabs .label {
+      font-weight: 800; letter-spacing: var(--ls-caps); text-transform: uppercase;
+      color: var(--color-fg-muted); margin-right: var(--space-3);
+    }
+    .sketch-tabs button {
+      background: transparent; border: 0; cursor: pointer;
+      padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill);
+      font-family: var(--font-body); font-size: var(--fs-xs); font-weight: 700;
+      color: var(--color-fg);
+    }
+    .sketch-tabs button.is-active {
+      background: var(--coral-500); color: var(--color-fg-on-coral);
+    }
+    .sketch-tabs button:hover:not(.is-active) { background: var(--cream-200); }
+    .sketch-tabs .star { color: var(--mustard-500); margin-right: 2px; }
+    .variant { display: none; }
+    .variant.is-active { display: block; }
+
+    /* Faux header */
+    .faux-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: var(--space-5) var(--space-6);
+      max-width: 1080px; margin: 0 auto;
+    }
+    .faux-header .mark { font-family: var(--font-display); font-size: var(--fs-xl); color: var(--coral-500); }
+    .faux-header nav a {
+      font-family: var(--font-body); font-size: var(--fs-xs); font-weight: 700;
+      text-transform: uppercase; letter-spacing: var(--ls-caps);
+      color: var(--color-fg-strong); text-decoration: none;
+      margin-left: var(--space-5);
+    }
+    .faux-header nav a.is-current { color: var(--coral-500); }
+
+    /* Shared About copy block (existing About.jsx, with D-13/16/25 baked in) */
+    .about-text {
+      max-width: 720px; margin: 0 auto; padding: var(--space-8) var(--space-5) 0;
+      text-align: center;
+    }
+    .about-text .eyebrow {
+      font-family: var(--font-body); font-size: var(--fs-xxs); font-weight: 800;
+      letter-spacing: var(--ls-caps); text-transform: uppercase;
+      color: var(--olive-500); margin-bottom: var(--space-3);
+    }
+    .about-text h2 {
+      font-family: var(--font-display);
+      font-size: 56px; line-height: 1.05;
+      color: var(--coral-500);
+      margin: 0 0 var(--space-5);
+    }
+    .about-text p {
+      font-family: var(--font-body); font-size: var(--fs-md);
+      line-height: var(--lh-loose); color: var(--color-fg);
+      max-width: 560px; margin: 0 auto var(--space-5);
+      text-wrap: pretty;
+    }
+    .about-text .signature {
+      display: inline-flex; gap: var(--space-2); align-items: center;
+      color: var(--ink-600); font-family: var(--font-hand); font-size: var(--fs-lg);
+    }
+    .about-text .signature .heart { color: var(--coral-500); }
+
+    /* ============================================================
+       VARIANT A — Three photos edge-to-edge, full bleed
+       ============================================================ */
+    .v-a .photo-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      margin-top: var(--space-8);
+      width: 100%;
+    }
+    .v-a .photo-strip .cell {
+      aspect-ratio: 4 / 5;
+      background-color: var(--cream-200);
+      background-size: cover;
+      background-position: center;
+    }
+    .v-a .photo-strip .cell:nth-child(1) { background-image: url("../assets/cluster-coral.jpg"); }
+    .v-a .photo-strip .cell:nth-child(2) { background-image: url("../assets/cluster-cobalt.jpg"); }
+    .v-a .photo-strip .cell:nth-child(3) { background-image: url("../assets/cluster-coral.jpg"); background-position: 60% 40%; }
+
+    /* ============================================================
+       VARIANT B — Three contained photos in 720px column with gap
+       ============================================================ */
+    .v-b .photo-strip {
+      max-width: 720px; margin: var(--space-8) auto 0;
+      padding: 0 var(--space-5) var(--space-8);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4);
+    }
+    .v-b .photo-strip .cell {
+      aspect-ratio: 1 / 1;
+      background-color: var(--cream-200);
+      background-size: cover;
+      background-position: center;
+      border-radius: var(--radius-sm);
+    }
+    .v-b .photo-strip .cell:nth-child(1) { background-image: url("../assets/cluster-coral.jpg"); }
+    .v-b .photo-strip .cell:nth-child(2) { background-image: url("../assets/cluster-cobalt.jpg"); }
+    .v-b .photo-strip .cell:nth-child(3) { background-image: url("../assets/cluster-coral.jpg"); background-position: 60% 40%; }
+
+    /* ============================================================
+       VARIANT C — Single hero photo, centered, contained
+       ============================================================ */
+    .v-c .photo-strip {
+      max-width: 720px; margin: var(--space-8) auto 0;
+      padding: 0 var(--space-5) var(--space-8);
+    }
+    .v-c .photo-strip .cell {
+      aspect-ratio: 16 / 9;
+      background-color: var(--cream-200);
+      background-image: url("../assets/cluster-cobalt.jpg");
+      background-size: cover;
+      background-position: center 40%;
+      border-radius: var(--radius-sm);
+    }
+
+    /* Footnote */
+    .note {
+      max-width: 720px; margin: var(--space-6) auto 0;
+      padding: 0 var(--space-5) var(--space-7);
+      font-family: var(--font-body); font-size: var(--fs-xs);
+      color: var(--color-fg-muted); text-align: center;
+      line-height: var(--lh-loose);
+    }
+  </style>
+</head>
+<body>
+
+<nav class="sketch-tabs" role="tablist" aria-label="Sketch variants">
+  <span class="label">Sketch 005 · /about photo strip</span>
+  <button class="is-active" data-variant="a">Variant A: 3 edge-to-edge full bleed</button>
+  <button data-variant="b"><span class="star">★</span>Variant B: 3 contained with gap</button>
+  <button data-variant="c">Variant C: single hero photo</button>
+</nav>
+
+<!-- ============================================================
+     VARIANT A
+     ============================================================ -->
+<section class="variant v-a is-active">
+  <header class="faux-header">
+    <div class="mark">Studio Bluemli</div>
+    <nav><a href="#">gallery</a><a href="#">pop-ups</a><a href="#" class="is-current">about</a><a href="#">say hi</a></nav>
+  </header>
+
+  <div class="about-text">
+    <div class="eyebrow">About the studio</div>
+    <h2>hand-assembled, one&nbsp;pair at&nbsp;a&nbsp;time</h2>
+    <p>I make earrings out of a little studio in NOPA, San Francisco — sourced glass, seed beads, vintage findings. Every pair is one-of-a-kind, and once it's gone, it's gone.</p>
+    <p>I bring the work to local pop-ups and markets a few times a season. If you want to see something in person (or ask about a piece), the easiest thing is to DM me on Instagram.</p>
+    <div class="signature">made with love from NOPA <span class="heart">♡</span></div>
+  </div>
+
+  <div class="photo-strip" role="img" aria-label="Three product photos">
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+  </div>
+
+  <p class="note">
+    Variant A: three product photos edge-to-edge, no gap, no rounded corners, full viewport width. Acts as a closing visual flourish — like the colophon band at the end of an editorial spread. Photo aspect 4:5 matches the gallery card aspect.
+  </p>
+</section>
+
+<!-- ============================================================
+     VARIANT B
+     ============================================================ -->
+<section class="variant v-b">
+  <header class="faux-header">
+    <div class="mark">Studio Bluemli</div>
+    <nav><a href="#">gallery</a><a href="#">pop-ups</a><a href="#" class="is-current">about</a><a href="#">say hi</a></nav>
+  </header>
+
+  <div class="about-text">
+    <div class="eyebrow">About the studio</div>
+    <h2>hand-assembled, one&nbsp;pair at&nbsp;a&nbsp;time</h2>
+    <p>I make earrings out of a little studio in NOPA, San Francisco — sourced glass, seed beads, vintage findings. Every pair is one-of-a-kind, and once it's gone, it's gone.</p>
+    <p>I bring the work to local pop-ups and markets a few times a season. If you want to see something in person (or ask about a piece), the easiest thing is to DM me on Instagram.</p>
+    <div class="signature">made with love from NOPA <span class="heart">♡</span></div>
+  </div>
+
+  <div class="photo-strip" role="img" aria-label="Three product photos">
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+  </div>
+
+  <p class="note">
+    Variant B: three square (1:1) photos in the same 720px column as the text, with a small gap between and `--radius-sm` corners. Reads as part of the page flow rather than a closing band. More intimate than A, less dramatic.
+  </p>
+</section>
+
+<!-- ============================================================
+     VARIANT C
+     ============================================================ -->
+<section class="variant v-c">
+  <header class="faux-header">
+    <div class="mark">Studio Bluemli</div>
+    <nav><a href="#">gallery</a><a href="#">pop-ups</a><a href="#" class="is-current">about</a><a href="#">say hi</a></nav>
+  </header>
+
+  <div class="about-text">
+    <div class="eyebrow">About the studio</div>
+    <h2>hand-assembled, one&nbsp;pair at&nbsp;a&nbsp;time</h2>
+    <p>I make earrings out of a little studio in NOPA, San Francisco — sourced glass, seed beads, vintage findings. Every pair is one-of-a-kind, and once it's gone, it's gone.</p>
+    <p>I bring the work to local pop-ups and markets a few times a season. If you want to see something in person (or ask about a piece), the easiest thing is to DM me on Instagram.</p>
+    <div class="signature">made with love from NOPA <span class="heart">♡</span></div>
+  </div>
+
+  <div class="photo-strip" role="img" aria-label="Single product photo">
+    <div class="cell"></div>
+  </div>
+
+  <p class="note">
+    Variant C: a single 16:9 hero photo inside the 720px column, `--radius-sm` corners. Quietest of the three — lets one piece breathe as a closing image. Lowest D-14 risk: only needs one good photo, no composition juggling.
+  </p>
+</section>
+
+<script>
+  const tabs = document.querySelectorAll('.sketch-tabs button[data-variant]');
+  const variants = { a: 'v-a', b: 'v-b', c: 'v-c' };
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const v = btn.dataset.variant;
+      tabs.forEach(b => b.classList.toggle('is-active', b === btn));
+      Object.entries(variants).forEach(([key, cls]) => {
+        document.querySelector('.' + cls).classList.toggle('is-active', key === v);
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+</script>
+</body>
+</html>
