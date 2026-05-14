@@ -47,7 +47,7 @@ function About() {
       </p>
 
       <div style={{ display: 'inline-flex', gap: 8, alignItems: 'center', color: 'var(--ink-600)', fontFamily: 'var(--font-hand)', fontSize: 22 }}>
-        made with love from NOPA <Mark.Heart color="var(--coral-500)" />
+        made with love from NOPA <Mark.Heart color="var(--coral-500)" filled={false} />
       </div>
     </section>
   );
