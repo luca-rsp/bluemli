@@ -16,6 +16,7 @@
 |---|------|----------------|--------|------|
 | 001 | gallery-detail-composition | What does the editorial detail page feel like — where do photo, name, and CTA sit? | A — centered narrow plate (640px) | detail, layout, type |
 | 002 | gallery-grid-sold-treatment | How does "Sold" read in the grid so it feels editorial, not broken? | A — status bottom-right (sold = lavender-500, one-of-one = olive-500, 700-weight) | grid, badge, sold-state |
+| 003 | landing-popup-callout | How quiet does the "NEXT POP-UP" callout need to be so it doesn't compete with the 88px Hero headline? | C — Caveat eyebrow (tilted, 28px) + Nunito when-line with coral venue + muted time | landing, popup, callout |
 
 ## Key Decisions
 
