@@ -1,34 +1,38 @@
 ---
-// src/pages/index.astro — Landing page shell (D-18, FND-05).
-// Phase 1 demo-loaded: Hero + PopupStrip + GalleryGrid (3 cards).
-// Phase 2 swaps gallery cards to real Content Collections; PopupStrip still uses
-// the Phase 1 inline null stub until Phase 3 (PAG-01, PAG-03) ships getCollection('popups').
+// src/pages/index.astro — Landing page (Phase 3 PAG-01).
+// D-01 Hero stays; D-02 mini-callout (the full popup strip lives on /popups only); D-03 omit section on zero upcoming;
+// D-04 featured count = 3 (newest by published_at, falls back to "newest 3 regardless of featured");
+// D-05 mini-callout has no embedded CTA (the conditional "see all" link is the only affordance);
+// D-26 wires <SEO /> with canonical-to-apex + og:image.
 //
-// prerender = true is required because Plan 01 chose `output: 'server'`
-// (modern @astrojs/cloudflare adapter pattern — Worker entrypoint emitted at
-// dist/server/entry.mjs). In server mode, pages are SSR-only by default; this
-// directive opts each Phase 1 page back into static prerendering so dist/client/
-// receives the .html file. The Worker entrypoint persists for Phase 4's
-// /api/contact route. See Astro routing-reference "Enable Prerendering in
-// Server Mode" and Plan 01-01 SUMMARY's "Output Mode Verification" section.
+// REVIEWS-MODE Concern 4: BaseLayout (with the title prop from site.og_title) emits the actual <title> tag;
+// <SEO /> emits og:title from the same source via its title prop (or falls back to site.og_title
+// internally if omitted). We pass title to BOTH so <title> and og:title match.
+
 export const prerender = true;
 
 import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import SEO from '../components/SEO.astro';
 import Header from '../components/design-skill/Header';
 import Hero from '../components/design-skill/Hero';
-import PopupStrip from '../components/design-skill/PopupStrip';
 import GalleryGrid from '../components/design-skill/GalleryGrid';
 import Footer from '../components/design-skill/Footer';
-
-// TODO: Phase 3 (PAG-01, PAG-03) replaces this null stub with getCollection('popups').
-const nextPopup = null;
+import PopupCallout from '../components/PopupCallout.astro';
+import { splitPopups } from '../lib/popups';
 
 const site = (await getEntry('site', 'default'))!.data;
 
+// PAG-03 / PAG-01: TZ-aware split. Build-time only (LA cutoff).
+const allPopups = await getCollection('popups');
+const { soonest, hasUpcoming, hasMultiple } = splitPopups(allPopups);
+
+// PAG-01 / D-04: featured-3 with fallback.
+// Primary: pieces where featured === true, sorted by published_at desc, take 3.
+// Fallback: if zero featured pieces, take the newest 3 from the full set.
 const allPieces = await getCollection('gallery');
-// Sort newest-first (D-14), take 3 most-recent for the landing-page preview strip.
-const featuredPieces = allPieces
+const featuredOnly = allPieces.filter((p) => p.data.featured === true);
+const featuredSorted = (featuredOnly.length > 0 ? featuredOnly : allPieces)
   .sort((a, b) => b.data.published_at.localeCompare(a.data.published_at))
   .slice(0, 3)
   .map((entry) => ({
@@ -39,10 +43,13 @@ const featuredPieces = allPieces
     photo:  `/gallery/${entry.id}/hero-400.webp`,
   }));
 ---
-<BaseLayout title="Studio Bluemli — handmade beaded earrings, NoPa San Francisco">
+<BaseLayout title={site.og_title}>
+  <SEO slot="head" title={site.og_title} pathname="/" />
   <Header slot="header" active="/" />
   <Hero />
-  {nextPopup && <PopupStrip popup={nextPopup} />}
-  <GalleryGrid pieces={featuredPieces} />
+  {hasUpcoming && soonest && (
+    <PopupCallout popup={soonest} hasMultiple={hasMultiple} />
+  )}
+  <GalleryGrid pieces={featuredSorted} />
   <Footer slot="footer" igHandle={site.ig_handle} contactEmail={site.contact_email} />
 </BaseLayout>
