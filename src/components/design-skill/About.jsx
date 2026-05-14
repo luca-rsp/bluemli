@@ -20,7 +20,7 @@ function About() {
         color: 'var(--indigo-500)', maxWidth: 560, margin: '0 auto 28px',
         textWrap: 'pretty',
       }}>
-        I make earrings out of a little studio in NoPa, San Francisco — sourced glass, seed beads, vintage findings.
+        I make earrings out of a little studio in NOPA, San Francisco — sourced glass, seed beads, vintage findings.
         Every pair is one-of-a-kind, and once it's gone, it's gone.
       </p>
 
