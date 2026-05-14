@@ -1,23 +1,113 @@
 ---
-// src/pages/say-hi.astro — Say Hi shell (D-18).
-// Phase 1: AppointmentForm is a static shell — <form action="/api/contact"> 404s in Phase 1.
-// Phase 4: /api/contact Worker handler accepts the POST (Turnstile + Resend).
+// src/pages/say-hi.astro — Phase 3 PAG-06 / D-18, D-21, D-22, D-23.
+// v1 scope cut: contact form dropped entirely. /say-hi is an IG-DM-link page
+// with a mailto fallback. AppointmentForm.jsx stays in src/components/design-skill/
+// (D-21) but is no longer imported here. wrangler.jsonc's run_worker_first:["/api/*"]
+// and astro.config.mjs's output:'server' are preserved untouched (D-22).
 //
-// prerender = true: required under Plan 01's `output: 'server'` mode. The page
-// itself is static; the FORM POSTs to /api/contact which the Worker (entry.mjs)
-// handles dynamically — they're independent routes.
+// REVIEWS-MODE Concern 4 fix: <BaseLayout title="..."> drives the <title> tag;
+// <SEO slot="head" /> only adds canonical/og/twitter (per Plan 02 reconciliation).
+
 export const prerender = true;
 
 import { getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import SEO from '../components/SEO.astro';
 import Header from '../components/design-skill/Header';
-import AppointmentForm from '../components/design-skill/AppointmentForm';
 import Footer from '../components/design-skill/Footer';
 
 const site = (await getEntry('site', 'default'))!.data;
 ---
 <BaseLayout title="Say Hi — Studio Bluemli">
+  <SEO slot="head" title="Say Hi — Studio Bluemli" pathname="/say-hi" />
   <Header slot="header" active="/say-hi" />
-  <AppointmentForm />
+
+  <section class="say-hi-stage" aria-label="Say hi">
+    <h1 class="say-hi">say hi</h1>
+    <p class="sub">let's talk earrings</p>
+    <a class="ig-button" href={site.ig_dm_url}>
+      DM me on Instagram <span class="arrow" aria-hidden="true">&rarr;</span>
+    </a>
+    <p class="mailto">
+      or email <a href={`mailto:${site.contact_email}`}>{site.contact_email}</a>
+    </p>
+  </section>
+
   <Footer slot="footer" igHandle={site.ig_handle} contactEmail={site.contact_email} />
 </BaseLayout>
+
+<style>
+  /* UI-SPEC §/say-hi — centered narrow column, no eyebrow (headline leads directly). */
+  .say-hi-stage {
+    max-width: 720px;
+    min-height: 540px;
+    margin: 0 auto;
+    padding: var(--space-9) var(--space-5) var(--space-7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .say-hi {
+    font-family: var(--font-display);
+    /* clamp(56px, 9vw, 96px) per UI-SPEC */
+    font-size: clamp(56px, 9vw, 96px);
+    color: var(--coral-500);
+    line-height: 1;
+    margin: 0 0 var(--space-3);
+  }
+
+  .sub {
+    font-family: var(--font-hand);
+    font-size: var(--fs-xl);              /* 28px */
+    color: var(--color-fg-strong);
+    line-height: 1;
+    margin: 0 0 var(--space-7);
+  }
+
+  .ig-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: var(--coral-500);
+    color: var(--color-fg-on-coral);
+    text-decoration: none;
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-pill);
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: var(--fs-md);              /* 18px */
+    line-height: 1;
+    transition: background var(--dur-fast) var(--ease-soft);
+  }
+  .ig-button:hover { background: var(--coral-700); }
+  .ig-button:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 3px;
+  }
+  .ig-button .arrow {
+    display: inline-block;
+    transition: transform var(--dur-fast) var(--ease-soft);
+  }
+  .ig-button:hover .arrow { transform: translateX(3px); }
+
+  .mailto {
+    font-family: var(--font-body);
+    font-size: var(--fs-sm);
+    color: var(--color-fg-muted);
+    line-height: var(--lh-normal);
+    margin: var(--space-5) 0 0;
+  }
+  .mailto a {
+    color: var(--coral-500);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .mailto a:hover { color: var(--coral-700); }
+  .mailto a:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 4px;
+  }
+</style>
