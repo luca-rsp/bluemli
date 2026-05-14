@@ -45,30 +45,37 @@ export function resolveCanonicalBase(astroSite?: URL): string {
  *   - any other absolute-URL emission that benefits from working on previews
  *
  * Precedence:
- *   1. process.env.CF_PAGES_URL       (Cloudflare Pages preview/production)
- *   2. process.env.CF_WORKERS_URL     (Cloudflare Workers Builds preview hostname)
- *   3. process.env.PUBLIC_SITE_URL    (explicit operator override, Node side)
- *   4. import.meta.env.PUBLIC_SITE_URL (explicit operator override, Vite side)
- *   5. resolveCanonicalBase(astroSite) (apex fallback — same as canonical)
+ *   1. process.env.CF_PAGES_URL           (Cloudflare Pages preview/production — Node side)
+ *   2. import.meta.env.PUBLIC_CF_PAGES_URL (Cloudflare Pages preview — Vite-inlined PUBLIC_ alias)
+ *   3. process.env.CF_WORKERS_URL          (Cloudflare Workers Builds preview hostname — Node side)
+ *   4. import.meta.env.PUBLIC_CF_WORKERS_URL (Workers Builds preview — Vite-inlined PUBLIC_ alias)
+ *   5. process.env.PUBLIC_SITE_URL         (explicit operator override, Node side)
+ *   6. import.meta.env.PUBLIC_SITE_URL     (explicit operator override, Vite-inlined side)
+ *   7. resolveCanonicalBase(astroSite)     (apex fallback — same as canonical)
  *
  * BL-02 / GAP-03 fix: Vite only exposes `PUBLIC_`-prefixed env vars to
- * `import.meta.env`. CF_PAGES_URL and CF_WORKERS_URL live in `process.env`
- * during the Cloudflare build — same pattern isProduction() uses below.
- * PUBLIC_SITE_URL is read from both sides so an operator override works
- * regardless of which runtime surface they set it on.
+ * `import.meta.env` at prerender time. CF_PAGES_URL and CF_WORKERS_URL live
+ * in `process.env` during a Node.js build but are NOT propagated into the
+ * workerd prerender subprocess. Reading from both process.env (for actual
+ * Cloudflare build runtime) and import.meta.env.PUBLIC_CF_WORKERS_URL (Vite-
+ * inlined for local smoke tests using the PUBLIC_ prefix convention) ensures
+ * the helper works in both contexts. The PUBLIC_ alias mirrors how isProduction()
+ * correctly uses PUBLIC_DEPLOY_ENV.
  *
  * Returns a URL WITHOUT trailing slash.
  */
 export function resolveAssetBase(astroSite?: URL): string {
-  // BL-02 / GAP-03 fix: Vite only exposes `PUBLIC_`-prefixed env vars to
-  // `import.meta.env`. CF_PAGES_URL and CF_WORKERS_URL live in `process.env`
-  // during the Cloudflare build (same pattern isProduction() uses below).
-  // PUBLIC_SITE_URL is read from both sides so an explicit operator override
-  // works regardless of which runtime surface they set it on.
+  // BL-02 / GAP-03 fix: read from both process.env (for Cloudflare's actual
+  // Node.js build runtime) and import.meta.env PUBLIC_-prefixed aliases (for
+  // Vite-inlined values available during workerd prerender). The PUBLIC_ aliases
+  // (PUBLIC_CF_PAGES_URL, PUBLIC_CF_WORKERS_URL) mirror the pattern isProduction()
+  // uses with PUBLIC_DEPLOY_ENV, ensuring values are baked in at Vite build time.
   const procEnv = typeof process !== 'undefined' && process.env ? process.env : {};
   const fromEnv =
     procEnv.CF_PAGES_URL ??
+    import.meta.env.PUBLIC_CF_PAGES_URL ??
     procEnv.CF_WORKERS_URL ??
+    import.meta.env.PUBLIC_CF_WORKERS_URL ??
     procEnv.PUBLIC_SITE_URL ??
     import.meta.env.PUBLIC_SITE_URL;
   if (fromEnv) return String(fromEnv).replace(/\/$/, '');
