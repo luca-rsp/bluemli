@@ -149,7 +149,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundations & Brand System | 5/5 | Complete | 2026-05-13 |
-| 2. Content Schema & Gallery | 0/5 | Not started | - |
+| 2. Content Schema & Gallery | 5/5 | Complete | 2026-05-14 |
 | 3. Page Composition & Pop-ups | 0/TBD | Not started | - |
 | 4. Contact Form & Deliverability | 0/TBD | Not started | - |
 | 5. Analytics, Polish & Launch | 0/TBD | Not started | - |
