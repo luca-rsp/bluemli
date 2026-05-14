@@ -84,10 +84,10 @@ Plans:
 ### Phase 3: Page Composition & Pop-ups
 **Goal**: All five pages render their real content on preview — landing (hero + OPTIONAL mini-callout for the next pop-up, omitted on zero upcoming per D-03 + 3 featured pieces + footer), gallery (from Phase 2), popups (timezone-correct upcoming + past archive, auto-refreshing daily), about (written portrait + closing photo strip reusing gallery hero WebPs per D-14), say-hi (Instagram DM link + mailto fallback, no form per D-18) — with per-page SEO meta and a published sitemap.
 **Depends on**: Phase 2
-**Requirements**: PAG-01, PAG-02, PAG-03, PAG-04, PAG-05, PAG-06, PAG-07, PAG-08, PAG-09
+**Requirements**: PAG-01, PAG-02, PAG-03, PAG-05, PAG-06, PAG-07, PAG-08, PAG-09 (PAG-04 deferred to a later phase — see Wave 3 note on 03-05)
 **Success Criteria** (what must be TRUE):
   1. Landing page shows the hero, a mini-callout for the next-upcoming pop-up (per D-02; OMITTED entirely when no future pop-up exists per D-03 — no eyebrow, no copy, no empty-state line), 3 featured gallery pieces (per D-04), and the footer — all populated from content collections.
-  2. A pop-up dated for "today" in Pacific time appears in the Upcoming section all day on its date in San Francisco (does not flip to Past at UTC midnight); after its end date, the next deploy (or the daily 3 AM PT cron rebuild) moves it to the Past archive automatically.
+  2. A pop-up dated for "today" in Pacific time appears in the Upcoming section all day on its date in San Francisco (does not flip to Past at UTC midnight); after its end date, the next deploy moves it to the Past archive automatically. *(Daily auto-rebuild cron deferred — see 03-05 SUMMARY: integrated `wrangler.jsonc` approach proved structurally incompatible with `@astrojs/cloudflare@13.5`; until cron is added in a future phase the founder triggers a rebuild manually when a popup ends.)*
   3. The About page renders a first-person written portrait with hand-font headline and the "made with love from NOPA ♡" signature close (D-16), plus a closing photo strip of 1–3 gallery hero WebPs (per D-14 — dedicated process/craft shots deferred to v1.x; the no-founder-face rule stays intact since gallery photos don't show the founder), with no empty "press" or "as featured in" placeholders.
   4. Sharing the home, a gallery piece, and a pop-up URL in iMessage/Slack/IG DM each produce a correct unfurl preview (title, description, og:image), and `https://studiobluemli.com/sitemap-index.xml` + `/robots.txt` return valid content with the sitemap reference.
   5. Every page's `<link rel="canonical">` points to the apex `studiobluemli.com` (not `www.`, not a preview hostname).
@@ -100,14 +100,14 @@ Plans:
 - [x] 03-02-seo-sitemap-robots-PLAN.md — Shared <SEO /> + @astrojs/sitemap + env-aware /robots.txt endpoint + default og:image PNG + REQUIREMENTS.md edits (PAG-02, PAG-06, PAG-07, PAG-08; D-19, D-23, D-26-D-29)
 
 **Wave 3** *(blocked on Wave 2 completion; three plans run in parallel)*
-- [ ] 03-03-popups-and-landing-PLAN.md — TZ-aware splitPopups() helper + landing mini-callout + /popups page with ALSO COMING UP/PAST/empty-state + PopupStrip CTA delete (PAG-01, PAG-03; D-02-D-11)
-- [ ] 03-04-about-and-say-hi-PLAN.md — /about copy rewrite + photo strip + signature + /say-hi IG-link page (form dropped) (PAG-05, PAG-06, PAG-09; D-13-D-18, D-21-D-23)
-- [ ] 03-05-cron-rebuild-PLAN.md — Cloudflare Workers scheduled handler + wrangler.jsonc triggers.crons + deploy-hook secret setup (PAG-04; D-12)
+- [x] 03-03-popups-and-landing-PLAN.md — TZ-aware splitPopups() helper + landing mini-callout + /popups page with ALSO COMING UP/PAST/empty-state + PopupStrip CTA delete (PAG-01, PAG-03; D-02-D-11)
+- [x] 03-04-about-and-say-hi-PLAN.md — /about copy rewrite + photo strip + signature + /say-hi IG-link page (form dropped) (PAG-05, PAG-06, PAG-09; D-13-D-18, D-21-D-23)
+- [~] 03-05-cron-rebuild-PLAN.md — DEFERRED (spike FAIL): integrated `wrangler.jsonc` + `src/scheduled.ts` approach proved structurally incompatible with `@astrojs/cloudflare@13.5`, which writes `dist/server/wrangler.json` and silently strips user-level `main` + `triggers.crons` at deploy time. Per user decision, cron rebuild is deferred to a future phase; founder triggers manual rebuild when a popup ends. Full root-cause analysis in `03-05-SUMMARY.md`. (PAG-04 deferred; D-12)
 **UI hint**: yes
 
 **Key risks / pitfalls:**
 - Timezone math is subtle (Pitfall #7) — store `date` + `start_time` + `tz: "America/Los_Angeles"`; compute cutoff in studio timezone using a real TZ library (`Temporal` polyfill or `@date-fns/tz`), never naive `new Date()` UTC math.
-- Daily auto-rebuild via Cloudflare cron — LOCKED (founder confirmed). Plan must wire the cron trigger to a build webhook so the upcoming/past split refreshes without founder action.
+- Daily auto-rebuild via Cloudflare cron — DEFERRED. Phase 3 spike (03-05) confirmed the integrated approach is structurally incompatible with `@astrojs/cloudflare@13.5` (adapter overwrites `wrangler.jsonc`). Documented fallback path: a SEPARATE cron-only Worker (`studio-bluemli-cron`) with its own `wrangler-cron.jsonc` + minimal `src/cron-only.ts`. Until that ships in a future phase, the founder triggers rebuilds manually when a popup ends.
 - Process/craft shots availability — SOFTENED in Phase 3 planning (D-14): the founder doesn't currently have dedicated bench/hands/beads photos; the About page reuses 1–3 existing gallery hero WebPs as the closing visual flourish. Real bench shots can be swapped in later via a small follow-up commit by the founder via the GitHub web UI when the photos exist. The no-founder-face lock is preserved.
 - Missing per-page `og:image` (Pitfall #14) — verify the shared `SEO.astro` component on every page during planning; emit absolute URLs (not relative) for og/twitter image meta.
 - Empty placeholders — if the founder has no real press, the About page ships without a press section; never show "as featured in" as an empty slot (Pitfall: anti-feature from FEATURES.md).

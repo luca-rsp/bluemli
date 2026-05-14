@@ -43,7 +43,7 @@
 - [ ] **PAG-01**: Landing page (`/`) renders a hero (logo, tagline, founder voice line), a "next pop-up" callout pulling from the same `popups` collection (with a graceful empty state: "no pop-ups on the calendar right now — DM me on Instagram"), 3-6 featured gallery pieces (`featured: true`), and a footer
 - [ ] **PAG-02**: Gallery page (`/gallery`) renders the grid from CNT-07
 - [ ] **PAG-03**: Pop-ups page (`/popups`) renders upcoming events prominently (date, location, time, description) and a compact past-event archive below; the upcoming/past split is computed at build time in `America/Los_Angeles`
-- [ ] **PAG-04**: A Cloudflare cron trigger rebuilds the site daily at ~3:00 AM Pacific so past pop-ups fall off the upcoming list without founder action
+- [ ] **PAG-04** *(deferred from Phase 3)*: A Cloudflare cron trigger rebuilds the site daily at ~3:00 AM Pacific so past pop-ups fall off the upcoming list without founder action. Phase 3's integrated approach (cron on the main `studio-bluemli` Worker via `wrangler.jsonc` edits) was confirmed structurally incompatible with `@astrojs/cloudflare@13.5` (adapter overwrites `wrangler.jsonc` at build time). Fallback: separate cron-only Worker. To be implemented in a later phase.
 - [ ] **PAG-05**: About page (`/about`) renders a first-person written portrait of the founder (no founder photo by founder decision); 1–3 process/craft shots (hands, beads, bench — work in progress, no founder face); generous whitespace; hand-font headline; signature close
 - [ ] **PAG-06**: Say Hi page (`/say-hi`) renders a visible Instagram DM link (`https://ig.me/m/studiobluemli`) plus a `mailto:hi@studiobluemli.com` fallback link. The v1 contact form is dropped (D-18, D-19); a `<form>` is NOT shipped on this page in v1.
 - [ ] **PAG-07**: A shared `SEO.astro` component emits per-page `<title>`, `<meta name="description">`, `og:title`, `og:description`, `og:image`, `og:url`, `twitter:card="summary_large_image"`, and a canonical `<link rel="canonical">` pointing to the apex URL
@@ -129,7 +129,7 @@
 | PAG-01 | Phase 3: Page Composition & Pop-ups | SC1 (landing renders hero + next-popup callout + featured pieces + footer, with empty-state line when no future popup) |
 | PAG-02 | Phase 3: Page Composition & Pop-ups | SC1 (gallery from Phase 2 wires into the live nav and is reachable from the production routes) |
 | PAG-03 | Phase 3: Page Composition & Pop-ups | SC2 (timezone-correct upcoming/past split in America/Los_Angeles) |
-| PAG-04 | Phase 3: Page Composition & Pop-ups | SC2 (daily 3 AM PT cron rebuild moves expired popups to Past without founder action) |
+| PAG-04 | Deferred to a later phase | Phase 3 spike (03-05) verified integrated `wrangler.jsonc` cron approach is structurally incompatible with `@astrojs/cloudflare@13.5`. Fallback (separate cron-only Worker) is documented but not implemented; founder rebuilds manually until then. |
 | PAG-05 | Phase 3: Page Composition & Pop-ups | SC3 (About renders written portrait + hand-font headline + signature close + 1–3 process/craft shots, no founder face, no empty press placeholders) |
 | PAG-06 | Phase 3: Page Composition & Pop-ups | SC1 (say-hi page renders form shell + IG + mailto fallbacks) — form delivery proven in Phase 4 |
 | PAG-07 | Phase 3: Page Composition & Pop-ups | SC4 (iMessage/Slack/IG unfurls show correct title/description/og:image), SC5 (canonical points to apex) |
