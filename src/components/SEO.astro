@@ -34,7 +34,11 @@ const { title, description, ogImage, pathname = '/' } = Astro.props;
 const site = (await getEntry('site', 'default'))!.data;
 const canonicalBase = resolveCanonicalBase(Astro.site);
 
-const canonical    = `${canonicalBase}${pathname === '/' ? '' : pathname}`;
+// BL-01 / GAP-02 fix: keep the trailing slash on root so canonical, og:url,
+// sitemap-0.xml's <loc>, and the URL users actually visit all agree on
+// `https://studiobluemli.com/` (NOT bare-apex). Google treats apex and
+// apex/ as canonically distinct on the root path.
+const canonical    = `${canonicalBase}${pathname === '/' ? '/' : pathname}`;
 const ogImageAbs   = ogImage ?? `${canonicalBase}/og-default.png`;
 const finalDesc    = description ?? site.og_description;
 const finalOgTitle = title ?? site.og_title;
