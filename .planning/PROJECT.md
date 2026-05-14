@@ -27,14 +27,13 @@ The product photography and brand voice come through cleanly on a cream-paper pa
 
 <!-- Current scope. Building toward these. -->
 
-- [ ] Landing page with hero (logo, tagline, founder photo or product hero), 3–6 featured gallery pieces, a callout for the next pop-up, and footer links _(Phase 1 shipped the demo-loaded shell; Phase 2 wired the featured-piece grid to real content; Phase 3 composes the remaining hero/pop-up/footer copy.)_
-- [ ] Pop-ups page showing upcoming events prominently (date, location, time) and a smaller archive of past events _(Phase 3 — PT-aware past/upcoming split with daily cron rebuild.)_
-- [ ] About page (founder story, studio, process — content TBD with founder) _(Phase 3.)_
-- [ ] Say Hi page with a contact form that emails the founder, plus visible Instagram link _(Phase 1 shipped the shell; Phase 4 wires `/api/contact` with Turnstile + KV rate limit + Resend.)_
+- [ ] Landing page with hero, 3 featured gallery pieces, an OPTIONAL "next pop-up" mini-callout (omitted entirely when no future popup exists per Phase 3 D-03), and footer links _(Phase 1 shipped the demo-loaded shell; Phase 2 wired the featured-piece grid to real content; Phase 3 composes the remaining hero/pop-up/footer copy.)_
+- [ ] Pop-ups page showing upcoming events prominently (date, location, time) and a smaller text-only archive of past events _(Phase 3 — PT-aware past/upcoming split with daily cron rebuild.)_
+- [ ] About page (founder story, studio, process — content drafted by Claude in brand voice, founder edits via GitHub web UI later; closing photo strip reuses 1–3 existing gallery hero WebPs per Phase 3 D-14 — dedicated process/craft shots deferred to v1.x) _(Phase 3.)_
+- [ ] Say Hi page with visible Instagram DM link + mailto fallback _(Phase 3 D-18: contact form dropped from v1; revisit as v1.x phase if IG channel stops scaling.)_
 - [ ] Pop-up events managed via a YAML file (or per-event markdown) in `/content`, with past/upcoming split derived from date _(Phase 3.)_
 - [ ] Live at apex `studiobluemli.com` (and `www.` redirects to apex) via the existing Cloudflare account _(Phase 5 — DNS cutover.)_
 - [ ] Umami Cloud analytics installed (free tier, single script tag, no consent banner needed) _(Phase 5.)_
-- [ ] Contact form is spam-protected (Cloudflare Turnstile) and delivers reliably to the founder's inbox _(Phase 4.)_
 
 ### Out of Scope
 
@@ -50,6 +49,7 @@ The product photography and brand voice come through cleanly on a cream-paper pa
 - Pressed-flower decorative images sprinkled across components — brand non-negotiable
 - Multi-language — English only for v1
 - Multiple authors / contributor flow — founder is the only editor
+- Contact form on `/say-hi` (`<form>` + `/api/contact` Worker + Turnstile + KV rate limit + Resend + SPF/DKIM/DMARC DNS coexistence with MS365) — dropped from v1 entirely per Phase 3 D-18/D-19. `/say-hi` ships as an IG-DM-link page + mailto fallback. Can return as a v1.x phase. `wrangler.jsonc`'s `run_worker_first: ["/api/*"]` and `astro.config.mjs`'s `output: 'server'` are preserved (D-22) so the rewiring cost is minimal.
 
 ## Context
 
