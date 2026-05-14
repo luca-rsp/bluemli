@@ -91,7 +91,18 @@ Plans:
   3. The About page renders a first-person written portrait with hand-font headline and signature close, plus 1–3 process/craft shots (hands, beads, bench — no founder face), with no empty "press" or "as featured in" placeholders.
   4. Sharing the home, a gallery piece, and a pop-up URL in iMessage/Slack/IG DM each produce a correct unfurl preview (title, description, og:image), and `https://studiobluemli.com/sitemap-index.xml` + `/robots.txt` return valid content with the sitemap reference.
   5. Every page's `<link rel="canonical">` points to the apex `studiobluemli.com` (not `www.`, not a preview hostname).
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+**Wave 1**
+- [ ] 03-01-brand-system-tweaks-PLAN.md — Wordmark font swap (Bagel Fat One -> Caveat Brush) and project-wide NoPa -> NOPA casing fix on user-facing copy (D-24, D-25)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 03-02-seo-sitemap-robots-PLAN.md — Shared <SEO /> + @astrojs/sitemap + env-aware /robots.txt endpoint + default og:image PNG + REQUIREMENTS.md edits (PAG-02, PAG-06, PAG-07, PAG-08; D-19, D-23, D-26-D-29)
+
+**Wave 3** *(blocked on Wave 2 completion; three plans run in parallel)*
+- [ ] 03-03-popups-and-landing-PLAN.md — TZ-aware splitPopups() helper + landing mini-callout + /popups page with ALSO COMING UP/PAST/empty-state + PopupStrip CTA delete (PAG-01, PAG-03; D-02-D-11)
+- [ ] 03-04-about-and-say-hi-PLAN.md — /about copy rewrite + photo strip + signature + /say-hi IG-link page (form dropped) (PAG-05, PAG-06, PAG-09; D-13-D-18, D-21-D-23)
+- [ ] 03-05-cron-rebuild-PLAN.md — Cloudflare Workers scheduled handler + wrangler.jsonc triggers.crons + deploy-hook secret setup (PAG-04; D-12)
 **UI hint**: yes
 
 **Key risks / pitfalls:**
