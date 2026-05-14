@@ -45,24 +45,10 @@
 - [ ] **PAG-03**: Pop-ups page (`/popups`) renders upcoming events prominently (date, location, time, description) and a compact past-event archive below; the upcoming/past split is computed at build time in `America/Los_Angeles`
 - [ ] **PAG-04**: A Cloudflare cron trigger rebuilds the site daily at ~3:00 AM Pacific so past pop-ups fall off the upcoming list without founder action
 - [ ] **PAG-05**: About page (`/about`) renders a first-person written portrait of the founder (no founder photo by founder decision); 1–3 process/craft shots (hands, beads, bench — work in progress, no founder face); generous whitespace; hand-font headline; signature close
-- [ ] **PAG-06**: Say Hi page (`/say-hi`) renders the contact form (CON-* requirements below) plus visible Instagram and `mailto:` fallback links
+- [ ] **PAG-06**: Say Hi page (`/say-hi`) renders a visible Instagram DM link (`https://ig.me/m/studiobluemli`) plus a `mailto:hi@studiobluemli.com` fallback link. The v1 contact form is dropped (D-18, D-19); a `<form>` is NOT shipped on this page in v1.
 - [ ] **PAG-07**: A shared `SEO.astro` component emits per-page `<title>`, `<meta name="description">`, `og:title`, `og:description`, `og:image`, `og:url`, `twitter:card="summary_large_image"`, and a canonical `<link rel="canonical">` pointing to the apex URL
 - [ ] **PAG-08**: `@astrojs/sitemap` is installed and generates `sitemap-index.xml`; a `robots.txt` references the sitemap
 - [ ] **PAG-09**: All product images have alt text; alt text never uses the words `flower|petal|floral|bloom|blossom`
-
-### Contact Form & Deliverability
-
-- [ ] **CON-01**: A POST endpoint at `src/pages/api/contact.ts` with `export const prerender = false` accepts the contact-form submission; routed to the Worker via `run_worker_first: ["/api/*"]`
-- [ ] **CON-02**: The endpoint's first action is server-side Turnstile siteverify (POST `https://challenges.cloudflare.com/turnstile/v0/siteverify` with `{secret, response, remoteip}`); rejects with 400 if `success !== true`
-- [ ] **CON-03**: A CSS-hidden honeypot field (`name="website"`) silently rejects submissions where the field is non-empty
-- [ ] **CON-04**: A KV-backed per-IP rate limit (1 submission/min, 10/hour) returns 429 when exceeded; KV namespace bound in `wrangler.toml`
-- [ ] **CON-05**: On valid submission, Resend sends the email with `from: "Studio Bluemli <hi@studiobluemli.com>"`, `to: hi@studiobluemli.com` (lands in the existing MS365 mailbox), `reply_to: <visitor's email>`, plain-text body containing the visitor's name + message + IP/UA in headers for debugging
-- [ ] **CON-06**: The `studiobluemli.com` domain is verified in Resend with SPF, DKIM, and DMARC records configured alongside (not replacing) the existing MS365 DNS records — SPF combines includes (`include:spf.protection.outlook.com include:_spf.resend.com`), DKIM uses Resend's own selectors (won't collide), and DMARC alignment validates for both senders
-- [ ] **CON-07**: Pre-launch deliverability smoke test: submit the form and verify the email lands in **both** Gmail and iCloud inboxes (not spam folders); test repeats from at least one preview-deploy URL
-- [ ] **CON-08**: All secrets (`RESEND_API_KEY`, `TURNSTILE_SECRET`, KV namespace ID) are set via `wrangler secret put`; never committed to `wrangler.toml`, `.env`, or any tracked file; `.dev.vars` is gitignored
-- [ ] **CON-09**: Separate Resend API keys for preview deploys vs production (so spam tests on previews don't burn production quota)
-- [ ] **CON-10**: The form uses progressive enhancement — a real `<form method="POST" action="/api/contact">` works without JavaScript; visible `mailto:hi@studiobluemli.com` and Instagram DM links serve as JS-disabled fallbacks
-- [ ] **CON-11**: On submission, the page shows an inline confirmation (no redirect away); on error, shows an inline error message with the same fallback links
 
 ### Launch & Operations
 
@@ -79,6 +65,8 @@
 
 ## Out of Scope (v1)
 
+- **Contact form (`<form>` element + `/api/contact` Worker route + Turnstile + KV rate limit + Resend integration + SPF/DKIM/DMARC DNS coexistence with MS365)** — dropped from v1 entirely per Phase 3 D-18/D-19. `/say-hi` ships as an IG-DM-link page + mailto fallback. The 11 CON-NN requirements (CON-01..CON-11) that previously specified this surface are moved here. Can return as a v1.x phase if the IG-only contact channel ever stops scaling. `wrangler.jsonc`'s `run_worker_first: ["/api/*"]` reservation and `astro.config.mjs`'s `output: 'server'` are preserved (D-22) so the rewiring cost is minimal.
+- **CON-01..CON-11 (formerly in §Contact Form & Deliverability)** — POST `/api/contact` endpoint, Turnstile siteverify, honeypot field, KV per-IP rate limit, Resend send-from-domain, MS365 DNS coexistence, deliverability smoke test, secrets via `wrangler secret put`, separate preview/production Resend keys, progressive enhancement, inline confirmation/error. All deferred along with the contact form per the above bullet.
 - **E-commerce / checkout / cart / payments** — sales happen at pop-ups and via Instagram DM. Adding commerce infrastructure is a different product; revisit only if pop-ups + DM stops scaling.
 - **User accounts / login** — nothing on the site is gated.
 - **CMS admin UI (Decap, Sveltia, Pages CMS, TinaCMS)** — markdown-in-repo is the v1 workflow. The file structure is *deliberately* CMS-compatible so this can be added later with zero data migration if the founder gets tired of GitHub web UI editing.
@@ -147,17 +135,6 @@
 | PAG-07 | Phase 3: Page Composition & Pop-ups | SC4 (iMessage/Slack/IG unfurls show correct title/description/og:image), SC5 (canonical points to apex) |
 | PAG-08 | Phase 3: Page Composition & Pop-ups | SC4 (sitemap-index.xml + robots.txt return valid content with sitemap reference) |
 | PAG-09 | Phase 3: Page Composition & Pop-ups | SC3 (alt text on every product image, never uses flower/petal/floral/bloom/blossom — also enforced by Phase 1 SC3 CI) |
-| CON-01 | Phase 4: Contact Form & Deliverability | SC1 (real submission lands in hi@studiobluemli.com inbox via /api/contact) |
-| CON-02 | Phase 4: Contact Form & Deliverability | SC2 (curl with forged Turnstile token returns 400 before any email is sent) |
-| CON-03 | Phase 4: Contact Form & Deliverability | SC2 (filled honeypot field silently dropped, no email) |
-| CON-04 | Phase 4: Contact Form & Deliverability | SC2 (11th submission from same IP within an hour returns 429) |
-| CON-05 | Phase 4: Contact Form & Deliverability | SC1 (From "Studio Bluemli <hi@studiobluemli.com>", Reply-To = visitor; Reply in Outlook addresses the visitor) |
-| CON-06 | Phase 4: Contact Form & Deliverability | SC3 (Resend dashboard green on SPF/DKIM/DMARC AND MS365 outbound still works) |
-| CON-07 | Phase 4: Contact Form & Deliverability | SC1 (real submission from preview lands in inbox, not spam) — Gmail + iCloud check verified in same phase |
-| CON-08 | Phase 4: Contact Form & Deliverability | SC5 (wrangler secret list shows the secrets; git history has no matches) |
-| CON-09 | Phase 4: Contact Form & Deliverability | SC5 (separate Resend API keys for preview vs production) |
-| CON-10 | Phase 4: Contact Form & Deliverability | SC4 (with JS disabled, form still works as real POST + visible mailto + IG fallbacks) |
-| CON-11 | Phase 4: Contact Form & Deliverability | SC1 (inline confirmation on success, no redirect away) — same Worker handles error rendering |
 | LCH-01 | Phase 5: Analytics, Polish & Launch | SC2 (Umami script in BaseLayout with data-website-id + data-domains restricting to studiobluemli.com) |
 | LCH-02 | Phase 5: Analytics, Polish & Launch | SC2 (domain registered in Umami; Realtime view shows visit within 5 minutes of cutover) |
 | LCH-03 | Phase 5: Analytics, Polish & Launch | SC2 (custom events fire for gallery card click, IG inquire click, contact-form submit) |

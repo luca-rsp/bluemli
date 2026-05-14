@@ -82,13 +82,13 @@ Plans:
 - Founder workflow risk (Pitfall #23) — the GitHub web UI flow must be documented with screenshots and the founder should dry-run adding a piece before this phase is signed off.
 
 ### Phase 3: Page Composition & Pop-ups
-**Goal**: All five pages render their real content on preview — landing (hero + next-pop-up callout + featured pieces), gallery (from Phase 2), popups (timezone-correct upcoming + past archive, auto-refreshing daily), about (written portrait + process shots), say-hi (form shell + IG + mailto fallbacks) — with per-page SEO meta and a published sitemap.
+**Goal**: All five pages render their real content on preview — landing (hero + OPTIONAL mini-callout for the next pop-up, omitted on zero upcoming per D-03 + 3 featured pieces + footer), gallery (from Phase 2), popups (timezone-correct upcoming + past archive, auto-refreshing daily), about (written portrait + closing photo strip reusing gallery hero WebPs per D-14), say-hi (Instagram DM link + mailto fallback, no form per D-18) — with per-page SEO meta and a published sitemap.
 **Depends on**: Phase 2
 **Requirements**: PAG-01, PAG-02, PAG-03, PAG-04, PAG-05, PAG-06, PAG-07, PAG-08, PAG-09
 **Success Criteria** (what must be TRUE):
-  1. Landing page shows the hero, the next-upcoming pop-up callout (or the empty-state line "no pop-ups on the calendar right now — DM me on Instagram" when no future pop-up exists), 3–6 featured gallery pieces, and the footer — all populated from content collections.
+  1. Landing page shows the hero, a mini-callout for the next-upcoming pop-up (per D-02; OMITTED entirely when no future pop-up exists per D-03 — no eyebrow, no copy, no empty-state line), 3 featured gallery pieces (per D-04), and the footer — all populated from content collections.
   2. A pop-up dated for "today" in Pacific time appears in the Upcoming section all day on its date in San Francisco (does not flip to Past at UTC midnight); after its end date, the next deploy (or the daily 3 AM PT cron rebuild) moves it to the Past archive automatically.
-  3. The About page renders a first-person written portrait with hand-font headline and signature close, plus 1–3 process/craft shots (hands, beads, bench — no founder face), with no empty "press" or "as featured in" placeholders.
+  3. The About page renders a first-person written portrait with hand-font headline and the "made with love from NOPA ♡" signature close (D-16), plus a closing photo strip of 1–3 gallery hero WebPs (per D-14 — dedicated process/craft shots deferred to v1.x; the no-founder-face rule stays intact since gallery photos don't show the founder), with no empty "press" or "as featured in" placeholders.
   4. Sharing the home, a gallery piece, and a pop-up URL in iMessage/Slack/IG DM each produce a correct unfurl preview (title, description, og:image), and `https://studiobluemli.com/sitemap-index.xml` + `/robots.txt` return valid content with the sitemap reference.
   5. Every page's `<link rel="canonical">` points to the apex `studiobluemli.com` (not `www.`, not a preview hostname).
 **Plans**: 5 plans
@@ -108,9 +108,10 @@ Plans:
 **Key risks / pitfalls:**
 - Timezone math is subtle (Pitfall #7) — store `date` + `start_time` + `tz: "America/Los_Angeles"`; compute cutoff in studio timezone using a real TZ library (`Temporal` polyfill or `@date-fns/tz`), never naive `new Date()` UTC math.
 - Daily auto-rebuild via Cloudflare cron — LOCKED (founder confirmed). Plan must wire the cron trigger to a build webhook so the upcoming/past split refreshes without founder action.
-- Process/craft shots availability — LOCKED ("process / craft shots" decided for About); confirm during plan-phase whether the founder has already shot these or needs to shoot them before the phase can sign off.
+- Process/craft shots availability — SOFTENED in Phase 3 planning (D-14): the founder doesn't currently have dedicated bench/hands/beads photos; the About page reuses 1–3 existing gallery hero WebPs as the closing visual flourish. Real bench shots can be swapped in later via a small follow-up commit by the founder via the GitHub web UI when the photos exist. The no-founder-face lock is preserved.
 - Missing per-page `og:image` (Pitfall #14) — verify the shared `SEO.astro` component on every page during planning; emit absolute URLs (not relative) for og/twitter image meta.
 - Empty placeholders — if the founder has no real press, the About page ships without a press section; never show "as featured in" as an empty slot (Pitfall: anti-feature from FEATURES.md).
+- Contact form scope cut (Phase 3 D-18) — `/say-hi` ships in v1 as an IG-DM-link page + mailto fallback only. The Phase 4 (Contact Form & Deliverability) entry in this ROADMAP is removed via a separate `/gsd-phase` operation after Phase 3 completes (per D-20); Phase 5's `Depends on` is updated by that same operation. Phase 3 plans do not edit the Phase 4 ROADMAP entry directly.
 
 ### Phase 4: Contact Form & Deliverability
 **Goal**: A visitor can fill the Say Hi form on the live preview and the message reliably lands in `hi@studiobluemli.com` (MS365 inbox) — surviving Turnstile + honeypot + KV rate limit — and the founder can hit Reply in Outlook/Gmail to reach the visitor.
