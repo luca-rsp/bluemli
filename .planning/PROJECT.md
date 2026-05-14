@@ -32,8 +32,8 @@ The product photography and brand voice come through cleanly on a cream-paper pa
 - [ ] About page (founder story, studio, process — content drafted by Claude in brand voice, founder edits via GitHub web UI later; closing photo strip reuses 1–3 existing gallery hero WebPs per Phase 3 D-14 — dedicated process/craft shots deferred to v1.x) _(Phase 3.)_
 - [ ] Say Hi page with visible Instagram DM link + mailto fallback _(Phase 3 D-18: contact form dropped from v1; revisit as v1.x phase if IG channel stops scaling.)_
 - [ ] Pop-up events managed via a YAML file (or per-event markdown) in `/content`, with past/upcoming split derived from date _(Phase 3.)_
-- [ ] Live at apex `studiobluemli.com` (and `www.` redirects to apex) via the existing Cloudflare account _(Phase 5 — DNS cutover.)_
-- [ ] Umami Cloud analytics installed (free tier, single script tag, no consent banner needed) _(Phase 5.)_
+- [ ] Live at apex `studiobluemli.com` (and `www.` redirects to apex) via the existing Cloudflare account _(Phase 4 — DNS cutover.)_
+- [ ] Umami Cloud analytics installed (free tier, single script tag, no consent banner needed) _(Phase 4.)_
 
 ### Out of Scope
 
@@ -63,7 +63,7 @@ The product photography and brand voice come through cleanly on a cream-paper pa
 
 ## Constraints
 
-- **Hosting**: Cloudflare Workers with Static Assets — a single Worker serves both the static bundle and the `/api/contact` endpoint via `wrangler.jsonc`'s `assets.run_worker_first: ["/api/*"]`. (Initial plan was Cloudflare Pages; corrected because `@astrojs/cloudflare@13` — required by Astro 6 — dropped Pages support, and Cloudflare froze Pages investment in favor of Workers.)
+- **Hosting**: Cloudflare Workers with Static Assets — a single Worker serves the static bundle; `wrangler.jsonc`'s `assets.run_worker_first: ["/api/*"]` and `astro.config.mjs`'s `output: 'server'` are preserved per Phase 3 D-22 so a future `/api/*` endpoint can be added without re-architecting. (Initial plan was Cloudflare Pages; corrected because `@astrojs/cloudflare@13` — required by Astro 6 — dropped Pages support, and Cloudflare froze Pages investment in favor of Workers.)
 - **Stack**: Astro — picked so the existing React JSX components from the design skill can be reused as-is, while shipping near-zero client JS.
 - **Content storage**: Markdown + YAML files in the repo. No database. Structure must remain compatible with a future git-backed CMS.
 - **Budget**: Free tier wherever possible. Cloudflare Workers free, Umami Cloud free, Resend/Mailchannels free, Turnstile free, GitHub repo.
@@ -77,8 +77,8 @@ The product photography and brand voice come through cleanly on a cream-paper pa
 |----------|-----------|---------|
 | Astro 6.2 on Cloudflare Workers + Static Assets | Static-first, renders the design skill's React JSX server-side, near-zero client JS. Pages was originally chosen but `@astrojs/cloudflare@13` (Astro 6) dropped Pages support — Workers with Static Assets is the active CF target. One Worker serves both static and `/api/contact`. | ✓ Validated in Phase 1 (Astro 6.3.1 + adapter 13.5 + Workers Builds shipping live preview; zero browser JS in `dist/client`) |
 | Markdown/YAML in repo for gallery + pop-ups (not a CMS, not a database) | Zero infra, free, founder edits a single file per change, and the structure stays compatible with adding a git-backed CMS later with zero data migration | — Phase 2/3 |
-| Contact form via Cloudflare Worker + Turnstile + email service (Resend or Mailchannels) | Keeps the site static while still letting visitors send a real message; spam protected; free-tier friendly | — Phase 4 |
-| Umami Cloud (hosted, free tier) for analytics | Privacy-first, no cookies, no consent banner, custom events possible if needed; can migrate to self-hosted later since Umami is OSS | — Phase 5 |
+| Contact form via Cloudflare Worker + Turnstile + email service (Resend or Mailchannels) | Keeps the site static while still letting visitors send a real message; spam protected; free-tier friendly | ✗ Dropped from v1 per Phase 3 D-18/D-19 — `/say-hi` ships as IG-DM-link + mailto only |
+| Umami Cloud (hosted, free tier) for analytics | Privacy-first, no cookies, no consent banner, custom events possible if needed; can migrate to self-hosted later since Umami is OSS | — Phase 4 |
 | No e-commerce in v1 | Sales happen at pop-ups and via DM; checkout infrastructure is a separate product the founder hasn't asked for | ✓ Validated (no checkout infra in any phase plan) |
 | Reuse `studio-bluemli-design` skill components and tokens | The brand system already exists and is intentional; reinventing it risks drift | ✓ Validated in Phase 1 (11 components synced, brand-rule grep in CI as required status check) |
 | Self-host fonts via Fontsource instead of `fontProviders.google()` | Astro's Google provider preserves Google's per-Unicode-range `@font-face` CSS, which for Korean-primary fonts like Bagel Fat One inflates the inline `<style>` block enough to fail Lighthouse mobile Performance. Fontsource ships pre-subsetted Latin WOFF2s. | ✓ Validated in Phase 1 (Performance 0.76→0.99 across all 5 routes; 95→14 `@font-face` declarations) |

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Ship the five-page editorial portfolio at studiobluemli.com in five coarse, dependency-driven phases. Phase 1 stands up the Astro 6.2 + React 19 + Cloudflare Workers (Static Assets) shell, copies in the design-skill components, encodes brand non-negotiables as CI grep rules, and corrects PROJECT.md's "Cloudflare Pages" constraint to "Cloudflare Workers with Static Assets." Phase 2 defines the strict Zod content schemas (gallery + popups + site) with per-slug image co-location and ships the gallery grid + per-piece detail pages. Phase 3 composes the remaining four pages — landing, popups (with build-time PT-aware past/upcoming split and a daily cron rebuild), about (written portrait + process shots, no founder face), say-hi shell — plus shared SEO + sitemap. Phase 4 ships the only dynamic surface: a `/api/contact` Worker route gated by server-side Turnstile, honeypot, KV rate limit, and Resend (`hi@studiobluemli.com`), with SPF/DKIM/DMARC carefully co-existing with the founder's MS365 records. Phase 5 wires Umami, security/cache headers, runs Lighthouse + OG validation, performs the DNS cutover (apex + `www` 301), and walks the "Looks Done But Isn't" checklist.
+Ship the five-page editorial portfolio at studiobluemli.com in four coarse, dependency-driven phases. Phase 1 stands up the Astro 6.2 + React 19 + Cloudflare Workers (Static Assets) shell, copies in the design-skill components, encodes brand non-negotiables as CI grep rules, and corrects PROJECT.md's "Cloudflare Pages" constraint to "Cloudflare Workers with Static Assets." Phase 2 defines the strict Zod content schemas (gallery + popups + site) with per-slug image co-location and ships the gallery grid + per-piece detail pages. Phase 3 composes the remaining four pages — landing, popups (with build-time PT-aware past/upcoming split and a daily cron rebuild), about (written portrait + process shots, no founder face), say-hi (IG-DM-link + mailto fallback, no form per D-18) — plus shared SEO + sitemap. Phase 4 wires Umami, security/cache headers, runs Lighthouse + OG validation, performs the DNS cutover (apex + `www` 301), and walks the "Looks Done But Isn't" checklist.
 
 ## Phases
 
@@ -15,8 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundations & Brand System** - Astro 6 on Workers + Static Assets, design-skill components copied in, brand non-negotiables enforced via CI _(complete 2026-05-13)_
 - [ ] **Phase 2: Content Schema & Gallery** - Strict Zod collections with per-slug image co-location; gallery grid + per-piece detail pages live on preview
 - [ ] **Phase 3: Page Composition & Pop-ups** - Landing, popups (timezone-correct split + daily cron), about, say-hi shell, shared SEO, sitemap
-- [ ] **Phase 4: Contact Form & Deliverability** - `/api/contact` Worker with Turnstile + honeypot + KV rate limit + Resend; SPF/DKIM/DMARC co-existing with MS365
-- [ ] **Phase 5: Analytics, Polish & Launch** - Umami events, security headers, Lighthouse/OG validation, DNS cutover to studiobluemli.com
+- [ ] **Phase 4: Analytics, Polish & Launch** - Umami events, security headers, Lighthouse/OG validation, DNS cutover to studiobluemli.com
 
 ## Phase Details
 
@@ -115,40 +114,18 @@ Plans:
 - Process/craft shots availability — SOFTENED in Phase 3 planning (D-14): the founder doesn't currently have dedicated bench/hands/beads photos; the About page reuses 1–3 existing gallery hero WebPs as the closing visual flourish. Real bench shots can be swapped in later via a small follow-up commit by the founder via the GitHub web UI when the photos exist. The no-founder-face lock is preserved.
 - Missing per-page `og:image` (Pitfall #14) — verify the shared `SEO.astro` component on every page during planning; emit absolute URLs (not relative) for og/twitter image meta.
 - Empty placeholders — if the founder has no real press, the About page ships without a press section; never show "as featured in" as an empty slot (Pitfall: anti-feature from FEATURES.md).
-- Contact form scope cut (Phase 3 D-18) — `/say-hi` ships in v1 as an IG-DM-link page + mailto fallback only. The Phase 4 (Contact Form & Deliverability) entry in this ROADMAP is removed via a separate `/gsd-phase` operation after Phase 3 completes (per D-20); Phase 5's `Depends on` is updated by that same operation. Phase 3 plans do not edit the Phase 4 ROADMAP entry directly.
+- Contact form scope cut (Phase 3 D-18) — `/say-hi` ships in v1 as an IG-DM-link page + mailto fallback only. The original Phase 4 (Contact Form & Deliverability) entry was removed via `/gsd-phase --remove 4` after Phase 3 completed (per D-20); what was Phase 5 (Analytics, Polish & Launch) is now Phase 4 and depends on Phase 3.
 
-### Phase 4: Contact Form & Deliverability
-**Goal**: A visitor can fill the Say Hi form on the live preview and the message reliably lands in `hi@studiobluemli.com` (MS365 inbox) — surviving Turnstile + honeypot + KV rate limit — and the founder can hit Reply in Outlook/Gmail to reach the visitor.
-**Depends on**: Phase 3
-**Requirements**: CON-01, CON-02, CON-03, CON-04, CON-05, CON-06, CON-07, CON-08, CON-09, CON-10, CON-11
-**Success Criteria** (what must be TRUE):
-  1. A real submission from a preview deploy lands in `hi@studiobluemli.com` in the **inbox** (not spam) within seconds, with `From: "Studio Bluemli <hi@studiobluemli.com>"` and a `Reply-To` set to the visitor's email — hitting Reply in Outlook addresses the visitor, not the no-reply.
-  2. A `curl` POST to `/api/contact` with a missing/forged Turnstile token returns 400 before any email is sent; a filled honeypot field is silently dropped (no email); the 11th submission from the same IP within an hour returns 429.
-  3. Resend's domain dashboard for `studiobluemli.com` shows green checks on SPF, DKIM, and DMARC, and **the existing MS365 outbound mail still works** (founder can send + receive on the MS365 mailbox without disruption).
-  4. With JavaScript disabled in DevTools, the Say Hi page still shows a working `<form method="POST" action="/api/contact">`, plus visible `mailto:hi@studiobluemli.com` and `https://ig.me/m/studiobluemli` fallbacks above or beside the form.
-  5. `wrangler secret list` shows `RESEND_API_KEY`, `TURNSTILE_SECRET`, and the KV namespace ID; `git log -p --all -S 'RESEND_API_KEY'` returns zero matches; preview deploys use a separate Resend API key from production.
-**Plans**: TBD
-
-**Key risks / pitfalls (this is the riskiest phase):**
-- **MS365 DNS coexistence** (PLANNING CONCERN): Resend SPF/DKIM/DMARC records must be added *alongside* existing MS365 records, not replace them. The SPF record must combine includes (`v=spf1 include:spf.protection.outlook.com include:_spf.resend.com -all`); DKIM uses Resend's own selectors (won't collide with MS365's); DMARC alignment must validate for both senders. **One wrong edit can break the founder's MS365 outbound mail** — pre-stage every record change, take a screenshot of the current DNS zone before edits, and verify MS365 send+receive after each change.
-- Skipping server-side Turnstile siteverify (Pitfall #2) — the Worker's first action, before reading the rest of the body, must POST to `challenges.cloudflare.com/turnstile/v0/siteverify` and reject if `success !== true`.
-- MailChannels copy-paste trap (Pitfall #1) — Mailchannels' free Cloudflare-Workers tier ended 2024-08-31; reject any tutorial/snippet that references `api.mailchannels.net/tx/v1/send` without an `Authorization` header.
-- SPF/DKIM/DMARC propagation (Pitfall #3) — kick off DNS records *first* (propagation takes minutes-to-hours) while Worker code is written in parallel.
-- DKIM CNAME format on Cloudflare — Cloudflare's UI sometimes wants the bare subdomain, not the FQDN; an extra trailing dot or wrong record type silently fails.
-- Secrets management (Pitfall #15) — `wrangler secret put` only; `.dev.vars` for local; never `wrangler.toml`/`.env`; gitignore `.env`, `.dev.vars`, `.wrangler/`.
-- Separate Resend keys for preview vs production (CON-09) — so spam tests on previews don't burn production quota or pollute domain reputation.
-- LOCKED for this phase (no founder questions needed): `From: hi@studiobluemli.com`, `to: hi@studiobluemli.com` (MS365-hosted), display name "Studio Bluemli".
-
-### Phase 5: Analytics, Polish & Launch
+### Phase 4: Analytics, Polish & Launch
 **Goal**: `https://studiobluemli.com` resolves to the production Worker, `www.` 301-redirects to apex, Umami records every visit and event from the production domain, all 5 pages score Lighthouse mobile ≥ 90, and the founder has walked the "Looks Done But Isn't" launch checklist end-to-end.
-**Depends on**: Phase 4
+**Depends on**: Phase 3
 **Requirements**: FND-03, LCH-01, LCH-02, LCH-03, LCH-04, LCH-05, LCH-06, LCH-07, LCH-08
 **Success Criteria** (what must be TRUE):
   1. Visiting `https://studiobluemli.com` shows the live production site over HTTPS with a valid certificate, and `https://www.studiobluemli.com/anything` returns a 301 to `https://studiobluemli.com/anything`.
-  2. Within 5 minutes of cutover, the Umami Cloud dashboard's Realtime view shows the founder's own visit plus custom events (gallery-card click, "inquire on Instagram" click, contact-form submit) — events from preview deploys do **not** appear (`data-domains` is enforced).
+  2. Within 5 minutes of cutover, the Umami Cloud dashboard's Realtime view shows the founder's own visit plus custom events (gallery-card click, "inquire on Instagram" click on `/say-hi`) — events from preview deploys do **not** appear (`data-domains` is enforced).
   3. Lighthouse mobile audit on the production URL scores ≥ 90 on Performance, Accessibility, Best Practices, and SEO for all 5 pages (landing, gallery, gallery detail sample, popups, about, say-hi).
   4. The Facebook Sharing Debugger and Twitter Card validator return valid previews (image, title, description) for the home, a representative gallery piece, and a pop-up URL.
-  5. The "Looks Done But Isn't" checklist (LCH-08) is walked top-to-bottom: contact form sends a real message into the inbox; sitemap + robots.txt return 200; every `og:image` URL returns 200; no console errors on any page; all 5 pages load < 2s on a throttled mobile connection.
+  5. The "Looks Done But Isn't" checklist (LCH-08) is walked top-to-bottom: sitemap + robots.txt return 200; every `og:image` URL returns 200; no console errors on any page; all 5 pages load < 2s on a throttled mobile connection.
 **Plans**: TBD
 
 **Key risks / pitfalls:**
@@ -160,12 +137,11 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
+Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundations & Brand System | 5/5 | Complete | 2026-05-13 |
 | 2. Content Schema & Gallery | 5/5 | Complete | 2026-05-14 |
 | 3. Page Composition & Pop-ups | 0/TBD | Not started | - |
-| 4. Contact Form & Deliverability | 0/TBD | Not started | - |
-| 5. Analytics, Polish & Launch | 0/TBD | Not started | - |
+| 4. Analytics, Polish & Launch | 0/TBD | Not started | - |

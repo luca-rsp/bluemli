@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Phase 3 UI-SPEC approved
-last_updated: "2026-05-14T14:25:11.611Z"
-last_activity: 2026-05-14 -- Phase 03 execution started
+status: ready
+stopped_at: Phase 3 complete & merged (PR #5); Phase 4 (was Phase 5) ready for planning
+last_updated: "2026-05-14T15:00:00.000Z"
+last_activity: 2026-05-14 -- Phase 03 merged; old Phase 4 (Contact Form) removed per D-20
 progress:
-  total_phases: 5
-  completed_phases: 2
+  total_phases: 4
+  completed_phases: 3
   total_plans: 17
-  completed_plans: 15
-  percent: 88
+  completed_plans: 17
+  percent: 100
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-12)
 
 **Core value:** The product photography and brand voice come through cleanly on a cream-paper page, and the founder can add or remove gallery pieces and pop-up events without writing code or paying a CMS.
-**Current focus:** Phase 03 — page-composition-pop-ups
+**Current focus:** Phase 04 — analytics-polish-launch (next; not yet planned)
 
 ## Current Position
 
-Phase: 03 (page-composition-pop-ups) — EXECUTING
-Plan: 1 of 2
-Status: Executing Phase 03
-Last activity: 2026-05-14 -- Phase 03 execution started
+Phase: 04 (analytics-polish-launch) — READY FOR PLANNING
+Plan: —
+Status: Phase 03 merged via PR #5; old Phase 04 (Contact Form & Deliverability) removed per D-20; Phase 05 renumbered to Phase 04
+Last activity: 2026-05-14 -- Phase 03 merged; old Phase 04 removed
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [███████░░░] 75%
 
 ## Performance Metrics
 
@@ -76,7 +76,7 @@ None yet.
 
 - **Phase 1:** `prettier-plugin-astro` v0.14.x may lag Astro 6 — verify and upgrade during planning if a newer release exists.
 - **Phase 2:** Lock the exact image pre-optimization tool (squoosh-cli vs sharp-cli) and document in `CONTENT_EDITING.md`.
-- **Phase 4:** MS365 DNS coexistence — Resend SPF/DKIM/DMARC records must be added *alongside* existing MS365 records without breaking founder's outbound mail. Pre-stage every record edit; screenshot DNS zone first; verify MS365 send/receive after each change.
+- *Phase 4 (Contact Form) MS365 DNS coexistence blocker — RESOLVED by removal of the contact form per D-18/D-20.*
 
 ## Deferred Items
 
@@ -88,6 +88,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-14T04:02:00.650Z
-Stopped at: Phase 3 UI-SPEC approved
-Resume file: .planning/phases/03-page-composition-pop-ups/03-UI-SPEC.md
+Last session: 2026-05-14T15:00:00.000Z
+Stopped at: Phase 3 complete & merged (PR #5); Phase 4 awaiting planning
+Resume file: .planning/ROADMAP.md (Phase 4: Analytics, Polish & Launch)
