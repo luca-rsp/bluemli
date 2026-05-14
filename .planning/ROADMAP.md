@@ -91,7 +91,7 @@ Plans:
   3. The About page renders a first-person written portrait with hand-font headline and the "made with love from NOPA ♡" signature close (D-16), plus a closing photo strip of 1–3 gallery hero WebPs (per D-14 — dedicated process/craft shots deferred to v1.x; the no-founder-face rule stays intact since gallery photos don't show the founder), with no empty "press" or "as featured in" placeholders.
   4. Sharing the home, a gallery piece, and a pop-up URL in iMessage/Slack/IG DM each produce a correct unfurl preview (title, description, og:image), and `https://studiobluemli.com/sitemap-index.xml` + `/robots.txt` return valid content with the sitemap reference.
   5. Every page's `<link rel="canonical">` points to the apex `studiobluemli.com` (not `www.`, not a preview hostname).
-**Plans**: 5 plans
+**Plans**: 7 plans (5 original + 2 gap-closure)
 Plans:
 **Wave 1**
 - [x] 03-01-brand-system-tweaks-PLAN.md — Wordmark font swap (Bagel Fat One -> Caveat Brush) and project-wide NoPa -> NOPA casing fix on user-facing copy (D-24, D-25)
@@ -103,6 +103,10 @@ Plans:
 - [x] 03-03-popups-and-landing-PLAN.md — TZ-aware splitPopups() helper + landing mini-callout + /popups page with ALSO COMING UP/PAST/empty-state + PopupStrip CTA delete (PAG-01, PAG-03; D-02-D-11)
 - [x] 03-04-about-and-say-hi-PLAN.md — /about copy rewrite + photo strip + signature + /say-hi IG-link page (form dropped) (PAG-05, PAG-06, PAG-09; D-13-D-18, D-21-D-23)
 - [~] 03-05-cron-rebuild-PLAN.md — DEFERRED (spike FAIL): integrated `wrangler.jsonc` + `src/scheduled.ts` approach proved structurally incompatible with `@astrojs/cloudflare@13.5`, which writes `dist/server/wrangler.json` and silently strips user-level `main` + `triggers.crons` at deploy time. Per user decision, cron rebuild is deferred to a future phase; founder triggers manual rebuild when a popup ends. Full root-cause analysis in `03-05-SUMMARY.md`. (PAG-04 deferred; D-12)
+
+**Gap-closure (post-verification; run in parallel, independent of original waves):**
+- [ ] 03-06-seo-robots-gap-closure-PLAN.md — Fix BL-01 (homepage canonical trailing slash) + BL-02 (resolveAssetBase reads process.env not import.meta.env) + BL-03 (PUBLIC_DEPLOY_ENV=production prefix on deploy script so robots.txt ships Allow + Sitemap); add scripts/check-seo-output.mjs + ci:seo-check npm gate (closes GAP-01, GAP-02, GAP-03; PAG-07, PAG-08)
+- [ ] 03-07-about-heart-glyph-PLAN.md — Pass filled={false} to Mark.Heart in About.jsx so /about signature renders outline ♡ per D-16 (closes GAP-04 / WR-06; PAG-05)
 **UI hint**: yes
 
 **Key risks / pitfalls:**
