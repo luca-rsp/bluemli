@@ -105,8 +105,8 @@ Plans:
 - [~] 03-05-cron-rebuild-PLAN.md — DEFERRED (spike FAIL): integrated `wrangler.jsonc` + `src/scheduled.ts` approach proved structurally incompatible with `@astrojs/cloudflare@13.5`, which writes `dist/server/wrangler.json` and silently strips user-level `main` + `triggers.crons` at deploy time. Per user decision, cron rebuild is deferred to a future phase; founder triggers manual rebuild when a popup ends. Full root-cause analysis in `03-05-SUMMARY.md`. (PAG-04 deferred; D-12)
 
 **Gap-closure (post-verification; run in parallel, independent of original waves):**
-- [ ] 03-06-seo-robots-gap-closure-PLAN.md — Fix BL-01 (homepage canonical trailing slash) + BL-02 (resolveAssetBase reads process.env not import.meta.env) + BL-03 (PUBLIC_DEPLOY_ENV=production prefix on deploy script so robots.txt ships Allow + Sitemap); add scripts/check-seo-output.mjs + ci:seo-check npm gate (closes GAP-01, GAP-02, GAP-03; PAG-07, PAG-08)
-- [ ] 03-07-about-heart-glyph-PLAN.md — Pass filled={false} to Mark.Heart in About.jsx so /about signature renders outline ♡ per D-16 (closes GAP-04 / WR-06; PAG-05)
+- [x] 03-06-seo-robots-gap-closure-PLAN.md — Fix BL-01 (homepage canonical trailing slash) + BL-02 (resolveAssetBase reads process.env not import.meta.env) + BL-03 (PUBLIC_DEPLOY_ENV=production prefix on deploy script so robots.txt ships Allow + Sitemap); add scripts/check-seo-output.mjs + ci:seo-check npm gate (closes GAP-01, GAP-02, GAP-03; PAG-07, PAG-08)
+- [x] 03-07-about-heart-glyph-PLAN.md — Pass filled={false} to Mark.Heart in About.jsx so /about signature renders outline ♡ per D-16 (closes GAP-04 / WR-06; PAG-05)
 **UI hint**: yes
 
 **Key risks / pitfalls:**
