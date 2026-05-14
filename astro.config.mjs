@@ -29,13 +29,6 @@ export default defineConfig({
   fonts: [
     {
       provider: fontProviders.fontsource(),
-      name: 'Bagel Fat One',
-      cssVariable: '--font-wordmark-loaded',
-      weights: [400],
-      display: 'swap',
-    },
-    {
-      provider: fontProviders.fontsource(),
       name: 'Caveat Brush',
       cssVariable: '--font-display-loaded',
       weights: [400],
