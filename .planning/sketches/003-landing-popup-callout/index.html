@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sketch 003 — Landing pop-up mini-callout · Studio Bluemli</title>
+  <link rel="stylesheet" href="../themes/default.css" />
+  <style>
+    /* ============================================================
+       Sketch chrome (tabs + scenario toggle)
+       ============================================================ */
+    .sketch-tabs {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--cream-50);
+      border-bottom: 1px solid var(--color-border-soft);
+      padding: var(--space-3) var(--space-4);
+      display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap;
+      font-family: var(--font-body); font-size: var(--fs-xs);
+    }
+    .sketch-tabs .label {
+      font-weight: 800; letter-spacing: var(--ls-caps); text-transform: uppercase;
+      color: var(--color-fg-muted); margin-right: var(--space-3);
+    }
+    .sketch-tabs button {
+      background: transparent; border: 0; cursor: pointer;
+      padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill);
+      font-family: var(--font-body); font-size: var(--fs-xs); font-weight: 700;
+      color: var(--color-fg);
+    }
+    .sketch-tabs button.is-active {
+      background: var(--coral-500); color: var(--color-fg-on-coral);
+    }
+    .sketch-tabs button:hover:not(.is-active) { background: var(--cream-200); }
+    .sketch-tabs .star { color: var(--mustard-500); margin-right: 2px; }
+    .sketch-tabs .divider { width: 1px; height: 22px; background: var(--color-border-soft); margin: 0 var(--space-2); }
+
+    .variant { display: none; }
+    .variant.is-active { display: block; }
+
+    /* Scenario rows — show 1-upcoming and many-upcoming on the same page */
+    .scenario {
+      margin: 0 auto;
+      max-width: 1080px;
+      padding: 0 var(--space-5);
+    }
+    .scenario-label {
+      font-family: var(--font-body);
+      font-size: var(--fs-xxs); font-weight: 800;
+      letter-spacing: var(--ls-caps); text-transform: uppercase;
+      color: var(--ink-400);
+      padding: var(--space-3) 0 var(--space-2);
+      border-top: 1px dashed var(--color-border-soft);
+      margin-top: var(--space-7);
+    }
+    .scenario-label:first-of-type { border-top: 0; margin-top: var(--space-4); }
+
+    /* ============================================================
+       Faux Hero (so callout sits below something with the right weight)
+       ============================================================ */
+    .faux-hero {
+      min-height: 360px;
+      padding: var(--space-7) var(--space-5) var(--space-6);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center;
+    }
+    .faux-hero .eyebrow {
+      font-family: var(--font-body); font-size: 13px; font-weight: 800;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--olive-500); margin-bottom: var(--space-3); white-space: nowrap;
+    }
+    .faux-hero .mark {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: var(--coral-500); margin-bottom: var(--space-3);
+      display: grid; place-items: center;
+      color: var(--cream-50); font-family: var(--font-display); font-size: var(--fs-md);
+    }
+    .faux-hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(48px, 8vw, 88px);
+      line-height: 1.05;
+      color: var(--coral-500);
+      margin: 0 0 var(--space-5); max-width: 680px;
+    }
+    .faux-hero .sub {
+      font-family: var(--font-body); font-size: var(--fs-md); line-height: 1.5;
+      color: var(--color-fg); max-width: 560px; margin: 0;
+    }
+
+    /* ============================================================
+       VARIANT A — All-text editorial caption-block
+       (centered, plain text, eyebrow + line + line, link beneath)
+       ============================================================ */
+    .v-a .callout {
+      max-width: 720px; margin: 0 auto;
+      padding: var(--space-6) var(--space-5);
+      text-align: center;
+    }
+    .v-a .callout .eyebrow {
+      font-family: var(--font-body);
+      font-size: var(--fs-xxs); font-weight: 800;
+      letter-spacing: var(--ls-caps); text-transform: uppercase;
+      color: var(--color-accent-leaf);
+      margin: 0 0 var(--space-3);
+    }
+    .v-a .callout .when {
+      font-family: var(--font-body);
+      font-size: var(--fs-lg); font-weight: 800;
+      color: var(--color-fg-strong);
+      margin: 0 0 var(--space-1);
+    }
+    .v-a .callout .when .dot { color: var(--ink-400); margin: 0 var(--space-2); font-weight: 400; }
+    .v-a .callout .time {
+      font-family: var(--font-body); font-size: var(--fs-sm);
+      color: var(--color-fg-muted);
+      margin: 0 0 var(--space-4);
+    }
+    .v-a .callout .see-all {
+      font-family: var(--font-body);
+      font-size: var(--fs-xs); font-weight: 700;
+      color: var(--coral-500); text-decoration: none;
+      letter-spacing: 0.01em;
+    }
+    .v-a .callout .see-all:hover { color: var(--coral-700); }
+    .v-a .callout .see-all .arrow { display: inline-block; transition: transform .15s; }
+    .v-a .callout .see-all:hover .arrow { transform: translateX(2px); }
+
+    /* ============================================================
+       VARIANT B — Thin colored stripe + inline text
+       (full-bleed band, eyebrow left + when right, link beneath)
+       ============================================================ */
+    .v-b .callout-band {
+      background: var(--cream-200);
+      padding: var(--space-5) var(--space-5);
+      margin-top: var(--space-5);
+    }
+    .v-b .callout-inner {
+      max-width: 1080px; margin: 0 auto;
+      display: flex; align-items: baseline; justify-content: center;
+      gap: var(--space-5); flex-wrap: wrap;
+    }
+    .v-b .callout-inner .eyebrow {
+      font-family: var(--font-body);
+      font-size: var(--fs-xxs); font-weight: 800;
+      letter-spacing: var(--ls-caps); text-transform: uppercase;
+      color: var(--color-accent-leaf);
+    }
+    .v-b .callout-inner .when {
+      font-family: var(--font-body); font-size: var(--fs-md); font-weight: 700;
+      color: var(--color-fg-strong);
+    }
+    .v-b .callout-inner .when .dot { color: var(--ink-400); margin: 0 var(--space-2); font-weight: 400; }
+    .v-b .callout-inner .time {
+      font-family: var(--font-body); font-size: var(--fs-sm);
+      color: var(--color-fg-muted);
+    }
+    .v-b .see-all-row {
+      max-width: 1080px; margin: var(--space-2) auto 0;
+      text-align: center;
+    }
+    .v-b .see-all {
+      font-family: var(--font-body);
+      font-size: var(--fs-xs); font-weight: 700;
+      color: var(--coral-500); text-decoration: none;
+    }
+    .v-b .see-all:hover { color: var(--coral-700); }
+
+    /* ============================================================
+       VARIANT C — Caveat eyebrow + date + venue, no chrome
+       (handwritten eyebrow uses Caveat — quieter than Caveat Brush —
+        full type stack centered, no band/border/photo)
+       ============================================================ */
+    .v-c .callout {
+      max-width: 640px; margin: 0 auto;
+      padding: var(--space-6) var(--space-5);
+      text-align: center;
+    }
+    .v-c .callout .hand-eyebrow {
+      font-family: var(--font-hand);   /* Caveat (NOT Caveat Brush) */
+      font-size: var(--fs-xl);          /* 28px — restrained */
+      color: var(--color-accent-leaf);
+      line-height: 1; margin: 0 0 var(--space-3);
+      transform: rotate(-1.5deg);
+      display: inline-block;
+    }
+    .v-c .callout .when {
+      font-family: var(--font-body);
+      font-size: var(--fs-xl); font-weight: 800;
+      line-height: 1.15;
+      color: var(--color-fg-strong);
+      margin: 0 0 var(--space-2);
+    }
+    .v-c .callout .venue { color: var(--coral-500); }
+    .v-c .callout .time {
+      font-family: var(--font-body); font-size: var(--fs-sm);
+      color: var(--color-fg-muted);
+      margin: 0 0 var(--space-4);
+    }
+    .v-c .callout .see-all {
+      font-family: var(--font-body);
+      font-size: var(--fs-xs); font-weight: 700;
+      color: var(--coral-500); text-decoration: none;
+      letter-spacing: 0.01em;
+    }
+    .v-c .callout .see-all:hover { color: var(--coral-700); }
+
+    /* Footnote */
+    .note {
+      max-width: 720px; margin: var(--space-7) auto 0;
+      padding: 0 var(--space-5) var(--space-7);
+      font-family: var(--font-body); font-size: var(--fs-xs);
+      color: var(--color-fg-muted); text-align: center;
+      line-height: var(--lh-loose);
+    }
+    .note code { background: var(--cream-200); padding: 1px 6px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<nav class="sketch-tabs" role="tablist" aria-label="Sketch variants">
+  <span class="label">Sketch 003 · Landing pop-up callout</span>
+  <button class="is-active" data-variant="a">Variant A: editorial caption-block</button>
+  <button data-variant="b">Variant B: cream-stripe band</button>
+  <button data-variant="c"><span class="star">★</span>Variant C: Caveat eyebrow, no chrome</button>
+</nav>
+
+<!-- ============================================================
+     VARIANT A
+     ============================================================ -->
+<section class="variant v-a is-active">
+  <div class="faux-hero">
+    <div class="eyebrow">Studio Bluemli · NOPA, San Francisco</div>
+    <div class="mark">★</div>
+    <h1>bright, beaded,<br/>one of a kind</h1>
+    <p class="sub">Hand-assembled earrings, made in NOPA. Sold at markets, pop-ups, and by appointment.</p>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-label">Scenario · 1 upcoming pop-up</div>
+    <div class="callout">
+      <div class="eyebrow">Next pop-up</div>
+      <p class="when">Saturday, June 7<span class="dot">·</span>Heath Ceramics</p>
+      <p class="time">11am – 5pm</p>
+    </div>
+
+    <div class="scenario-label">Scenario · 3 upcoming pop-ups</div>
+    <div class="callout">
+      <div class="eyebrow">Next pop-up</div>
+      <p class="when">Saturday, June 7<span class="dot">·</span>Heath Ceramics</p>
+      <p class="time">11am – 5pm</p>
+      <a class="see-all" href="/popups">see all upcoming pop-ups <span class="arrow">→</span></a>
+    </div>
+
+    <p class="note">
+      Variant A: pure type, generous breathing room, centered. The eyebrow is Nunito caps (matches the gallery's "THE GALLERY"); when-line is bold Nunito at 22px. No band, no border, no photo. Quietest of the three.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================
+     VARIANT B
+     ============================================================ -->
+<section class="variant v-b">
+  <div class="faux-hero">
+    <div class="eyebrow">Studio Bluemli · NOPA, San Francisco</div>
+    <div class="mark">★</div>
+    <h1>bright, beaded,<br/>one of a kind</h1>
+    <p class="sub">Hand-assembled earrings, made in NOPA. Sold at markets, pop-ups, and by appointment.</p>
+  </div>
+
+  <div class="scenario-label scenario" style="border-top:0;">Scenario · 1 upcoming pop-up</div>
+  <div class="callout-band">
+    <div class="callout-inner">
+      <span class="eyebrow">Next pop-up</span>
+      <span class="when">Saturday, June 7<span class="dot">·</span>Heath Ceramics</span>
+      <span class="time">11am – 5pm</span>
+    </div>
+  </div>
+
+  <div class="scenario-label scenario" style="margin-top: var(--space-7);">Scenario · 3 upcoming pop-ups</div>
+  <div class="callout-band">
+    <div class="callout-inner">
+      <span class="eyebrow">Next pop-up</span>
+      <span class="when">Saturday, June 7<span class="dot">·</span>Heath Ceramics</span>
+      <span class="time">11am – 5pm</span>
+    </div>
+  </div>
+  <div class="see-all-row">
+    <a class="see-all" href="/popups">see all upcoming pop-ups →</a>
+  </div>
+
+  <p class="note">
+    Variant B: full-bleed cream-200 stripe band (one tone darker than the page background) with eyebrow + when + time inline on a single row. Reads as a distinct "section" without a hard border. The "see all" link sits below the band.
+  </p>
+</section>
+
+<!-- ============================================================
+     VARIANT C
+     ============================================================ -->
+<section class="variant v-c">
+  <div class="faux-hero">
+    <div class="eyebrow">Studio Bluemli · NOPA, San Francisco</div>
+    <div class="mark">★</div>
+    <h1>bright, beaded,<br/>one of a kind</h1>
+    <p class="sub">Hand-assembled earrings, made in NOPA. Sold at markets, pop-ups, and by appointment.</p>
+  </div>
+
+  <div class="scenario">
+    <div class="scenario-label">Scenario · 1 upcoming pop-up</div>
+    <div class="callout">
+      <span class="hand-eyebrow">next pop-up</span>
+      <p class="when">Saturday, June 7 — <span class="venue">Heath Ceramics</span></p>
+      <p class="time">11am – 5pm</p>
+    </div>
+
+    <div class="scenario-label">Scenario · 3 upcoming pop-ups</div>
+    <div class="callout">
+      <span class="hand-eyebrow">next pop-up</span>
+      <p class="when">Saturday, June 7 — <span class="venue">Heath Ceramics</span></p>
+      <p class="time">11am – 5pm</p>
+      <a class="see-all" href="/popups">see all upcoming pop-ups →</a>
+    </div>
+
+    <p class="note">
+      Variant C: handwritten "next pop-up" eyebrow in <code>--font-hand</code> (Caveat — the looser sibling of Caveat Brush) at 28px, tilted ~1.5°. When-line uses an em-dash and colors the venue coral. Adds personality without volume.
+    </p>
+  </div>
+</section>
+
+<script>
+  // Tab switcher
+  const tabs = document.querySelectorAll('.sketch-tabs button[data-variant]');
+  const variants = { a: 'v-a', b: 'v-b', c: 'v-c' };
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const v = btn.dataset.variant;
+      tabs.forEach(b => b.classList.toggle('is-active', b === btn));
+      Object.entries(variants).forEach(([key, cls]) => {
+        document.querySelector('.' + cls).classList.toggle('is-active', key === v);
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+</script>
+</body>
+</html>

@@ -42,10 +42,22 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate responsive WebP variants (prebuild)
+        run: pnpm run prebuild:images
+
       - name: Typecheck
         run: pnpm exec astro check
 
       - name: Build
+        env:
+          # GAP-01 / 03-06: the build that feeds Lighthouse must produce the
+          # same robots.txt that production ships (`Allow: /` + Sitemap). Without
+          # this flag, robots.txt emits `Disallow: /` and Lighthouse's SEO
+          # is-crawlable audit drops the score below the 0.9 gate. CI does not
+          # deploy from here (Cloudflare Workers Builds is wired separately),
+          # so flagging the artifact production-mode here is purely about
+          # auditing the same bytes prod ships.
+          PUBLIC_DEPLOY_ENV: production
         run: pnpm exec astro build
 
       - name: Write .assetsignore (Plan 04 postbuild — REVIEW FIX M2)
@@ -59,6 +71,21 @@ jobs:
 
       - name: No-hydration / no-browser-JS check (FND-01 — REVIEW FIX M1)
         run: bash scripts/check-no-hydration.sh
+
+      - name: Phase 2 smoke (built HTML greps — MEDIUM-4 replacement for Playwright in CI)
+        run: |
+          # Gallery index references all 6 seeded slugs
+          test "$(grep -oE '/gallery/cluster-[a-z]+\b' dist/client/gallery/index.html | sort -u | wc -l)" = 6
+          # Each detail page has og:image in <head> (HIGH-4 — any host accepted)
+          for slug in blush cobalt coral lavender saffron sage; do
+            awk '/<head>/,/<\/head>/{print}' "dist/client/gallery/cluster-$slug/index.html" \
+              | grep -qE 'og:image.*https?://.+/gallery/cluster-'"$slug"'/hero-800\.webp' \
+              || { echo "MISSING og:image in head: $slug"; exit 1; }
+          done
+          # cluster-sage (status: available per Plan 01) must NOT contain the literal "Sold" label
+          awk '/<body/,/<\/body>/{print}' "dist/client/gallery/cluster-sage/index.html" \
+            | grep -q '\bSold\b' && { echo "FAIL: cluster-sage (available) shows 'Sold' text"; exit 1; }
+          echo "[smoke] Phase 2 dist/client greps passed."
 
       # Lighthouse CI (FND-12). Canonical path: lighthouserc.json declares
       # staticDistDir: "./dist/client" and the action serves it over a local

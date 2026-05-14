@@ -1,0 +1,57 @@
+---
+// src/components/SEO.astro — Phase 3 PAG-07 / D-26.
+// Per-page SEO meta emitter. Consumed via `<SEO slot="head" ... />` from each
+// .astro page. Outputs land in BaseLayout's <slot name="head" />.
+//
+// REVIEWS-MODE Concern 1 fix: canonical + og:url ALWAYS use resolveCanonicalBase()
+// (apex). Never leak preview hostnames.
+//
+// REVIEWS-MODE Concern 4 fix: the page title tag is NOT emitted here.
+// BaseLayout.astro continues to own the page title via its existing `title`
+// prop. Each page passes its title to BaseLayout the same way it always has.
+// SEO.astro only adds canonical, description, og/twitter meta. This is the
+// least-blast-radius choice and matches the PATTERNS.md "pick (a)" decision.
+//
+// Defaults: og_title + og_description from src/content/site/config.yaml.
+// Default og:image: /og-default.png on apex (D-27 path 3).
+
+import { getEntry } from 'astro:content';
+import { resolveCanonicalBase } from '../lib/site-url';
+
+interface Props {
+  /** Page title for og:title. Optional — falls back to site.og_title. */
+  title?:       string;
+  /** Plain-text description. Falls back to site.og_description. */
+  description?: string;
+  /** ABSOLUTE URL to the og:image. Falls back to ${canonicalBase}/og-default.png. */
+  ogImage?:    string;
+  /** Path of the current page. Defaults to "/". */
+  pathname?:   string;
+}
+
+const { title, description, ogImage, pathname = '/' } = Astro.props;
+
+const site = (await getEntry('site', 'default'))!.data;
+const canonicalBase = resolveCanonicalBase(Astro.site);
+
+// BL-01 / GAP-02 fix: keep the trailing slash on root so canonical, og:url,
+// sitemap-0.xml's <loc>, and the URL users actually visit all agree on
+// `https://studiobluemli.com/` (NOT bare-apex). Google treats apex and
+// apex/ as canonically distinct on the root path.
+const canonical    = `${canonicalBase}${pathname === '/' ? '/' : pathname}`;
+const ogImageAbs   = ogImage ?? `${canonicalBase}/og-default.png`;
+const finalDesc    = description ?? site.og_description;
+const finalOgTitle = title ?? site.og_title;
+---
+<meta name="description" content={finalDesc} />
+
+<link rel="canonical" href={canonical} />
+
+<meta property="og:title"       content={finalOgTitle} />
+<meta property="og:description" content={finalDesc} />
+<meta property="og:image"       content={ogImageAbs} />
+<meta property="og:url"         content={canonical} />
+<meta property="og:type"        content="website" />
+
+<meta name="twitter:card"  content="summary_large_image" />
+<meta name="twitter:image" content={ogImageAbs} />

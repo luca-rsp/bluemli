@@ -19,7 +19,7 @@ failed=0
 # Uses -P for PCRE negative lookahead. Note: -P is mutually exclusive with -E
 # in both BSD and GNU grep ("conflicting matchers specified"); use -P only. The
 # alternation operator | is supported natively in PCRE.
-if grep -rnP '(bg-white|background:\s*white|#fff(?![0-9a-fA-F])|#[fF]{6})' \
+if grep -rnP '(bg-white|background:\s*white|#[fF]{3}(?![0-9a-fA-F])|#[fF]{6})' \
      --include='*.astro' --include='*.jsx' --include='*.tsx' --include='*.ts' --include='*.css' \
      --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=.git \
      --exclude-dir=.planning --exclude-dir=.claude \
@@ -108,20 +108,19 @@ if grep -rEn 'border(-top|-bottom|-left|-right)?:\s*1px' \
   failed=1
 fi
 
-# Rule 7: sample-data leak (D-03) — DISABLED in Phase 1. Phase 2 uncomments.
-# Once Phase 2 ships real Content Collections, any "Sample Piece" string surviving
-# in src/content/ is a leak from the deleted src/sample-data.ts.
-# TODO: enable in Phase 2 plan by uncommenting the if-block below.
-#
-# if grep -rEn '"Sample Piece"' \
-#      --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=.git \
-#      --exclude-dir=.planning --exclude-dir=.claude \
-#      src/content/ 2>/dev/null ; then
-#   echo ""
-#   echo "FAIL: Remove sample-data markers before merging — Phase 2 ships real content."
-#   echo "  Sample-data lives only in src/sample-data.ts during Phase 1; Phase 2 deletes that file."
-#   failed=1
-# fi
+# Rule 7: sample-data leak (Phase 2, D-03). Plan 04 deleted src/sample-data.ts;
+# any "Sample Piece" string OR `price: 0` line surviving in src/content/ is a
+# leak/regression.
+if grep -rEn '("Sample Piece"|^price: 0$)' \
+     --include='*.md' \
+     --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=.git \
+     --exclude-dir=.planning --exclude-dir=.claude \
+     src/content/ 2>/dev/null ; then
+  echo ""
+  echo "FAIL: Remove sample-data markers before merging — Phase 2 ships real content."
+  echo "  'Sample Piece' names and price: 0 are Phase 1 test markers; real pieces have real names and prices."
+  failed=1
+fi
 
 if [ "$failed" -eq 0 ]; then
   echo "All brand rules pass."

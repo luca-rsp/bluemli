@@ -13,7 +13,7 @@ function Hero() {
       <div className="eyebrow" style={{
         fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 800, letterSpacing: '0.16em',
         textTransform: 'uppercase', color: 'var(--olive-500)', marginBottom: 16, whiteSpace: 'nowrap',
-      }}>Studio Bluemli · NoPa, San Francisco</div>
+      }}>Studio Bluemli · NOPA, San Francisco</div>
 
       <img src="/mark.svg" alt="" width="72" height="72" style={{ marginBottom: 18 }} />
 
@@ -32,7 +32,7 @@ function Hero() {
         fontFamily: 'var(--font-body)', fontSize: 18, lineHeight: 1.5,
         color: 'var(--indigo-500)', maxWidth: 560, margin: '0 0 32px',
       }}>
-        Hand-assembled earrings, made in NoPa. Sold at markets, pop-ups, and by appointment.
+        Hand-assembled earrings, made in NOPA. Sold at markets, pop-ups, and by appointment.
       </div>
 
       <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', justifyContent: 'center' }}>

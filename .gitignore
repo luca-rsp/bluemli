@@ -22,3 +22,6 @@ Thumbs.db
 # Misc
 *.log
 .lighthouseci/
+
+# Gallery prebuild WebP variants + manifest (regenerated each build — see scripts/prebuild-images.mjs)
+public/gallery/

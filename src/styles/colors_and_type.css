@@ -112,7 +112,7 @@
        3. The handwritten tagline    → friendly inline asides
        4. The clean rounded sans     → product detail, UI, long-form
      ============================================================ */
-  --font-wordmark:    "Bagel Fat One", "Pacifico", "Lobster", system-ui, sans-serif;
+  --font-wordmark:    var(--font-display-loaded), "Caveat Brush", cursive;
   --font-display:     "Caveat Brush", "Permanent Marker", "Marker Felt", cursive;
   --font-hand:        "Caveat", "Patrick Hand", "Comic Sans MS", cursive;
   --font-body:        "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;

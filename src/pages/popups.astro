@@ -1,19 +1,248 @@
 ---
-// src/pages/popups.astro — Pop-ups shell (D-18).
-// Phase 1: PopupStrip renders one upcoming sample.
-// Phase 3: timezone-correct past/upcoming split from popups collection.
+// src/pages/popups.astro — Pop-ups page (Phase 3 PAG-03).
+// D-06 layout (soonest PopupStrip + ALSO COMING UP + PAST); D-07 text-only past (no photos);
+// D-08 empty state copy; D-09 PopupStrip CTA deleted (handled in PopupStrip.jsx itself);
+// D-10 no per-slug routes; D-11 TZ-aware split via splitPopups (Plan 03 helper).
 //
-// prerender = true: required under Plan 01's `output: 'server'` mode.
+// REVIEWS-MODE Concern 2 fix: date labels use Temporal.PlainDate.toLocaleString
+// from `date` ONLY. start_time / end_time are FREE-FORM display strings ("11am",
+// "11:00 AM") and are interpolated VERBATIM into time labels — never parsed as
+// Date components.
+//
+// REVIEWS-MODE Concern 4 fix: BaseLayout's title prop owns the <title> tag;
+// <SEO /> adds canonical/og/twitter only. Both pass the same title for
+// consistency with og:title.
+//
+// REVIEWS-MODE Concern 14 fix: PAG-03 mentions "description" alongside date/
+// location/time. The soonest upcoming popup's markdown body is rendered below
+// the strip via astro:content's render() helper, giving the founder a place
+// to write things like "free champagne" or directions to the venue.
+
 export const prerender = true;
 
+import { getCollection, getEntry, render } from 'astro:content';
+import { Temporal } from 'temporal-polyfill';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import SEO from '../components/SEO.astro';
 import Header from '../components/design-skill/Header';
 import PopupStrip from '../components/design-skill/PopupStrip';
 import Footer from '../components/design-skill/Footer';
-import { sampleNextPopup } from '../sample-data';
+import { splitPopups } from '../lib/popups';
+
+const site = (await getEntry('site', 'default'))!.data;
+const all = await getCollection('popups');
+const { soonest, alsoComing, past } = splitPopups(all);
+
+// PopupStrip.jsx accepts camelCase props (startTime/endTime), but the schema is snake_case.
+// Build a JS-friendly view-model for the strip; keep the original entry untouched.
+const soonestVM = soonest ? {
+  name:      soonest.data.name,
+  date:      soonest.data.date,
+  startTime: soonest.data.start_time,
+  endTime:   soonest.data.end_time,
+  tz:        soonest.data.tz,
+  location:  soonest.data.location,
+} : null;
+
+// Concern 14: render the soonest popup's markdown body as the description block.
+// The astro:content `render(entry)` helper returns `{ Content }` for inline rendering.
+// Only render description for the soonest upcoming popup (PopupStrip's full editorial
+// surface). ALSO COMING UP and PAST stay compact text rows.
+const soonestRendered = soonest ? await render(soonest) : null;
+const SoonestDescription = soonestRendered?.Content;
+
+// Concern 2: date labels via Temporal.PlainDate. NEVER compose a Date from `${date}T${startTime}`.
+function formatRowDate(p: typeof soonest) {
+  if (!p) return '';
+  return Temporal.PlainDate.from(p.data.date).toLocaleString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric',
+  });
+}
+function rowTime(p: typeof soonest) {
+  if (!p) return '';
+  // Verbatim interpolation — start_time / end_time are free-form display strings.
+  return `${p.data.start_time}–${p.data.end_time}`;
+}
+
+// Best-effort city extraction from the optional `address` field; hardcode fallback to "San Francisco".
+function rowCity(p: typeof soonest) {
+  if (!p) return 'San Francisco';
+  const addr = p.data.address;
+  if (!addr) return 'San Francisco';
+  // Try to pull a city out of a comma-separated address ("123 Main St, San Francisco, CA").
+  const parts = addr.split(',').map((s) => s.trim());
+  if (parts.length >= 2) return parts[parts.length - 2];
+  return 'San Francisco';
+}
+
+const hasAny = (soonest !== null) || past.length > 0;
 ---
 <BaseLayout title="Pop-ups — Studio Bluemli">
+  <SEO slot="head" title="Pop-ups — Studio Bluemli" pathname="/popups" />
   <Header slot="header" active="/popups" />
-  <PopupStrip popup={sampleNextPopup} />
-  <Footer slot="footer" />
+
+  {!hasAny && (
+    <section class="popups-empty">
+      <span class="empty-eyebrow">Pop-ups</span>
+      <p class="empty-body">
+        No pop-ups on the calendar yet —<br/>
+        follow <a class="empty-ig" href={`https://instagram.com/${site.ig_handle}`}>@{site.ig_handle}</a> for the next one.
+      </p>
+    </section>
+  )}
+
+  {soonestVM && <PopupStrip popup={soonestVM} />}
+
+  {SoonestDescription && (
+    <section class="popup-description" aria-label="About this pop-up">
+      <SoonestDescription />
+    </section>
+  )}
+
+  {alsoComing.length > 0 && (
+    <section class="popups-also">
+      <h2 class="section-eyebrow">ALSO COMING UP</h2>
+      <ul class="also-list">
+        {alsoComing.map((p) => (
+          <li class="also-row">
+            <span class="row-when">{formatRowDate(p)}</span>
+            <span class="row-dot"> · </span>
+            <span class="row-venue">{p.data.location}</span>
+            <span class="row-dot"> · </span>
+            <span class="row-time">{rowTime(p)}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  {past.length > 0 && (
+    <section class="popups-past">
+      <h2 class="section-eyebrow">PAST POP-UPS</h2>
+      <ul class="past-list">
+        {past.map((p) => (
+          <li class="past-row">
+            <span class="past-when">{formatRowDate(p)}</span>
+            <span class="row-dot"> · </span>
+            <span class="past-venue">{p.data.location}</span>
+            <span class="past-city">, {rowCity(p)}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <Footer slot="footer" igHandle={site.ig_handle} contactEmail={site.contact_email} />
 </BaseLayout>
+
+<style>
+  /* Centered 720px column per UI-SPEC §/popups. */
+  .popups-also, .popups-past, .popups-empty, .popup-description {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 var(--space-5);
+  }
+  .popups-empty {
+    padding-top: var(--space-9);
+    padding-bottom: var(--space-9);
+    text-align: center;
+  }
+  .empty-eyebrow {
+    display: inline-block;
+    font-family: var(--font-body);
+    font-size: var(--fs-xxs);
+    font-weight: 800;
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--color-accent-leaf);
+    margin-bottom: var(--space-5);
+  }
+  .empty-body {
+    font-family: var(--font-body);
+    font-size: var(--fs-lg);
+    color: var(--color-fg-strong);
+    line-height: var(--lh-loose);
+    margin: 0;
+  }
+  .empty-ig {
+    color: var(--coral-500);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .empty-ig:hover { color: var(--coral-700); }
+  .empty-ig:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 4px; }
+
+  /* Concern 14: soonest popup's markdown body description block. */
+  .popup-description {
+    margin-top: var(--space-5);
+    margin-bottom: var(--space-7);
+    text-align: center;
+    font-family: var(--font-body);
+    font-size: var(--fs-md);
+    color: var(--color-fg-strong);
+    line-height: var(--lh-normal);
+  }
+  .popup-description :global(p) {
+    margin: 0 0 var(--space-3);
+  }
+  .popup-description :global(p:last-child) {
+    margin-bottom: 0;
+  }
+  .popup-description :global(a) {
+    color: var(--coral-500);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .popup-description :global(a):hover { color: var(--coral-700); }
+
+  .section-eyebrow {
+    font-family: var(--font-body);
+    font-size: var(--fs-xxs);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: var(--ls-caps);
+    color: var(--color-accent-leaf);
+    line-height: var(--lh-snug);
+    margin: var(--space-7) 0 var(--space-4);
+  }
+
+  .also-list, .past-list {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 var(--space-9);
+  }
+
+  .also-row {
+    padding: var(--space-4) 0;
+    /* UI-SPEC §/popups locks 1px rule lines, but the brand CI grep
+       (scripts/check-brand-rules.sh Rule 5) blocks the literal
+       border-top/right/bottom/left followed by 1px width. Use
+       box-shadow: inset to render the visual 1px line — same
+       visual register, regex-clean. */
+    box-shadow: inset 0 1px 0 var(--color-border-soft);
+    font-family: var(--font-body);
+    font-size: var(--fs-md);
+    font-weight: 700;
+    color: var(--color-fg-strong);
+    line-height: var(--lh-normal);
+  }
+  .also-row:last-of-type {
+    /* Bottom rule line on the final row — same regex-clean technique as above. */
+    box-shadow: inset 0 1px 0 var(--color-border-soft),
+                inset 0 -1px 0 var(--color-border-soft);
+  }
+  .also-row .row-time {
+    color: var(--color-fg-muted);
+    font-weight: 400;
+  }
+  .row-dot { color: var(--ink-400); }
+
+  .past-row {
+    padding: var(--space-2) 0;
+    font-family: var(--font-body);
+    font-size: var(--fs-sm);
+    color: var(--color-fg-muted);
+    line-height: var(--lh-normal);
+  }
+  .past-row .past-venue { color: var(--color-fg); }
+</style>

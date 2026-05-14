@@ -8,10 +8,13 @@ function PopupStrip({ popup }) {
   // skill demoed — but the values come from the prop (D-01: demo-loaded → real Phase 3 data).
   const dateLabel = (() => {
     if (!popup || !popup.date) return '';
-    // Format the ISO date using Intl.DateTimeFormat with the popup's timezone so
-    // the displayed weekday is correct regardless of build TZ.
+    // REVIEWS-MODE Concern 2 fix: build the Date from `popup.date` ALONE (UTC
+    // midnight of the YYYY-MM-DD string). Intl.DateTimeFormat with the popup's
+    // timeZone resolves the displayed weekday correctly. popup.startTime is
+    // a free-form display string ("11am") and is NEVER fed into a Date — it
+    // would NaN. The time portion is rendered separately via timeLabel below.
     try {
-      const d = new Date(popup.date + 'T' + (popup.startTime || '12:00') + ':00');
+      const d = new Date(popup.date);
       return new Intl.DateTimeFormat('en-US', {
         weekday: 'long', month: 'long', day: 'numeric',
         timeZone: popup.tz || 'America/Los_Angeles',
@@ -58,17 +61,6 @@ function PopupStrip({ popup }) {
 
       <div style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 18, color: 'var(--indigo-700)', marginTop: 14 }}>
         {dateLabel}{timeLabel ? ` · ${timeLabel}` : ''}
-      </div>
-
-      <div style={{ marginTop: 28, display: 'flex', justifyContent: 'center', gap: 14 }}>
-        {/* Real <a> to /say-hi instead of a button handler — no client: directive, so
-            the original handler would never have fired. SSR-safe. */}
-        <a href="/say-hi" style={{
-          display: 'inline-flex', alignItems: 'center', padding: '12px 24px',
-          background: 'var(--coral-500)', color: 'var(--cream-50)',
-          textDecoration: 'none', borderRadius: 8,
-          fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 16,
-        }}>book by appointment</a>
       </div>
     </section>
   );

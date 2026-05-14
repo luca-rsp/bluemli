@@ -62,8 +62,19 @@ Plans:
   2. A typo in a gallery frontmatter field (e.g., `availabilty: sold`) fails the build with a clear Zod error message, before the bad data ever ships.
   3. A sold piece, marked `status: sold`, renders in the gallery grid with a quiet editorial "Sold" badge (not hidden) and remains in the portfolio archive.
   4. The per-piece detail page emits a per-piece `og:image` (the piece's hero photo, absolute URL) so an Instagram or iMessage link unfurls correctly.
-  5. `CONTENT_EDITING.md` exists at the repo root with screenshots of the GitHub web UI flow and a clearly labeled "never delete, flip availability" section; zero `git`/`npm`/`cd` instructions appear in any content-editing step.
-**Plans**: TBD
+  5. `CONTENT_EDITING.md` exists at the repo root with the GitHub web UI flow documented in prose (screenshots deferred to first founder content-editing workflow review — section §3 of CONTENT_EDITING.md flags this) and a clearly labeled "never delete, flip availability" section; zero `git`/`npm`/`cd` instructions appear in any content-editing step.
+**Plans**: 5 plans
+Plans:
+**Wave 1**
+- [x] 02-01-PLAN.md — Schema + 6 seed pieces + site config + BaseLayout head slot (CNT-01..CNT-06, CNT-10)
+- [x] 02-02-PLAN.md — HEIC→WebP prebuild pipeline + CI step + gitignore (CNT-11)
+- [x] 02-03-PLAN.md — Phase 1 cleanup (delete ProductSheet, fix #FFF regex)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [x] 02-04-PLAN.md — Wire schema into /gallery + /gallery/<slug> + delete sample-data + activate Rule 7 (CNT-02, CNT-07, CNT-08, CNT-09, CNT-10, CNT-11, PAG-09)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [x] 02-05-PLAN.md — CONTENT_EDITING.md + REQUIREMENTS/ROADMAP narrative sync (CNT-12)
 
 **Key risks / pitfalls:**
 - Schema design is one-shot: every `.strict()` enum, every required field, and the per-slug image co-location pattern must be baked in now (Pitfalls #6, #11, #12) — migrating later means rewriting every existing file.
@@ -71,24 +82,40 @@ Plans:
 - Founder workflow risk (Pitfall #23) — the GitHub web UI flow must be documented with screenshots and the founder should dry-run adding a piece before this phase is signed off.
 
 ### Phase 3: Page Composition & Pop-ups
-**Goal**: All five pages render their real content on preview — landing (hero + next-pop-up callout + featured pieces), gallery (from Phase 2), popups (timezone-correct upcoming + past archive, auto-refreshing daily), about (written portrait + process shots), say-hi (form shell + IG + mailto fallbacks) — with per-page SEO meta and a published sitemap.
+**Goal**: All five pages render their real content on preview — landing (hero + OPTIONAL mini-callout for the next pop-up, omitted on zero upcoming per D-03 + 3 featured pieces + footer), gallery (from Phase 2), popups (timezone-correct upcoming + past archive, auto-refreshing daily), about (written portrait + closing photo strip reusing gallery hero WebPs per D-14), say-hi (Instagram DM link + mailto fallback, no form per D-18) — with per-page SEO meta and a published sitemap.
 **Depends on**: Phase 2
-**Requirements**: PAG-01, PAG-02, PAG-03, PAG-04, PAG-05, PAG-06, PAG-07, PAG-08, PAG-09
+**Requirements**: PAG-01, PAG-02, PAG-03, PAG-05, PAG-06, PAG-07, PAG-08, PAG-09 (PAG-04 deferred to a later phase — see Wave 3 note on 03-05)
 **Success Criteria** (what must be TRUE):
-  1. Landing page shows the hero, the next-upcoming pop-up callout (or the empty-state line "no pop-ups on the calendar right now — DM me on Instagram" when no future pop-up exists), 3–6 featured gallery pieces, and the footer — all populated from content collections.
-  2. A pop-up dated for "today" in Pacific time appears in the Upcoming section all day on its date in San Francisco (does not flip to Past at UTC midnight); after its end date, the next deploy (or the daily 3 AM PT cron rebuild) moves it to the Past archive automatically.
-  3. The About page renders a first-person written portrait with hand-font headline and signature close, plus 1–3 process/craft shots (hands, beads, bench — no founder face), with no empty "press" or "as featured in" placeholders.
+  1. Landing page shows the hero, a mini-callout for the next-upcoming pop-up (per D-02; OMITTED entirely when no future pop-up exists per D-03 — no eyebrow, no copy, no empty-state line), 3 featured gallery pieces (per D-04), and the footer — all populated from content collections.
+  2. A pop-up dated for "today" in Pacific time appears in the Upcoming section all day on its date in San Francisco (does not flip to Past at UTC midnight); after its end date, the next deploy moves it to the Past archive automatically. *(Daily auto-rebuild cron deferred — see 03-05 SUMMARY: integrated `wrangler.jsonc` approach proved structurally incompatible with `@astrojs/cloudflare@13.5`; until cron is added in a future phase the founder triggers a rebuild manually when a popup ends.)*
+  3. The About page renders a first-person written portrait with hand-font headline and the "made with love from NOPA ♡" signature close (D-16), plus a closing photo strip of 1–3 gallery hero WebPs (per D-14 — dedicated process/craft shots deferred to v1.x; the no-founder-face rule stays intact since gallery photos don't show the founder), with no empty "press" or "as featured in" placeholders.
   4. Sharing the home, a gallery piece, and a pop-up URL in iMessage/Slack/IG DM each produce a correct unfurl preview (title, description, og:image), and `https://studiobluemli.com/sitemap-index.xml` + `/robots.txt` return valid content with the sitemap reference.
   5. Every page's `<link rel="canonical">` points to the apex `studiobluemli.com` (not `www.`, not a preview hostname).
-**Plans**: TBD
+**Plans**: 7 plans (5 original + 2 gap-closure)
+Plans:
+**Wave 1**
+- [x] 03-01-brand-system-tweaks-PLAN.md — Wordmark font swap (Bagel Fat One -> Caveat Brush) and project-wide NoPa -> NOPA casing fix on user-facing copy (D-24, D-25)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [x] 03-02-seo-sitemap-robots-PLAN.md — Shared <SEO /> + @astrojs/sitemap + env-aware /robots.txt endpoint + default og:image PNG + REQUIREMENTS.md edits (PAG-02, PAG-06, PAG-07, PAG-08; D-19, D-23, D-26-D-29)
+
+**Wave 3** *(blocked on Wave 2 completion; three plans run in parallel)*
+- [x] 03-03-popups-and-landing-PLAN.md — TZ-aware splitPopups() helper + landing mini-callout + /popups page with ALSO COMING UP/PAST/empty-state + PopupStrip CTA delete (PAG-01, PAG-03; D-02-D-11)
+- [x] 03-04-about-and-say-hi-PLAN.md — /about copy rewrite + photo strip + signature + /say-hi IG-link page (form dropped) (PAG-05, PAG-06, PAG-09; D-13-D-18, D-21-D-23)
+- [~] 03-05-cron-rebuild-PLAN.md — DEFERRED (spike FAIL): integrated `wrangler.jsonc` + `src/scheduled.ts` approach proved structurally incompatible with `@astrojs/cloudflare@13.5`, which writes `dist/server/wrangler.json` and silently strips user-level `main` + `triggers.crons` at deploy time. Per user decision, cron rebuild is deferred to a future phase; founder triggers manual rebuild when a popup ends. Full root-cause analysis in `03-05-SUMMARY.md`. (PAG-04 deferred; D-12)
+
+**Gap-closure (post-verification; run in parallel, independent of original waves):**
+- [x] 03-06-seo-robots-gap-closure-PLAN.md — Fix BL-01 (homepage canonical trailing slash) + BL-02 (resolveAssetBase reads process.env not import.meta.env) + BL-03 (PUBLIC_DEPLOY_ENV=production prefix on deploy script so robots.txt ships Allow + Sitemap); add scripts/check-seo-output.mjs + ci:seo-check npm gate (closes GAP-01, GAP-02, GAP-03; PAG-07, PAG-08)
+- [x] 03-07-about-heart-glyph-PLAN.md — Pass filled={false} to Mark.Heart in About.jsx so /about signature renders outline ♡ per D-16 (closes GAP-04 / WR-06; PAG-05)
 **UI hint**: yes
 
 **Key risks / pitfalls:**
 - Timezone math is subtle (Pitfall #7) — store `date` + `start_time` + `tz: "America/Los_Angeles"`; compute cutoff in studio timezone using a real TZ library (`Temporal` polyfill or `@date-fns/tz`), never naive `new Date()` UTC math.
-- Daily auto-rebuild via Cloudflare cron — LOCKED (founder confirmed). Plan must wire the cron trigger to a build webhook so the upcoming/past split refreshes without founder action.
-- Process/craft shots availability — LOCKED ("process / craft shots" decided for About); confirm during plan-phase whether the founder has already shot these or needs to shoot them before the phase can sign off.
+- Daily auto-rebuild via Cloudflare cron — DEFERRED. Phase 3 spike (03-05) confirmed the integrated approach is structurally incompatible with `@astrojs/cloudflare@13.5` (adapter overwrites `wrangler.jsonc`). Documented fallback path: a SEPARATE cron-only Worker (`studio-bluemli-cron`) with its own `wrangler-cron.jsonc` + minimal `src/cron-only.ts`. Until that ships in a future phase, the founder triggers rebuilds manually when a popup ends.
+- Process/craft shots availability — SOFTENED in Phase 3 planning (D-14): the founder doesn't currently have dedicated bench/hands/beads photos; the About page reuses 1–3 existing gallery hero WebPs as the closing visual flourish. Real bench shots can be swapped in later via a small follow-up commit by the founder via the GitHub web UI when the photos exist. The no-founder-face lock is preserved.
 - Missing per-page `og:image` (Pitfall #14) — verify the shared `SEO.astro` component on every page during planning; emit absolute URLs (not relative) for og/twitter image meta.
 - Empty placeholders — if the founder has no real press, the About page ships without a press section; never show "as featured in" as an empty slot (Pitfall: anti-feature from FEATURES.md).
+- Contact form scope cut (Phase 3 D-18) — `/say-hi` ships in v1 as an IG-DM-link page + mailto fallback only. The Phase 4 (Contact Form & Deliverability) entry in this ROADMAP is removed via a separate `/gsd-phase` operation after Phase 3 completes (per D-20); Phase 5's `Depends on` is updated by that same operation. Phase 3 plans do not edit the Phase 4 ROADMAP entry directly.
 
 ### Phase 4: Contact Form & Deliverability
 **Goal**: A visitor can fill the Say Hi form on the live preview and the message reliably lands in `hi@studiobluemli.com` (MS365 inbox) — surviving Turnstile + honeypot + KV rate limit — and the founder can hit Reply in Outlook/Gmail to reach the visitor.
@@ -138,7 +165,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundations & Brand System | 5/5 | Complete | 2026-05-13 |
-| 2. Content Schema & Gallery | 0/TBD | Not started | - |
+| 2. Content Schema & Gallery | 5/5 | Complete | 2026-05-14 |
 | 3. Page Composition & Pop-ups | 0/TBD | Not started | - |
 | 4. Contact Form & Deliverability | 0/TBD | Not started | - |
 | 5. Analytics, Polish & Launch | 0/TBD | Not started | - |

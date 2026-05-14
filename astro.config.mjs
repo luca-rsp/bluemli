@@ -2,6 +2,7 @@
 import { defineConfig, passthroughImageService, fontProviders } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import react from '@astrojs/react';
+import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   site: 'https://studiobluemli.com',
@@ -16,7 +17,7 @@ export default defineConfig({
 
   adapter: cloudflare({}),
 
-  integrations: [react()],
+  integrations: [react(), sitemap()],
 
   image: {
     // Sharp doesn't run in workerd (Pitfall #9). Use passthrough — no transforms
@@ -27,13 +28,6 @@ export default defineConfig({
   // Astro 6 stable Fonts API — top-level `fonts`, NOT under experimental.
   // `display: 'swap'` is required on every face (FND-07, Pitfall #10, D-15).
   fonts: [
-    {
-      provider: fontProviders.fontsource(),
-      name: 'Bagel Fat One',
-      cssVariable: '--font-wordmark-loaded',
-      weights: [400],
-      display: 'swap',
-    },
     {
       provider: fontProviders.fontsource(),
       name: 'Caveat Brush',

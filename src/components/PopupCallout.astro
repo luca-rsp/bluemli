@@ -1,0 +1,96 @@
+---
+// src/components/PopupCallout.astro — Phase 3 PAG-01 / D-02, D-05.
+// Landing-page mini-callout. Quieter than PopupStrip — PopupStrip stays on /popups only.
+//
+// Visual register: UI-SPEC §Landing mini-callout + sketch-findings 003-C.
+// Layout: centered 640px-max column, eyebrow + when-line + time + optional see-all link.
+//
+// REVIEWS-MODE Concern 2 fix: date label built from `date` ONLY via
+// Temporal.PlainDate.toLocaleString. The `start_time` and `end_time` fields
+// are FREE-FORM display strings ("11am", "11:00 AM") and are interpolated
+// VERBATIM into the time line — never parsed as Date components. This is
+// both build-machine-TZ-safe and resilient to whatever string the founder
+// puts in start_time.
+
+import type { CollectionEntry } from 'astro:content';
+import { Temporal } from 'temporal-polyfill';
+
+interface Props {
+  popup:       CollectionEntry<'popups'>;
+  hasMultiple: boolean;
+}
+const { popup, hasMultiple } = Astro.props;
+
+// Concern 2: build the date label from `date` alone via Temporal.PlainDate.
+// Never construct a Date from `${date}T${startTime}` — start_time is a
+// display string ("11am") and would NaN.
+const plainDate = Temporal.PlainDate.from(popup.data.date);
+const dateLabel = plainDate.toLocaleString('en-US', {
+  weekday: 'long',
+  month:   'long',
+  day:     'numeric',
+});
+
+// Time-line: en-dash separator (UI-SPEC: never hyphen).
+// startTime + endTime rendered VERBATIM — no parsing.
+const timeLabel = `${popup.data.start_time}–${popup.data.end_time}`;
+---
+<section class="popup-callout">
+  <span class="hand-eyebrow">next pop-up</span>
+  <p class="when">{dateLabel} — <span class="venue">{popup.data.location}</span></p>
+  <p class="time">{timeLabel}</p>
+  {hasMultiple && (
+    <a class="see-all" href="/popups">see all upcoming pop-ups →</a>
+  )}
+</section>
+
+<style>
+  /* UI-SPEC §Landing — verbatim from 03-RESEARCH.md Example 1. */
+  .popup-callout {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: var(--space-6) var(--space-5);
+    text-align: center;
+  }
+  .hand-eyebrow {
+    font-family: var(--font-hand);
+    font-size: var(--fs-xl);              /* 28px */
+    color: var(--color-accent-leaf);
+    line-height: 1;
+    display: inline-block;
+    transform: rotate(-1.5deg);
+    margin-bottom: var(--space-3);
+  }
+  .when {
+    font-family: var(--font-body);
+    font-weight: 800;
+    font-size: var(--fs-xl);              /* 28px */
+    color: var(--color-fg-strong);
+    line-height: 1.15;
+    margin: 0 0 var(--space-4);
+  }
+  .when .venue { color: var(--coral-500); }
+  .time {
+    font-family: var(--font-body);
+    font-size: var(--fs-sm);
+    color: var(--color-fg-muted);
+    line-height: var(--lh-normal);
+    margin: 0 0 var(--space-3);
+  }
+  .see-all {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: var(--fs-xs);
+    color: var(--coral-500);
+    text-decoration: none;
+    line-height: 1;
+    display: inline-block;
+    transition: transform var(--dur-fast) var(--ease-soft),
+                color     var(--dur-fast) var(--ease-soft);
+  }
+  .see-all:hover { color: var(--coral-700); transform: translateX(2px); }
+  .see-all:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 4px;
+  }
+</style>

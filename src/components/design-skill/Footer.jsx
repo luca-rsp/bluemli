@@ -2,7 +2,7 @@
 import React from 'react';
 import Mark from './Mark';
 
-function Footer() {
+function Footer({ igHandle, contactEmail }) {
   return (
     <footer role="contentinfo" style={{
       padding: '48px 32px 56px',
@@ -16,15 +16,15 @@ function Footer() {
         <div style={{ fontFamily: 'var(--font-wordmark)', fontSize: 28, color: 'var(--coral-500)', lineHeight: 1, letterSpacing: '-0.02em' }}>Studio Bluemli</div>
       </div>
       <div style={{ marginTop: 6, fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--indigo-500)' }}>
-        hand-assembled earrings · made in NoPa, San Francisco
+        hand-assembled earrings · made in NOPA, San Francisco
       </div>
 
       <div style={{ marginTop: 22, display: 'flex', justifyContent: 'center', gap: 22, fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--indigo-500)' }}>
-        <a href="https://instagram.com/studio_bluemli" target="_blank" rel="noreferrer" style={{ color: 'var(--coral-500)' }}>@studio_bluemli</a>
+        <a href={`https://instagram.com/${igHandle}`} target="_blank" rel="noreferrer" style={{ color: 'var(--coral-500)' }}>@{igHandle}</a>
         <span style={{ color: 'var(--ink-400)' }}>·</span>
-        <a href="mailto:hi@studiobluemli.com" style={{ color: 'var(--coral-500)' }}>hi@studiobluemli.com</a>
+        <a href={`mailto:${contactEmail}`} style={{ color: 'var(--coral-500)' }}>{contactEmail}</a>
         <span style={{ color: 'var(--ink-400)' }}>·</span>
-        <span style={{ color: 'var(--olive-500)', fontWeight: 700 }}>NoPa, San Francisco</span>
+        <span style={{ color: 'var(--olive-500)', fontWeight: 700 }}>NOPA, San Francisco</span>
       </div>
 
       <div style={{ marginTop: 24, fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--ink-600)', letterSpacing: '0.04em' }}>

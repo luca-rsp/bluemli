@@ -7,6 +7,7 @@ function Header({ active = '/' }) {
     ['/',        'home'],
     ['/gallery', 'gallery'],
     ['/popups',  'pop-ups'],
+    ['/about',   'about'],
     ['/say-hi',  'say hi'],
   ];
   // Mobile nav uses <details><summary>. Native semantics:
@@ -139,9 +140,6 @@ function Header({ active = '/' }) {
 }
 
 // HeaderProps.active union — must accept ALL five route paths.
-// /about is included even though it's not in the visible nav, because
-// Plan 04 about.astro passes `active="/about"`. Missing this entry breaks
-// `pnpm exec astro check` with a prop-type error.
 /** @typedef {Object} HeaderProps
  *  @property {'/' | '/gallery' | '/popups' | '/about' | '/say-hi'} [active]
  */

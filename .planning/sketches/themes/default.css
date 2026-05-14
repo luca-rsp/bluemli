@@ -1,0 +1,105 @@
+/* ============================================================
+   Studio Bluemli — sketch theme (default)
+   Subset of src/styles/colors_and_type.css, scoped to what
+   sketches need. Throwaway file — not the source of truth.
+   ============================================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=Caveat+Brush&family=Caveat:wght@400;500&family=Nunito:wght@400;600;700;800&display=swap");
+
+:root {
+  /* Cream paper */
+  --cream-50:  #FAEDE0;
+  --cream-100: #F5DCC7;
+  --cream-200: #ECCDB3;
+  --cream-300: #DDB99A;
+
+  /* Coral */
+  --coral-300: #E89A82;
+  --coral-500: #D6553B;
+  --coral-700: #A93C26;
+
+  /* Pink */
+  --pink-200:  #F4C2CB;
+  --pink-400:  #E89AAA;
+  --pink-500:  #D87593;
+
+  /* Indigo */
+  --indigo-400: #5A6BB3;
+  --indigo-500: #3E4E8B;
+  --indigo-700: #2A3669;
+
+  /* Olive */
+  --olive-400: #9AA065;
+  --olive-500: #6E7438;
+
+  /* Mustard / lavender (sparingly) */
+  --mustard-500: #E9B23F;
+  --lavender-500: #9B85B5;
+
+  /* Ink (warm grays on cream) */
+  --ink-900: #2B2014;
+  --ink-600: #6C5A47;
+  --ink-400: #A48F77;
+
+  /* Semantic */
+  --color-bg:           var(--cream-100);
+  --color-bg-soft:      var(--cream-50);
+  --color-bg-deep:      var(--cream-200);
+  --color-surface-card: var(--cream-50);
+
+  --color-fg:           var(--indigo-500);
+  --color-fg-strong:    var(--indigo-700);
+  --color-fg-muted:     var(--ink-600);
+  --color-fg-hint:      var(--ink-400);
+  --color-fg-on-coral:  var(--cream-50);
+
+  --color-accent-hot:   var(--coral-500);
+  --color-accent-leaf:  var(--olive-500);
+  --color-accent-sky:   var(--indigo-500);
+
+  --color-link:         var(--coral-500);
+  --color-link-hover:   var(--coral-700);
+  --color-focus-ring:   var(--coral-500);
+
+  --color-border-soft:  rgba(43, 32, 20, 0.08);
+  --color-border:       rgba(43, 32, 20, 0.16);
+
+  /* Fonts */
+  --font-display:     "Caveat Brush", "Permanent Marker", "Marker Felt", cursive;
+  --font-hand:        "Caveat", "Patrick Hand", cursive;
+  --font-body:        "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Type scale */
+  --fs-xxs: 12px; --fs-xs: 14px; --fs-sm: 16px; --fs-md: 18px;
+  --fs-lg: 22px; --fs-xl: 28px; --fs-2xl: 36px; --fs-3xl: 48px;
+  --fs-4xl: 64px; --fs-5xl: 88px;
+
+  --lh-tight: 1.05; --lh-snug: 1.2; --lh-normal: 1.45; --lh-loose: 1.7;
+  --ls-caps: 0.08em;
+
+  /* Spacing (8pt) */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px;
+  --space-9: 96px;
+
+  /* Radii */
+  --radius-sm: 8px; --radius-md: 14px; --radius-lg: 22px; --radius-pill: 999px;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-normal);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a { color: var(--color-link); text-decoration: underline; text-underline-offset: 3px; }
+a:hover { color: var(--color-link-hover); }
+a:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 3px; border-radius: 2px; }
+
+button { font-family: var(--font-body); }

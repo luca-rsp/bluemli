@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sketch 006 — /say-hi IG-link page · Studio Bluemli</title>
+  <link rel="stylesheet" href="../themes/default.css" />
+  <style>
+    /* ============================================================
+       Sketch chrome
+       ============================================================ */
+    .sketch-tabs {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--cream-50);
+      border-bottom: 1px solid var(--color-border-soft);
+      padding: var(--space-3) var(--space-4);
+      display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap;
+      font-family: var(--font-body); font-size: var(--fs-xs);
+    }
+    .sketch-tabs .label {
+      font-weight: 800; letter-spacing: var(--ls-caps); text-transform: uppercase;
+      color: var(--color-fg-muted); margin-right: var(--space-3);
+    }
+    .sketch-tabs button {
+      background: transparent; border: 0; cursor: pointer;
+      padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill);
+      font-family: var(--font-body); font-size: var(--fs-xs); font-weight: 700;
+      color: var(--color-fg);
+    }
+    .sketch-tabs button.is-active {
+      background: var(--coral-500); color: var(--color-fg-on-coral);
+    }
+    .sketch-tabs button:hover:not(.is-active) { background: var(--cream-200); }
+    .sketch-tabs .star { color: var(--mustard-500); margin-right: 2px; }
+    .variant { display: none; }
+    .variant.is-active { display: block; }
+
+    /* Faux header + footer */
+    .faux-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: var(--space-5) var(--space-6);
+      max-width: 1080px; margin: 0 auto;
+    }
+    .faux-header .mark { font-family: var(--font-display); font-size: var(--fs-xl); color: var(--coral-500); }
+    .faux-header nav a {
+      font-family: var(--font-body); font-size: var(--fs-xs); font-weight: 700;
+      text-transform: uppercase; letter-spacing: var(--ls-caps);
+      color: var(--color-fg-strong); text-decoration: none;
+      margin-left: var(--space-5);
+    }
+    .faux-header nav a.is-current { color: var(--coral-500); }
+    .faux-footer {
+      padding: var(--space-6) var(--space-6); text-align: center;
+      font-family: var(--font-body); font-size: var(--fs-xs);
+      color: var(--color-fg-muted);
+      border-top: 1px solid var(--color-border-soft);
+      margin-top: var(--space-9);
+    }
+    .faux-footer .tag {
+      font-family: var(--font-hand); font-size: var(--fs-md); color: var(--color-fg-strong);
+      display: block; margin-bottom: var(--space-2);
+    }
+
+    /* ============================================================
+       VARIANT A — Hero-style (matches landing weight)
+       ============================================================ */
+    .v-a .stage {
+      min-height: 540px;
+      max-width: 720px; margin: 0 auto;
+      padding: var(--space-9) var(--space-5) var(--space-7);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center;
+    }
+    .v-a .stage .eyebrow {
+      font-family: var(--font-body); font-size: var(--fs-xxs); font-weight: 800;
+      letter-spacing: var(--ls-caps); text-transform: uppercase;
+      color: var(--olive-500); margin-bottom: var(--space-3);
+    }
+    .v-a .stage h1 {
+      font-family: var(--font-display);
+      font-size: clamp(56px, 9vw, 96px);
+      line-height: 1; color: var(--coral-500);
+      margin: 0 0 var(--space-3);
+    }
+    .v-a .stage .sub {
+      font-family: var(--font-hand); font-size: var(--fs-xl);
+      color: var(--color-fg-strong);
+      margin: 0 0 var(--space-7);
+    }
+    .v-a .stage .ig-button {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      background: var(--coral-500); color: var(--color-fg-on-coral);
+      text-decoration: none;
+      padding: var(--space-3) var(--space-6);
+      border-radius: var(--radius-pill);
+      font-family: var(--font-body); font-weight: 800; font-size: var(--fs-md);
+    }
+    .v-a .stage .ig-button:hover { background: var(--coral-700); color: var(--color-fg-on-coral); }
+    .v-a .stage .ig-button .arrow { display: inline-block; transition: transform .15s; }
+    .v-a .stage .ig-button:hover .arrow { transform: translateX(3px); }
+    .v-a .stage .mailto {
+      margin-top: var(--space-4);
+      font-family: var(--font-body); font-size: var(--fs-sm);
+      color: var(--color-fg-muted);
+    }
+    .v-a .stage .mailto a { color: var(--coral-500); }
+
+    /* ============================================================
+       VARIANT B — Ultra-minimal centered single-link
+       ============================================================ */
+    .v-b .stage {
+      min-height: 540px;
+      max-width: 560px; margin: 0 auto;
+      padding: var(--space-9) var(--space-5);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center;
+    }
+    .v-b .stage h1 {
+      font-family: var(--font-display);
+      font-size: var(--fs-3xl);  /* 48px — quieter */
+      line-height: 1; color: var(--coral-500);
+      margin: 0 0 var(--space-5);
+    }
+    .v-b .stage p {
+      font-family: var(--font-body); font-size: var(--fs-md);
+      line-height: var(--lh-loose); color: var(--color-fg);
+      margin: 0 0 var(--space-3);
+    }
+    .v-b .stage a {
+      color: var(--coral-500); text-decoration: underline;
+      text-underline-offset: 4px; font-weight: 700;
+    }
+    .v-b .stage a:hover { color: var(--coral-700); }
+
+    /* ============================================================
+       VARIANT C — Eyebrow + Caveat headline + two stacked button-like links
+       ============================================================ */
+    .v-c .stage {
+      min-height: 540px;
+      max-width: 480px; margin: 0 auto;
+      padding: var(--space-9) var(--space-5) var(--space-7);
+      display: flex; flex-direction: column; align-items: stretch;
+      text-align: center;
+    }
+    .v-c .stage .eyebrow {
+      font-family: var(--font-body); font-size: var(--fs-xxs); font-weight: 800;
+      letter-spacing: var(--ls-caps); text-transform: uppercase;
+      color: var(--olive-500); margin-bottom: var(--space-3);
+      text-align: center;
+    }
+    .v-c .stage h1 {
+      font-family: var(--font-display);
+      font-size: 64px; line-height: 1;
+      color: var(--coral-500);
+      margin: 0 0 var(--space-2);
+      text-align: center;
+    }
+    .v-c .stage .sub {
+      font-family: var(--font-hand); font-size: var(--fs-xl);
+      color: var(--color-fg-strong);
+      margin: 0 0 var(--space-7);
+      text-align: center;
+    }
+    .v-c .stage .link-stack {
+      display: flex; flex-direction: column; gap: var(--space-3);
+      width: 100%;
+    }
+    .v-c .stage .link-primary {
+      background: var(--coral-500); color: var(--color-fg-on-coral);
+      text-decoration: none;
+      padding: var(--space-4) var(--space-5);
+      border-radius: var(--radius-pill);
+      font-family: var(--font-body); font-weight: 800; font-size: var(--fs-md);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .v-c .stage .link-primary:hover { background: var(--coral-700); color: var(--color-fg-on-coral); }
+    .v-c .stage .link-secondary {
+      background: transparent; color: var(--coral-500);
+      text-decoration: none;
+      padding: var(--space-4) var(--space-5);
+      border-radius: var(--radius-pill);
+      box-shadow: inset 0 0 0 2px var(--coral-500);
+      font-family: var(--font-body); font-weight: 800; font-size: var(--fs-md);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .v-c .stage .link-secondary:hover { color: var(--coral-700); box-shadow: inset 0 0 0 2px var(--coral-700); }
+    .v-c .stage .link-stack .arrow { transition: transform .15s; }
+    .v-c .stage .link-primary:hover .arrow,
+    .v-c .stage .link-secondary:hover .arrow { transform: translateX(3px); }
+
+    /* Footnote */
+    .note {
+      max-width: 720px; margin: 0 auto;
+      padding: var(--space-3) var(--space-5) var(--space-7);
+      font-family: var(--font-body); font-size: var(--fs-xs);
+      color: var(--color-fg-muted); text-align: center;
+      line-height: var(--lh-loose);
+    }
+  </style>
+</head>
+<body>
+
+<nav class="sketch-tabs" role="tablist" aria-label="Sketch variants">
+  <span class="label">Sketch 006 · /say-hi IG-link</span>
+  <button class="is-active" data-variant="a"><span class="star">★</span>Variant A: Hero-style</button>
+  <button data-variant="b">Variant B: ultra-minimal text</button>
+  <button data-variant="c">Variant C: two stacked button-links</button>
+</nav>
+
+<!-- ============================================================
+     VARIANT A
+     ============================================================ -->
+<section class="variant v-a is-active">
+  <header class="faux-header">
+    <div class="mark">Studio Bluemli</div>
+    <nav><a href="#">gallery</a><a href="#">pop-ups</a><a href="#">about</a><a href="#" class="is-current">say hi</a></nav>
+  </header>
+
+  <div class="stage">
+    <h1>say hi</h1>
+    <p class="sub">let's talk earrings</p>
+    <a class="ig-button" href="https://ig.me/m/studiobluemli">DM me on Instagram <span class="arrow">→</span></a>
+    <p class="mailto">or email <a href="mailto:hi@studiobluemli.com">hi@studiobluemli.com</a></p>
+  </div>
+
+  <p class="note">
+    Variant A (refined): Hero-style — Caveat Brush headline at clamp(56–96px) matches the landing Hero's weight, Caveat sub-tagline at 28px, single coral pill IG button, mailto small text underneath. Eyebrow dropped (would duplicate the "say hi" headline). Feels intentional and warm without sprouting a form.
+  </p>
+
+  <footer class="faux-footer">
+    <span class="tag">made with love from NOPA ♡</span>
+    Studio Bluemli · @studiobluemli · hi@studiobluemli.com
+  </footer>
+</section>
+
+<!-- ============================================================
+     VARIANT B
+     ============================================================ -->
+<section class="variant v-b">
+  <header class="faux-header">
+    <div class="mark">Studio Bluemli</div>
+    <nav><a href="#">gallery</a><a href="#">pop-ups</a><a href="#">about</a><a href="#" class="is-current">say hi</a></nav>
+  </header>
+
+  <div class="stage">
+    <h1>say hi</h1>
+    <p>The easiest way to reach me is on Instagram — <a href="https://ig.me/m/studiobluemli">DM @studiobluemli</a>.</p>
+    <p>Or send a note to <a href="mailto:hi@studiobluemli.com">hi@studiobluemli.com</a>.</p>
+  </div>
+
+  <p class="note">
+    Variant B: ultra-minimal — Caveat Brush at 48px (gallery-detail size), two short sentences, links inline, no button. Reads like a personal note. Lowest visual weight, highest risk of "is this page finished?".
+  </p>
+
+  <footer class="faux-footer">
+    <span class="tag">made with love from NOPA ♡</span>
+    Studio Bluemli · @studiobluemli · hi@studiobluemli.com
+  </footer>
+</section>
+
+<!-- ============================================================
+     VARIANT C
+     ============================================================ -->
+<section class="variant v-c">
+  <header class="faux-header">
+    <div class="mark">Studio Bluemli</div>
+    <nav><a href="#">gallery</a><a href="#">pop-ups</a><a href="#">about</a><a href="#" class="is-current">say hi</a></nav>
+  </header>
+
+  <div class="stage">
+    <div class="eyebrow">Say hi</div>
+    <h1>say hi</h1>
+    <p class="sub">let's talk earrings</p>
+    <div class="link-stack">
+      <a class="link-primary" href="https://ig.me/m/studiobluemli">
+        <span>DM me on Instagram</span>
+        <span class="arrow">→</span>
+      </a>
+      <a class="link-secondary" href="mailto:hi@studiobluemli.com">
+        <span>email hi@studiobluemli.com</span>
+        <span class="arrow">→</span>
+      </a>
+    </div>
+  </div>
+
+  <p class="note">
+    Variant C: two equal-weight pill links (coral fill + coral outline) stacked in a 480px column. Treats IG and email as two doors of equal standing. Slightly more "link-in-bio" but reads as deliberate options rather than primary + fallback.
+  </p>
+
+  <footer class="faux-footer">
+    <span class="tag">made with love from NOPA ♡</span>
+    Studio Bluemli · @studiobluemli · hi@studiobluemli.com
+  </footer>
+</section>
+
+<script>
+  const tabs = document.querySelectorAll('.sketch-tabs button[data-variant]');
+  const variants = { a: 'v-a', b: 'v-b', c: 'v-c' };
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const v = btn.dataset.variant;
+      tabs.forEach(b => b.classList.toggle('is-active', b === btn));
+      Object.entries(variants).forEach(([key, cls]) => {
+        document.querySelector('.' + cls).classList.toggle('is-active', key === v);
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+</script>
+</body>
+</html>

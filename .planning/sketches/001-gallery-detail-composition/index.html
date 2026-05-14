@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sketch 001 — Gallery detail composition · Studio Bluemli</title>
+  <link rel="stylesheet" href="../themes/default.css" />
+  <style>
+    /* Sketch-only chrome */
+    .sketch-tabs {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--cream-50);
+      border-bottom: 1px solid var(--color-border-soft);
+      padding: var(--space-3) var(--space-4);
+      display: flex; gap: var(--space-2); align-items: center;
+      font-family: var(--font-body); font-size: var(--fs-xs);
+    }
+    .sketch-tabs .label {
+      font-weight: 800; letter-spacing: var(--ls-caps); text-transform: uppercase;
+      color: var(--color-fg-muted); margin-right: var(--space-3);
+    }
+    .sketch-tabs button {
+      background: transparent; border: 0; cursor: pointer;
+      padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill);
+      font-family: var(--font-body); font-size: var(--fs-xs); font-weight: 700;
+      color: var(--color-fg);
+    }
+    .sketch-tabs button.is-active {
+      background: var(--coral-500); color: var(--color-fg-on-coral);
+    }
+    .sketch-tabs button:hover:not(.is-active) { background: var(--cream-200); }
+    .sketch-tabs .star { color: var(--mustard-500); margin-right: 2px; }
+
+    .variant { display: none; }
+    .variant.is-active { display: block; }
+
+    /* Shared chrome */
+    .site-header {
+      padding: var(--space-5) var(--space-6);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .site-header .mark {
+      font-family: var(--font-display);
+      font-size: var(--fs-xl);
+      color: var(--coral-500);
+      letter-spacing: -0.01em;
+    }
+    .site-header nav a {
+      font-family: var(--font-body);
+      font-size: var(--fs-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: var(--ls-caps);
+      color: var(--color-fg-strong);
+      text-decoration: none;
+      margin-left: var(--space-5);
+    }
+    .site-header nav a.is-current { color: var(--coral-500); }
+
+    .back-link {
+      font-family: var(--font-body);
+      font-size: var(--fs-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: var(--ls-caps);
+      color: var(--color-fg-muted);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--coral-500); }
+
+    .status-badge {
+      display: inline-block;
+      font-family: var(--font-body);
+      font-size: var(--fs-xxs);
+      font-weight: 800;
+      letter-spacing: var(--ls-caps);
+      text-transform: uppercase;
+      color: var(--color-accent-leaf);
+    }
+    .status-badge.sold { color: var(--lavender-500); }
+
+    .cta-button {
+      display: inline-block;
+      background: var(--coral-500);
+      color: var(--color-fg-on-coral);
+      text-decoration: none;
+      padding: var(--space-3) var(--space-6);
+      border-radius: var(--radius-pill);
+      font-family: var(--font-body);
+      font-weight: 800;
+      font-size: var(--fs-sm);
+      letter-spacing: 0.01em;
+    }
+    .cta-button:hover { background: var(--coral-700); color: var(--color-fg-on-coral); }
+
+    .mailto-fallback {
+      font-family: var(--font-body);
+      font-size: var(--fs-xs);
+      color: var(--color-fg-muted);
+    }
+
+    .product-photo {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: var(--cream-200);
+    }
+
+    .description {
+      font-family: var(--font-body);
+      font-size: var(--fs-md);
+      line-height: var(--lh-loose);
+      color: var(--color-fg);
+    }
+
+    /* ============ Variant A: centered narrow plate ============ */
+    .v-a .plate {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: var(--space-4) var(--space-5) var(--space-9);
+    }
+    .v-a .back-row { margin-bottom: var(--space-5); }
+    .v-a .product-photo { border-radius: var(--radius-sm); margin-bottom: var(--space-6); }
+    .v-a h1.name {
+      font-family: var(--font-display);
+      color: var(--coral-500);
+      font-size: var(--fs-3xl);
+      line-height: var(--lh-tight);
+      margin: 0 0 var(--space-3);
+      text-align: center;
+    }
+    .v-a .meta-row {
+      display: flex; justify-content: center; align-items: baseline;
+      gap: var(--space-4);
+      font-family: var(--font-body);
+      font-size: var(--fs-lg);
+      color: var(--color-fg-strong);
+      margin-bottom: var(--space-5);
+    }
+    .v-a .meta-row .price { font-weight: 800; }
+    .v-a .description { text-align: center; max-width: 520px; margin: 0 auto var(--space-6); }
+    .v-a .cta-stack {
+      display: flex; flex-direction: column; align-items: center;
+      gap: var(--space-3); margin-bottom: var(--space-7);
+    }
+    .v-a .back-bottom { text-align: center; }
+
+    /* ============ Variant B: left-aligned plate ============ */
+    .v-b .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: var(--space-4) var(--space-6) var(--space-9);
+    }
+    .v-b .back-row { margin-bottom: var(--space-5); }
+    .v-b .plate {
+      max-width: 720px;
+      margin-left: 0;
+    }
+    .v-b .product-photo { border-radius: var(--radius-sm); margin-bottom: var(--space-6); }
+    .v-b h1.name {
+      font-family: var(--font-display);
+      color: var(--coral-500);
+      font-size: var(--fs-4xl);
+      line-height: var(--lh-tight);
+      margin: 0 0 var(--space-3);
+    }
+    .v-b .meta-row {
+      display: flex; align-items: baseline;
+      gap: var(--space-4);
+      font-family: var(--font-body);
+      font-size: var(--fs-lg);
+      color: var(--color-fg-strong);
+      margin-bottom: var(--space-5);
+      padding-bottom: var(--space-4);
+      border-bottom: none;
+    }
+    .v-b .meta-row .price { font-weight: 800; }
+    .v-b .meta-row .divider { color: var(--color-fg-hint); }
+    .v-b .description { max-width: 560px; margin: 0 0 var(--space-6); }
+    .v-b .cta-stack {
+      display: flex; align-items: center; gap: var(--space-5);
+      margin-bottom: var(--space-8);
+    }
+    .v-b .back-bottom { font-style: normal; }
+
+    /* ============ Variant C: photo-dominant tight stack ============ */
+    .v-c .page {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: var(--space-4) var(--space-5) var(--space-9);
+    }
+    .v-c .back-row {
+      margin-bottom: var(--space-5);
+      text-align: left;
+    }
+    .v-c .product-photo {
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-7);
+      box-shadow: 0 24px 64px -36px rgba(43, 32, 20, 0.35);
+    }
+    .v-c h1.name {
+      font-family: var(--font-display);
+      color: var(--coral-500);
+      font-size: var(--fs-5xl);
+      line-height: 0.95;
+      margin: 0 0 var(--space-2);
+      text-align: center;
+    }
+    .v-c .hand-aside {
+      display: block;
+      text-align: center;
+      font-family: var(--font-hand);
+      font-size: var(--fs-lg);
+      color: var(--color-fg);
+      margin-bottom: var(--space-4);
+    }
+    .v-c .meta-row {
+      display: flex; justify-content: center; align-items: baseline;
+      gap: var(--space-4);
+      font-family: var(--font-body);
+      font-size: var(--fs-xl);
+      color: var(--color-fg-strong);
+      margin-bottom: var(--space-5);
+    }
+    .v-c .meta-row .price { font-weight: 800; }
+    .v-c .description {
+      text-align: center;
+      max-width: 540px;
+      margin: 0 auto var(--space-6);
+      font-size: var(--fs-md);
+    }
+    .v-c .cta-stack {
+      display: flex; flex-direction: column; align-items: center;
+      gap: var(--space-3); margin-bottom: var(--space-8);
+    }
+    .v-c .cta-button {
+      font-size: var(--fs-md);
+      padding: var(--space-4) var(--space-7);
+    }
+    .v-c .back-bottom { text-align: center; }
+
+    /* ============ Site header — shared across variants ============ */
+    .site-header .mark { font-family: var(--font-display); font-size: var(--fs-2xl); }
+
+    /* Sketch toolbar */
+    #sketch-tools {
+      position: fixed; bottom: 12px; right: 12px; z-index: 9999;
+      font-family: system-ui, sans-serif; font-size: 12px;
+      background: rgba(20, 20, 25, 0.78); color: #fff;
+      padding: 10px 12px; border-radius: 10px;
+      opacity: 0.4; transition: opacity 0.2s;
+      display: flex; gap: 10px; align-items: center;
+    }
+    #sketch-tools:hover { opacity: 1; }
+    #sketch-tools .group { display: flex; gap: 6px; align-items: center; }
+    #sketch-tools select, #sketch-tools button {
+      background: #2a2a2f; color: #fff; border: 1px solid #3a3a40;
+      padding: 4px 8px; border-radius: 6px; font: inherit; cursor: pointer;
+    }
+    #sketch-tools button.is-active { background: #d6553b; border-color: #d6553b; }
+    #viewport-frame { transition: max-width 0.18s ease; margin: 0 auto; }
+    body.vp-phone   #viewport-frame { max-width: 375px;  box-shadow: 0 0 0 1px rgba(43,32,20,0.06); }
+    body.vp-tablet  #viewport-frame { max-width: 768px;  box-shadow: 0 0 0 1px rgba(43,32,20,0.06); }
+    body.vp-desktop #viewport-frame { max-width: 1280px; }
+    body.vp-full    #viewport-frame { max-width: none; }
+  </style>
+</head>
+<body class="vp-full">
+
+  <!-- ============ Sketch tabs ============ -->
+  <div class="sketch-tabs">
+    <span class="label">Sketch 001 · detail composition</span>
+    <button class="is-active" data-variant="a"><span class="star">★</span>A · Centered narrow plate</button>
+    <button data-variant="b">B · Left-aligned plate</button>
+    <button data-variant="c">C · Photo-dominant, tight stack</button>
+  </div>
+
+  <div id="viewport-frame">
+
+    <!-- ============ Variant A ============ -->
+    <section class="variant v-a is-active" data-variant="a">
+      <header class="site-header">
+        <a href="#" class="mark">Studio Bluemli</a>
+        <nav>
+          <a href="#" class="is-current">Gallery</a>
+          <a href="#">Pop-ups</a>
+          <a href="#">About</a>
+          <a href="#">Say hi</a>
+        </nav>
+      </header>
+
+      <div class="plate">
+        <div class="back-row">
+          <a href="#" class="back-link">← Back to the gallery</a>
+        </div>
+
+        <img class="product-photo" src="../assets/cluster-coral.jpg" alt="Coral cluster — a pair of beaded earrings in coral and peach tones on a cream surface" />
+
+        <h1 class="name">Coral cluster</h1>
+        <div class="meta-row">
+          <span class="price">$48</span>
+          <span class="status-badge">Available</span>
+        </div>
+        <p class="description">Stones the color of ripe peaches, clustered on a sterling silver hoop. About two inches long and light enough to forget you're wearing them.</p>
+
+        <div class="cta-stack">
+          <a class="cta-button" href="https://ig.me/m/studiobluemli">Ask about this pair on Instagram</a>
+          <span class="mailto-fallback">or email <a href="mailto:hi@studiobluemli.com">hi@studiobluemli.com</a></span>
+        </div>
+
+        <div class="back-bottom">
+          <a href="#" class="back-link">← Back to the gallery</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Variant B ============ -->
+    <section class="variant v-b" data-variant="b">
+      <header class="site-header">
+        <a href="#" class="mark">Studio Bluemli</a>
+        <nav>
+          <a href="#" class="is-current">Gallery</a>
+          <a href="#">Pop-ups</a>
+          <a href="#">About</a>
+          <a href="#">Say hi</a>
+        </nav>
+      </header>
+
+      <div class="page">
+        <div class="back-row">
+          <a href="#" class="back-link">← Back to the gallery</a>
+        </div>
+
+        <div class="plate">
+          <img class="product-photo" src="../assets/cluster-coral.jpg" alt="Coral cluster — a pair of beaded earrings in coral and peach tones on a cream surface" />
+
+          <h1 class="name">Coral cluster</h1>
+          <div class="meta-row">
+            <span class="price">$48</span>
+            <span class="divider">·</span>
+            <span class="status-badge">Available</span>
+          </div>
+          <p class="description">Stones the color of ripe peaches, clustered on a sterling silver hoop. About two inches long and light enough to forget you're wearing them.</p>
+
+          <div class="cta-stack">
+            <a class="cta-button" href="https://ig.me/m/studiobluemli">Ask about this pair on Instagram</a>
+            <span class="mailto-fallback">or email <a href="mailto:hi@studiobluemli.com">hi@studiobluemli.com</a></span>
+          </div>
+
+          <div class="back-bottom">
+            <a href="#" class="back-link">← Back to the gallery</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Variant C ============ -->
+    <section class="variant v-c" data-variant="c">
+      <header class="site-header">
+        <a href="#" class="mark">Studio Bluemli</a>
+        <nav>
+          <a href="#" class="is-current">Gallery</a>
+          <a href="#">Pop-ups</a>
+          <a href="#">About</a>
+          <a href="#">Say hi</a>
+        </nav>
+      </header>
+
+      <div class="page">
+        <div class="back-row">
+          <a href="#" class="back-link">← Back to the gallery</a>
+        </div>
+
+        <img class="product-photo" src="../assets/cluster-coral.jpg" alt="Coral cluster — a pair of beaded earrings in coral and peach tones on a cream surface" />
+
+        <h1 class="name">Coral cluster</h1>
+        <span class="hand-aside">(one of one)</span>
+        <div class="meta-row">
+          <span class="price">$48</span>
+          <span class="status-badge">Available</span>
+        </div>
+        <p class="description">Stones the color of ripe peaches, clustered on a sterling silver hoop. About two inches long, light enough to forget you're wearing them.</p>
+
+        <div class="cta-stack">
+          <a class="cta-button" href="https://ig.me/m/studiobluemli">Ask about this pair on Instagram</a>
+          <span class="mailto-fallback">or email <a href="mailto:hi@studiobluemli.com">hi@studiobluemli.com</a></span>
+        </div>
+
+        <div class="back-bottom">
+          <a href="#" class="back-link">← Back to the gallery</a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ============ Sketch toolbar ============ -->
+  <div id="sketch-tools">
+    <div class="group">
+      <span style="opacity:0.7">theme</span>
+      <select id="theme-select" onchange="document.querySelector('link[href*=themes]').href='../themes/'+this.value+'.css'">
+        <option value="default">default</option>
+      </select>
+    </div>
+    <div class="group">
+      <span style="opacity:0.7">viewport</span>
+      <button onclick="setVp('phone')">phone</button>
+      <button onclick="setVp('tablet')">tablet</button>
+      <button onclick="setVp('desktop')">desktop</button>
+      <button class="is-active" onclick="setVp('full')">full</button>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.sketch-tabs button[data-variant]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const v = btn.dataset.variant;
+        document.querySelectorAll('.sketch-tabs button[data-variant]').forEach(b => b.classList.toggle('is-active', b.dataset.variant === v));
+        document.querySelectorAll('.variant').forEach(s => s.classList.toggle('is-active', s.dataset.variant === v));
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      });
+    });
+
+    // Viewport switching
+    function setVp(size) {
+      document.body.classList.remove('vp-phone','vp-tablet','vp-desktop','vp-full');
+      document.body.classList.add('vp-' + size);
+      document.querySelectorAll('#sketch-tools .group:nth-child(2) button').forEach(b => {
+        b.classList.toggle('is-active', b.textContent === size);
+      });
+    }
+  </script>
+</body>
+</html>

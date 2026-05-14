@@ -20,21 +20,20 @@ The product photography and brand voice come through cleanly on a cream-paper pa
 - [x] **Mobile-first responsive layout — Lighthouse mobile ≥ 90 across all categories** _(Phase 1 — FND-12. CI gates on Performance 0.99 / Accessibility 0.95 / Best Practices 1.00 / SEO 0.91 across all 5 routes after Fontsource self-hosting closed the Korean-subset payload bug.)_
 - [x] **Brand non-negotiables enforced as code** _(Phase 1 — FND-10, FND-11. CI grep blocks `bg-white`, `#FFF`, `flower`/`petal`/`floral`/`bloom`/`blossom`, `gradient`, `backdrop-filter`, `border: 1px`, and uppercase filenames under `src/pages/` before merge.)_
 - [x] **`:focus-visible` accessibility rule applied to every interactive element** _(Phase 1 — FND-13. Global 2px coral outline at 2px offset in `BaseLayout.astro`.)_
+- [x] **Gallery page listing all pieces with photo, name, price, availability status, and 1–2 sentence description** _(Phase 2 — CNT-07, CNT-08, CNT-09, CNT-10. `/gallery` index + per-piece `/gallery/<slug>` detail pages prerendered from a strict Zod content collection; per-piece `og:image` with env-aware base URL; six seeded pieces in `src/content/gallery/`.)_
+- [x] **Gallery entries managed via markdown files in `/content/gallery/` — adding/removing a piece is a single file change** _(Phase 2 — CNT-01..CNT-06, CNT-11, CNT-12. Founder edits markdown + drops a HEIC; the CI prebuild step converts HEIC→WebP variants and emits a dimensions manifest before typecheck; `CONTENT_EDITING.md` documents the GitHub web UI flow in prose, zero CLI words.)_
 
 ### Active
 
 <!-- Current scope. Building toward these. -->
 
-- [ ] Landing page with hero (logo, tagline, founder photo or product hero), 3–6 featured gallery pieces, a callout for the next pop-up, and footer links _(Phase 1 shipped the demo-loaded shell; Phase 3 composes real content.)_
-- [ ] Gallery page listing all pieces, each with photo(s), name, price, availability status (available / sold / one-of-one), and a short 1–2 sentence description _(Phase 2.)_
-- [ ] Pop-ups page showing upcoming events prominently (date, location, time) and a smaller archive of past events _(Phase 3 — PT-aware past/upcoming split with daily cron rebuild.)_
-- [ ] About page (founder story, studio, process — content TBD with founder) _(Phase 3.)_
-- [ ] Say Hi page with a contact form that emails the founder, plus visible Instagram link _(Phase 1 shipped the shell; Phase 4 wires `/api/contact` with Turnstile + KV rate limit + Resend.)_
-- [ ] Gallery entries managed via markdown files in `/content/gallery/` — adding/removing a piece is a single file change _(Phase 2.)_
+- [ ] Landing page with hero, 3 featured gallery pieces, an OPTIONAL "next pop-up" mini-callout (omitted entirely when no future popup exists per Phase 3 D-03), and footer links _(Phase 1 shipped the demo-loaded shell; Phase 2 wired the featured-piece grid to real content; Phase 3 composes the remaining hero/pop-up/footer copy.)_
+- [ ] Pop-ups page showing upcoming events prominently (date, location, time) and a smaller text-only archive of past events _(Phase 3 — PT-aware past/upcoming split with daily cron rebuild.)_
+- [ ] About page (founder story, studio, process — content drafted by Claude in brand voice, founder edits via GitHub web UI later; closing photo strip reuses 1–3 existing gallery hero WebPs per Phase 3 D-14 — dedicated process/craft shots deferred to v1.x) _(Phase 3.)_
+- [ ] Say Hi page with visible Instagram DM link + mailto fallback _(Phase 3 D-18: contact form dropped from v1; revisit as v1.x phase if IG channel stops scaling.)_
 - [ ] Pop-up events managed via a YAML file (or per-event markdown) in `/content`, with past/upcoming split derived from date _(Phase 3.)_
 - [ ] Live at apex `studiobluemli.com` (and `www.` redirects to apex) via the existing Cloudflare account _(Phase 5 — DNS cutover.)_
 - [ ] Umami Cloud analytics installed (free tier, single script tag, no consent banner needed) _(Phase 5.)_
-- [ ] Contact form is spam-protected (Cloudflare Turnstile) and delivers reliably to the founder's inbox _(Phase 4.)_
 
 ### Out of Scope
 
@@ -50,6 +49,7 @@ The product photography and brand voice come through cleanly on a cream-paper pa
 - Pressed-flower decorative images sprinkled across components — brand non-negotiable
 - Multi-language — English only for v1
 - Multiple authors / contributor flow — founder is the only editor
+- Contact form on `/say-hi` (`<form>` + `/api/contact` Worker + Turnstile + KV rate limit + Resend + SPF/DKIM/DMARC DNS coexistence with MS365) — dropped from v1 entirely per Phase 3 D-18/D-19. `/say-hi` ships as an IG-DM-link page + mailto fallback. Can return as a v1.x phase. `wrangler.jsonc`'s `run_worker_first: ["/api/*"]` and `astro.config.mjs`'s `output: 'server'` are preserved (D-22) so the rewiring cost is minimal.
 
 ## Context
 
@@ -101,4 +101,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-13 — Phase 1 (Foundations & Brand System) complete. Live on `studio-bluemli.<account>.workers.dev`. Up next: Phase 2 (content schema & gallery).*
+*Last updated: 2026-05-14 — Phase 2 (Content Schema & Gallery) complete. `/gallery` index + per-piece detail pages live with six seeded pieces; HEIC→WebP prebuild pipeline + Zod-strict schema + `CONTENT_EDITING.md` shipped. End-to-end founder PR-preview dry-run deferred to first real piece. Up next: Phase 3 (page composition & pop-ups).*

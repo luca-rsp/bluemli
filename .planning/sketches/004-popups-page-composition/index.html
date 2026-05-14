@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sketch 004 — /popups page composition · Studio Bluemli</title>
+  <link rel="stylesheet" href="../themes/default.css" />
+  <style>
+    /* ============================================================
+       Sketch chrome
+       ============================================================ */
+    .sketch-tabs {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--cream-50);
+      border-bottom: 1px solid var(--color-border-soft);
+      padding: var(--space-3) var(--space-4);
+      display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap;
+      font-family: var(--font-body); font-size: var(--fs-xs);
+    }
+    .sketch-tabs .label {
+      font-weight: 800; letter-spacing: var(--ls-caps); text-transform: uppercase;
+      color: var(--color-fg-muted); margin-right: var(--space-3);
+    }
+    .sketch-tabs button {
+      background: transparent; border: 0; cursor: pointer;
+      padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill);
+      font-family: var(--font-body); font-size: var(--fs-xs); font-weight: 700;
+      color: var(--color-fg);
+    }
+    .sketch-tabs button.is-active {
+      background: var(--coral-500); color: var(--color-fg-on-coral);
+    }
+    .sketch-tabs button:hover:not(.is-active) { background: var(--cream-200); }
+    .sketch-tabs .star { color: var(--mustard-500); margin-right: 2px; }
+    .variant { display: none; }
+    .variant.is-active { display: block; }
+
+    /* Scenario dividers */
+    .scenario-label {
+      font-family: var(--font-body);
+      font-size: var(--fs-xxs); font-weight: 800;
+      letter-spacing: var(--ls-caps); text-transform: uppercase;
+      color: var(--ink-400);
+      padding: var(--space-3) var(--space-5) var(--space-2);
+      max-width: 1080px; margin: var(--space-7) auto 0;
+      border-top: 1px dashed var(--color-border-soft);
+    }
+    .scenario-label:first-of-type { border-top: 0; margin-top: var(--space-4); }
+
+    /* ============================================================
+       Faux site header (just for context)
+       ============================================================ */
+    .faux-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: var(--space-5) var(--space-6);
+      max-width: 1080px; margin: 0 auto;
+    }
+    .faux-header .mark {
+      font-family: var(--font-display); font-size: var(--fs-xl);
+      color: var(--coral-500);
+    }
+    .faux-header nav a {
+      font-family: var(--font-body); font-size: var(--fs-xs); font-weight: 700;
+      text-transform: uppercase; letter-spacing: var(--ls-caps);
+      color: var(--color-fg-strong); text-decoration: none;
+      margin-left: var(--space-5);
+    }
+    .faux-header nav a.is-current { color: var(--coral-500); }
+
+    /* ============================================================
+       Full PopupStrip (shared between variants; reproduced from JSX)
+       D-09: NO "book by appointment" CTA.
+       ============================================================ */
+    .popup-strip {
+      margin: var(--space-6) var(--space-5);
+      max-width: 1080px;
+      margin-left: auto; margin-right: auto;
+      padding: var(--space-7) var(--space-6);
+      background: var(--cream-50);
+      border-radius: 32px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .popup-strip .color-stripe {
+      position: absolute; top: 0; left: 0; right: 0; height: 8px;
+      display: flex;
+    }
+    .popup-strip .color-stripe span { flex: 1; }
+    .popup-strip .color-stripe span:nth-child(1) { background: var(--coral-500); }
+    .popup-strip .color-stripe span:nth-child(2) { background: var(--pink-500); }
+    .popup-strip .color-stripe span:nth-child(3) { background: var(--mustard-500); }
+    .popup-strip .color-stripe span:nth-child(4) { background: var(--olive-500); }
+    .popup-strip .color-stripe span:nth-child(5) { background: var(--indigo-500); }
+    .popup-strip .color-stripe span:nth-child(6) { background: var(--lavender-500); }
+    .popup-strip .eyebrow {
+      font-family: var(--font-body);
+      font-size: 12px; font-weight: 800; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--olive-500);
+      margin-bottom: 10px;
+    }
+    .popup-strip h2 {
+      font-family: var(--font-display); font-size: 80px;
+      color: var(--pink-500); line-height: 1;
+      margin: 0 0 4px;
+    }
+    .popup-strip .at-venue {
+      font-family: var(--font-display); font-size: 32px;
+      color: var(--olive-500); line-height: 1.2;
+      margin-top: 14px;
+    }
+    .popup-strip .at-venue .venue { color: var(--indigo-500); }
+    .popup-strip .when-line {
+      font-family: var(--font-body); font-weight: 700;
+      font-size: var(--fs-md); color: var(--indigo-700);
+      margin-top: 14px;
+    }
+
+    /* ============================================================
+       VARIANT A — Indented compact lists
+       (ALSO COMING UP as plain centered text rows, PAST as a tight
+        text list with muted color. Centered narrow column feel.)
+       ============================================================ */
+    .v-a .lists { max-width: 720px; margin: 0 auto; padding: 0 var(--space-5) var(--space-9); }
+    .v-a .section-eyebrow {
+      font-family: var(--font-body); font-size: var(--fs-xxs); font-weight: 800;
+      letter-spacing: var(--ls-caps); text-transform: uppercase;
+      color: var(--color-accent-leaf);
+      text-align: center;
+      margin: var(--space-7) 0 var(--space-4);
+    }
+    .v-a .also-row {
+      font-family: var(--font-body); font-size: var(--fs-md);
+      color: var(--color-fg-strong); font-weight: 700;
+      text-align: center;
+      padding: var(--space-3) 0;
+      border-top: 1px solid var(--color-border-soft);
+    }
+    .v-a .also-row:last-of-type { border-bottom: 1px solid var(--color-border-soft); }
+    .v-a .also-row .dot { color: var(--ink-400); margin: 0 var(--space-2); font-weight: 400; }
+    .v-a .also-row .venue { color: var(--color-fg-strong); }
+    .v-a .also-row .time { color: var(--color-fg-muted); font-weight: 400; }
+    .v-a .past-row {
+      font-family: var(--font-body); font-size: var(--fs-sm);
+      color: var(--color-fg-muted); font-weight: 400;
+      text-align: center;
+      padding: var(--space-2) 0;
+    }
+    .v-a .past-row .dot { color: var(--ink-400); margin: 0 var(--space-2); }
+    .v-a .past-row .venue { color: var(--color-fg); }
+
+    /* ============================================================
+       VARIANT B — Table-like rows + two-column PAST
+       (ALSO COMING UP as 3-column flex rows: date | venue | time
+        PAST as a two-column dense list with subdued type)
+       ============================================================ */
+    .v-b .lists { max-width: 1080px; margin: 0 auto; padding: 0 var(--space-5) var(--space-9); }
+    .v-b .section-eyebrow {
+      font-family: var(--font-body); font-size: var(--fs-xxs); font-weight: 800;
+      letter-spacing: var(--ls-caps); text-transform: uppercase;
+      color: var(--color-accent-leaf);
+      text-align: left;
+      margin: var(--space-7) 0 var(--space-4);
+      padding-left: var(--space-5);
+    }
+    .v-b .also-grid {
+      display: grid; grid-template-columns: 1fr; gap: 0;
+      max-width: 880px; margin: 0 auto;
+    }
+    .v-b .also-row {
+      display: grid;
+      grid-template-columns: 220px 1fr 140px;
+      gap: var(--space-4);
+      align-items: baseline;
+      padding: var(--space-4) var(--space-5);
+      border-top: 1px solid var(--color-border-soft);
+      font-family: var(--font-body); font-size: var(--fs-md);
+    }
+    .v-b .also-row:last-of-type { border-bottom: 1px solid var(--color-border-soft); }
+    .v-b .also-row .date  { color: var(--color-fg-strong); font-weight: 800; }
+    .v-b .also-row .venue { color: var(--color-fg); font-weight: 700; }
+    .v-b .also-row .time  { color: var(--color-fg-muted); font-weight: 400; text-align: right; }
+
+    .v-b .past-cols {
+      max-width: 880px; margin: 0 auto;
+      column-count: 2; column-gap: var(--space-6);
+      padding: 0 var(--space-5);
+    }
+    .v-b .past-row {
+      font-family: var(--font-body); font-size: var(--fs-sm);
+      color: var(--color-fg-muted); font-weight: 400;
+      padding: var(--space-2) 0;
+      break-inside: avoid;
+    }
+    .v-b .past-row .dot { color: var(--ink-400); margin: 0 var(--space-2); }
+    .v-b .past-row .venue { color: var(--color-fg); }
+    @media (max-width: 720px) {
+      .v-b .also-row { grid-template-columns: 1fr; gap: var(--space-1); }
+      .v-b .also-row .time { text-align: left; }
+      .v-b .past-cols { column-count: 1; }
+    }
+
+    /* ============================================================
+       Empty state (D-08) — shared between both variants
+       ============================================================ */
+    .empty-state {
+      max-width: 720px; margin: var(--space-9) auto;
+      padding: 0 var(--space-5);
+      text-align: center;
+    }
+    .empty-state .eyebrow {
+      font-family: var(--font-body); font-size: var(--fs-xxs); font-weight: 800;
+      letter-spacing: var(--ls-caps); text-transform: uppercase;
+      color: var(--color-accent-leaf);
+      margin: 0 0 var(--space-4);
+    }
+    .empty-state p {
+      font-family: var(--font-body); font-size: var(--fs-lg);
+      line-height: var(--lh-loose);
+      color: var(--color-fg-strong);
+      margin: 0;
+    }
+
+    /* Footnote */
+    .note {
+      max-width: 720px; margin: var(--space-6) auto 0;
+      padding: 0 var(--space-5) var(--space-7);
+      font-family: var(--font-body); font-size: var(--fs-xs);
+      color: var(--color-fg-muted); text-align: center;
+      line-height: var(--lh-loose);
+    }
+  </style>
+</head>
+<body>
+
+<nav class="sketch-tabs" role="tablist" aria-label="Sketch variants">
+  <span class="label">Sketch 004 · /popups composition</span>
+  <button class="is-active" data-variant="a"><span class="star">★</span>Variant A: indented compact lists</button>
+  <button data-variant="b">Variant B: table-rows + 2-col past</button>
+</nav>
+
+<!-- ============================================================
+     VARIANT A
+     ============================================================ -->
+<section class="variant v-a is-active">
+
+  <header class="faux-header">
+    <div class="mark">Studio Bluemli</div>
+    <nav><a href="#">gallery</a><a href="#" class="is-current">pop-ups</a><a href="#">about</a><a href="#">say hi</a></nav>
+  </header>
+
+  <div class="scenario-label">Scenario · 1 upcoming + 4 past</div>
+  <section class="popup-strip">
+    <div class="color-stripe"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="eyebrow">next pop-up</div>
+    <h2>pop-up</h2>
+    <div class="at-venue">at <span class="venue">Heath Ceramics</span></div>
+    <div class="when-line">Saturday, June 7 · 11am–5pm</div>
+  </section>
+  <div class="lists">
+    <h3 class="section-eyebrow" style="text-align:center;">Past pop-ups</h3>
+    <div class="past-row">Saturday, May 3 <span class="dot">·</span> <span class="venue">Outside Lands Market</span>, San Francisco</div>
+    <div class="past-row">Friday, April 18 <span class="dot">·</span> <span class="venue">Mission Bazaar</span>, San Francisco</div>
+    <div class="past-row">Saturday, March 22 <span class="dot">·</span> <span class="venue">Heath Ceramics</span>, San Francisco</div>
+    <div class="past-row">Saturday, February 15 <span class="dot">·</span> <span class="venue">Stable Cafe Market</span>, San Francisco</div>
+  </div>
+
+  <div class="scenario-label">Scenario · 1 upcoming + 3 also coming up + 6 past</div>
+  <section class="popup-strip">
+    <div class="color-stripe"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="eyebrow">next pop-up</div>
+    <h2>pop-up</h2>
+    <div class="at-venue">at <span class="venue">Heath Ceramics</span></div>
+    <div class="when-line">Saturday, June 7 · 11am–5pm</div>
+  </section>
+  <div class="lists">
+    <h3 class="section-eyebrow" style="text-align:center;">Also coming up</h3>
+    <div class="also-row">Saturday, June 21 <span class="dot">·</span> <span class="venue">Mission Bazaar</span> <span class="dot">·</span> <span class="time">12–6pm</span></div>
+    <div class="also-row">Friday, July 4 <span class="dot">·</span> <span class="venue">Outside Lands Market</span> <span class="dot">·</span> <span class="time">10am–4pm</span></div>
+    <div class="also-row">Saturday, July 19 <span class="dot">·</span> <span class="venue">Stable Cafe Market</span> <span class="dot">·</span> <span class="time">11am–5pm</span></div>
+
+    <h3 class="section-eyebrow" style="text-align:center;">Past pop-ups</h3>
+    <div class="past-row">Saturday, May 3 <span class="dot">·</span> <span class="venue">Outside Lands Market</span>, San Francisco</div>
+    <div class="past-row">Friday, April 18 <span class="dot">·</span> <span class="venue">Mission Bazaar</span>, San Francisco</div>
+    <div class="past-row">Saturday, March 22 <span class="dot">·</span> <span class="venue">Heath Ceramics</span>, San Francisco</div>
+    <div class="past-row">Saturday, February 15 <span class="dot">·</span> <span class="venue">Stable Cafe Market</span>, San Francisco</div>
+    <div class="past-row">Saturday, January 25 <span class="dot">·</span> <span class="venue">Renegade Craft Fair</span>, San Francisco</div>
+    <div class="past-row">Sunday, December 8, 2025 <span class="dot">·</span> <span class="venue">Holiday Bazaar at Sketchbook</span>, San Francisco</div>
+  </div>
+
+  <div class="scenario-label">Scenario · empty (zero upcoming + zero past) — D-08</div>
+  <div class="empty-state">
+    <div class="eyebrow">pop-ups</div>
+    <p>No pop-ups on the calendar yet —<br/>follow <a href="#" style="color:var(--coral-500);text-decoration:underline;text-underline-offset:3px;">@studiobluemli</a> for the next one.</p>
+  </div>
+
+  <p class="note">
+    Variant A: centered narrow column. ALSO COMING UP rows are 18px bold Nunito on hairline rule lines; PAST is a tight muted text list (no rules). Reads as one quiet editorial archive, generous breathing room. The PopupStrip stays as the single loud element.
+  </p>
+</section>
+
+<!-- ============================================================
+     VARIANT B
+     ============================================================ -->
+<section class="variant v-b">
+  <header class="faux-header">
+    <div class="mark">Studio Bluemli</div>
+    <nav><a href="#">gallery</a><a href="#" class="is-current">pop-ups</a><a href="#">about</a><a href="#">say hi</a></nav>
+  </header>
+
+  <div class="scenario-label">Scenario · 1 upcoming + 4 past</div>
+  <section class="popup-strip">
+    <div class="color-stripe"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="eyebrow">next pop-up</div>
+    <h2>pop-up</h2>
+    <div class="at-venue">at <span class="venue">Heath Ceramics</span></div>
+    <div class="when-line">Saturday, June 7 · 11am–5pm</div>
+  </section>
+  <div class="lists">
+    <h3 class="section-eyebrow">Past pop-ups</h3>
+    <div class="past-cols">
+      <div class="past-row">Saturday, May 3 <span class="dot">·</span> <span class="venue">Outside Lands Market</span>, SF</div>
+      <div class="past-row">Friday, April 18 <span class="dot">·</span> <span class="venue">Mission Bazaar</span>, SF</div>
+      <div class="past-row">Saturday, March 22 <span class="dot">·</span> <span class="venue">Heath Ceramics</span>, SF</div>
+      <div class="past-row">Saturday, February 15 <span class="dot">·</span> <span class="venue">Stable Cafe Market</span>, SF</div>
+    </div>
+  </div>
+
+  <div class="scenario-label">Scenario · 1 upcoming + 3 also coming up + 6 past</div>
+  <section class="popup-strip">
+    <div class="color-stripe"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="eyebrow">next pop-up</div>
+    <h2>pop-up</h2>
+    <div class="at-venue">at <span class="venue">Heath Ceramics</span></div>
+    <div class="when-line">Saturday, June 7 · 11am–5pm</div>
+  </section>
+  <div class="lists">
+    <h3 class="section-eyebrow">Also coming up</h3>
+    <div class="also-grid">
+      <div class="also-row">
+        <span class="date">Saturday, June 21</span>
+        <span class="venue">Mission Bazaar</span>
+        <span class="time">12–6pm</span>
+      </div>
+      <div class="also-row">
+        <span class="date">Friday, July 4</span>
+        <span class="venue">Outside Lands Market</span>
+        <span class="time">10am–4pm</span>
+      </div>
+      <div class="also-row">
+        <span class="date">Saturday, July 19</span>
+        <span class="venue">Stable Cafe Market</span>
+        <span class="time">11am–5pm</span>
+      </div>
+    </div>
+
+    <h3 class="section-eyebrow">Past pop-ups</h3>
+    <div class="past-cols">
+      <div class="past-row">Saturday, May 3 <span class="dot">·</span> <span class="venue">Outside Lands Market</span>, SF</div>
+      <div class="past-row">Friday, April 18 <span class="dot">·</span> <span class="venue">Mission Bazaar</span>, SF</div>
+      <div class="past-row">Saturday, March 22 <span class="dot">·</span> <span class="venue">Heath Ceramics</span>, SF</div>
+      <div class="past-row">Saturday, February 15 <span class="dot">·</span> <span class="venue">Stable Cafe Market</span>, SF</div>
+      <div class="past-row">Saturday, January 25 <span class="dot">·</span> <span class="venue">Renegade Craft Fair</span>, SF</div>
+      <div class="past-row">Sunday, December 8, 2025 <span class="dot">·</span> <span class="venue">Holiday Bazaar at Sketchbook</span>, SF</div>
+    </div>
+  </div>
+
+  <div class="scenario-label">Scenario · empty (zero upcoming + zero past) — D-08</div>
+  <div class="empty-state">
+    <div class="eyebrow">pop-ups</div>
+    <p>No pop-ups on the calendar yet —<br/>follow <a href="#" style="color:var(--coral-500);text-decoration:underline;text-underline-offset:3px;">@studiobluemli</a> for the next one.</p>
+  </div>
+
+  <p class="note">
+    Variant B: full-width editorial layout. ALSO COMING UP becomes a 3-column row (date / venue / time-right-aligned) — scans like a tour schedule. PAST collapses to two dense columns so a year-deep archive doesn't dominate. Mobile: both collapse to single-column gracefully.
+  </p>
+</section>
+
+<script>
+  const tabs = document.querySelectorAll('.sketch-tabs button[data-variant]');
+  const variants = { a: 'v-a', b: 'v-b' };
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const v = btn.dataset.variant;
+      tabs.forEach(b => b.classList.toggle('is-active', b === btn));
+      Object.entries(variants).forEach(([key, cls]) => {
+        document.querySelector('.' + cls).classList.toggle('is-active', key === v);
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+</script>
+</body>
+</html>
