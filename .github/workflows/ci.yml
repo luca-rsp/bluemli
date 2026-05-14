@@ -49,6 +49,15 @@ jobs:
         run: pnpm exec astro check
 
       - name: Build
+        env:
+          # GAP-01 / 03-06: the build that feeds Lighthouse must produce the
+          # same robots.txt that production ships (`Allow: /` + Sitemap). Without
+          # this flag, robots.txt emits `Disallow: /` and Lighthouse's SEO
+          # is-crawlable audit drops the score below the 0.9 gate. CI does not
+          # deploy from here (Cloudflare Workers Builds is wired separately),
+          # so flagging the artifact production-mode here is purely about
+          # auditing the same bytes prod ships.
+          PUBLIC_DEPLOY_ENV: production
         run: pnpm exec astro build
 
       - name: Write .assetsignore (Plan 04 postbuild — REVIEW FIX M2)
