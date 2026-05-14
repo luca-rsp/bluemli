@@ -1,10 +1,11 @@
 ---
 phase: 3
 slug: page-composition-pop-ups
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-05-13
+reviewed_at: 2026-05-13T00:00:00Z
 ---
 
 # Phase 3 — UI Design Contract
@@ -242,7 +243,7 @@ All layouts are validated and prescriptive. Executors reproduce exactly. See `.c
 
 - **Condition:** render only when `upcomingPopups.length >= 1`. When zero upcoming, omit the entire section (D-03).
 - **Container:** `.popup-callout`, `max-width: 640px`, `margin: 0 auto`, `padding: var(--space-6) var(--space-5)`, `text-align: center`. No band, no card background, no border.
-- **Vertical order:** `span.hand-eyebrow` (Caveat, 28px, olive, -1.5° rotation, `display: inline-block`) → `p.when` (Nunito 800, 28px, venue in coral) → `p.time` (Nunito 400, 16px, muted) → `a.see-all` (only when `upcomingPopups.length >= 1`, conditionally rendered, Nunito 700, 14px, coral, right-arrow with +2px hover slide).
+- **Vertical order:** `span.hand-eyebrow` (Caveat, 28px, olive, -1.5° rotation, `display: inline-block`) → `p.when` (Nunito 800, 28px, venue in coral) → `p.time` (Nunito 400, 16px, muted) → `a.see-all` (only when `upcomingPopups.length >= 2`, conditionally rendered, Nunito 700, 14px, coral, right-arrow with +2px hover slide).
 - **Position on landing:** between Hero CTAs / bead cluster and the featured-pieces grid.
 - **Featured-pieces grid:** 3 most-recent `featured: true` pieces (D-04). Falls back to newest 3 regardless of featured flag if zero pieces are `featured: true`. Sorted by `published_at` desc.
 
