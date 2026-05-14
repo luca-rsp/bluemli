@@ -27,7 +27,6 @@ const { title } = Astro.props;
         cssVariable suffix `-loaded` matches astro.config.mjs declarations (Plan 01).
         The design-skill CSS keeps --font-wordmark/--font-display/--font-body as cascade strings
         so loaded fonts compose with system-ui fallbacks. */}
-    <Font cssVariable="--font-wordmark-loaded" preload />
     <Font cssVariable="--font-display-loaded" preload />
     <Font cssVariable="--font-body-loaded" preload />
     {/* REVIEW FIX M5: Caveat is loaded as --font-hand-loaded because About.jsx
