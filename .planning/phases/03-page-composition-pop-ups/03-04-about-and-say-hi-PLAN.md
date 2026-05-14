@@ -104,7 +104,8 @@ function About() {
 Edits this plan makes to About.jsx:
 1. The body `<p>` paragraph is rewritten per D-13 voice rules (sentence-case, friendly parentheticals, NOPA in caps, no emoji other than ♡, no flower vocab). 2-3 paragraphs covering: origin story, the earring-making process, NOPA studio.
 2. The signature line `— the founder <Mark.Heart />` is changed to `made with love from NOPA <Mark.Heart />` (D-16).
-3. The eyebrow and headline are PRESERVED (they're correct per UI-SPEC §/about typography table).
+3. The h2 headline inner text changes from `hand-assembled, one pair at a time` (6 words — out of spec) to `made by hand` (3 words — UI-SPEC §Copywriting Contract → /about explicit example). All h2 styling (font-family: var(--font-display), font-size: 56, color: var(--coral-500)) is preserved exactly; only the text node changes.
+4. The eyebrow is PRESERVED (`about the studio` — already 1-4 words lowercase per the eyebrow contract).
 
 Mark.Heart contract (from src/components/design-skill/Mark.jsx — referenced by About.jsx):
 - It's an SVG glyph component accepting `color` prop. Renders the ♡ shape. Existing usage in About.jsx is `<Mark.Heart color="var(--coral-500)" />` — preserved.
@@ -142,7 +143,7 @@ Available gallery slugs (run `ls src/content/gallery/` during execution to disco
   <behavior>
     - About.jsx renders the same DOM structure: a `<section>` with eyebrow + h2 headline + body paragraphs + signature row.
     - Body paragraphs (2-3 of them) cover: (a) origin/setup story, (b) the earring-making process, (c) NOPA studio context. Tone is first-person, warm, sentence-case, with at least one friendly parenthetical aside. NOPA appears in caps. No emoji other than ♡. No words flower / petal / floral / bloom / blossom.
-    - The headline stays "hand-assembled, one pair at a time" (already correct per UI-SPEC §/about — 1-4 word brand-voiced phrase in Caveat Brush 56px coral).
+    - The headline is rewritten from the current 6-word "hand-assembled, one pair at a time" to a 1–4 word brand-voiced phrase per UI-SPEC §Copywriting Contract → /about. The locked target is `made by hand` (UI-SPEC explicitly lists this as the example). The Caveat Brush 56px coral styling is preserved exactly; only the h2 inner text changes.
     - The eyebrow stays "about the studio".
     - The signature row changes from `— the founder <Mark.Heart />` to `made with love from NOPA <Mark.Heart />` (D-16). The `<Mark.Heart color="var(--coral-500)" />` is preserved adjacent to the text.
     - All style objects are preserved exactly.
@@ -211,12 +212,30 @@ Replace with:
 
 (The font-size bumps from 18 to 22 to match UI-SPEC §/about typography table's `--fs-lg` 22px for the signature row. The `<Mark.Heart>` glyph + coral color are preserved.)
 
-**Preserve unchanged:** the `/* eslint-disable */`, the React + Mark imports, the function signature, the outer `<section>` style block, the eyebrow `<div>`, the h2 headline, and the default export.
+**Edit (c) — Rewrite the h2 headline inner text (currently lines 89-92).** The current h2 reads:
+
+```jsx
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 56, color: 'var(--coral-500)', /* ...rest of style preserved... */ }}>
+        hand-assembled, one&nbsp;pair at&nbsp;a&nbsp;time
+      </h2>
+```
+
+Change the inner text from `hand-assembled, one&nbsp;pair at&nbsp;a&nbsp;time` to:
+
+```
+made by hand
+```
+
+The h2's style object MUST be preserved byte-for-byte (font-family, fontSize: 56, color: var(--coral-500), and any other style props that are currently there — line-height, margin, letter-spacing, etc.). Only the text content between `<h2 ...>` and `</h2>` is replaced. No `&nbsp;` entities remain.
+
+**Why this changes:** UI-SPEC §Copywriting Contract → /about locks the headline contract as "Caveat Brush headline: 1-4 words, brand-voiced, coral. Example: `made by hand`." The current 6-word headline is out of spec. The plan-checker (W2) flagged this; the rewrite is part of the D-13 copy pass.
+
+**Preserve unchanged:** the `/* eslint-disable */`, the React + Mark imports, the function signature, the outer `<section>` style block, the eyebrow `<div>`, the h2 STYLE OBJECT (only the text node changes), and the default export.
 
 **D-17 anti-pattern check (no press section):** Do NOT add any "as featured in" or "press" or "as seen in" markup. UI-SPEC §/about photo strip handling lives in `about.astro` (Task 2), not About.jsx.
   </action>
   <verify>
-    <automated>grep -c "made with love from NOPA" src/components/design-skill/About.jsx && grep -c "— the founder" src/components/design-skill/About.jsx && grep -c "NOPA" src/components/design-skill/About.jsx && grep -ciE "flower|petal|floral|bloom|blossom|featured in|as seen in|press" src/components/design-skill/About.jsx && grep -cE '\([^)]+\)' src/components/design-skill/About.jsx && npx astro check 2>&1 | tail -5</automated>
+    <automated>grep -c "made with love from NOPA" src/components/design-skill/About.jsx && grep -c "— the founder" src/components/design-skill/About.jsx && grep -c "NOPA" src/components/design-skill/About.jsx && grep -ciE "flower|petal|floral|bloom|blossom|featured in|as seen in|press" src/components/design-skill/About.jsx && grep -cE '\([^)]+\)' src/components/design-skill/About.jsx && grep -c "made by hand" src/components/design-skill/About.jsx && grep -c "hand-assembled, one" src/components/design-skill/About.jsx && npx astro check 2>&1 | tail -5</automated>
   </verify>
   <acceptance_criteria>
     - `grep -c "made with love from NOPA" src/components/design-skill/About.jsx` returns 1 (D-16)
@@ -228,9 +247,11 @@ Replace with:
     - `grep -c "Mark.Heart" src/components/design-skill/About.jsx` returns 1 (heart glyph preserved)
     - `grep -c "Instagram" src/components/design-skill/About.jsx` returns at least 1 (anchoring the say-hi pathway)
     - `npx astro check` exits 0
+    - `grep -c "made by hand" src/components/design-skill/About.jsx` returns 1 (W2: UI-SPEC-locked 1-4 word headline)
+    - `grep -c "hand-assembled, one" src/components/design-skill/About.jsx` returns 0 (W2: old 6-word headline gone from the h2 — note that the body paragraph still contains the word `hand-assembled` in descriptive prose, which is correct)
   </acceptance_criteria>
   <done>
-    About.jsx body is rewritten per D-13 voice rules, signature is D-16'd, and no brand-rule violations introduced.
+    About.jsx body is rewritten per D-13 voice rules, h2 headline is W2-compliant ("made by hand", 3 words), signature is D-16'd, and no brand-rule violations introduced.
   </done>
 </task>
 

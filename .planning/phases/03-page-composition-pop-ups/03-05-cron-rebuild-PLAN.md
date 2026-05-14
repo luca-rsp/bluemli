@@ -313,10 +313,10 @@ Expected: prints "JSONC parses OK".
     HUMAN ACTION REQUIRED — Claude cannot automate this. The deploy hook URL must be created in the Cloudflare dashboard (no CLI exists for hook creation) and stored as a Worker secret via interactive `wrangler secret put` (no non-interactive secret-set API for one-shot values). See `<how-to-verify>` below for the full step-by-step the engineer follows.
   </action>
   <verify>
-    <automated>npx wrangler secret list 2>&1 | grep -c "DEPLOY_HOOK_URL"</automated>
+    <automated>test -f src/scheduled.ts && grep -c '"main": "src/scheduled.ts"' wrangler.jsonc && grep -c "DEPLOY_HOOK_URL" src/scheduled.ts && echo VERIFY_OK</automated>
   </verify>
   <done>
-    Engineer reports "approved" after: (a) the deploy hook exists in the Cloudflare dashboard, (b) `wrangler secret put DEPLOY_HOOK_URL` succeeded, (c) `wrangler secret list` shows the secret, (d) `npx wrangler deploy --dry-run` exits 0 with the cron schedule acknowledged.
+    Engineer reports "approved" after: (a) the deploy hook exists in the Cloudflare dashboard, (b) `wrangler secret put DEPLOY_HOOK_URL` succeeded, (c) `wrangler secret list` shows the secret (engineer-side confirmation; the automated probe deliberately does NOT call `wrangler secret list` because that command requires Cloudflare auth and would brittle the verify in fresh CI/local environments), (d) `npx wrangler deploy --dry-run` exits 0 with the cron schedule acknowledged. The automated `<verify>` only confirms the local artifacts (src/scheduled.ts exists; wrangler.jsonc points main to it; DEPLOY_HOOK_URL is referenced in src/scheduled.ts). The engineer's "approved" resume signal is the binding gate.
   </done>
   <what-built>
     src/scheduled.ts and wrangler.jsonc are updated to consume a `DEPLOY_HOOK_URL` secret at runtime. Without that secret set, the deploy hook POST will hit `undefined` and log an error daily until the secret is configured.

@@ -1062,22 +1062,22 @@ For each Phase 3 decision, a quick verification the executor can run. None of th
 
 **If this table makes you uneasy:** A1 is the only one that could meaningfully cost time during execution. Mitigate by having Plan 0 / Task 0 of the cron plan be a `wrangler deploy --dry-run` probe; if it errors with "no scheduled handler", the fallback (a separate `cron-worker` with shared deploy-hook secret) is one wrangler.jsonc + one `src/cron.ts` file away.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should Phase 3 also delete the unused `AppointmentForm.jsx` file?**
    - What we know: D-21 says safe default is keep + drop the import. The component file is small (~50 LOC).
    - What's unclear: nothing imports it after Phase 3 lands; whether the CI brand-rule grep continues to scan it (yes, per Phase 1 D-09).
-   - Recommendation: **keep the file**; drop only the import from `say-hi.astro`. Minimum-blast-radius. Re-evaluate if v1.x revives the contact form path.
+   - RESOLVED: Recommendation: **keep the file**; drop only the import from `say-hi.astro`. Minimum-blast-radius. Re-evaluate if v1.x revives the contact form path.
 
 2. **Where does `OPS.md` (or equivalent) document the one-time deploy-hook setup?**
    - What we know: the executor will run `wrangler secret put DEPLOY_HOOK_URL` once; the founder will create the hook in the Cloudflare dashboard.
    - What's unclear: whether this lands in `CONTENT_EDITING.md` (founder-facing) or a new `OPS.md` (engineer-facing).
-   - Recommendation: **engineer-facing `OPS.md`** at repo root — the founder doesn't need to set up cron; that's an engineering chore on first deploy. If we ever expose cron config to the founder (we won't), revisit.
+   - RESOLVED: Recommendation: **engineer-facing `OPS.md`** at repo root — the founder doesn't need to set up cron; that's an engineering chore on first deploy. If we ever expose cron config to the founder (we won't), revisit.
 
 3. **Does the cron handler need a way to skip the rebuild if no popup has rolled off?**
    - What we know: a rebuild costs Workers Builds free-tier minutes; idempotent rebuilds are cheap but not free.
    - What's unclear: whether the founder cares about saving 1–2 builds per week (most days, no popup is rolling off).
-   - Recommendation: **always trigger.** A daily rebuild is the contract (PAG-04). Adding skip-logic adds state (where to read "last cutoff" from? KV?) that defeats the simplicity win. If build budget ever becomes a concern, revisit then.
+   - RESOLVED: Recommendation: **always trigger.** A daily rebuild is the contract (PAG-04). Adding skip-logic adds state (where to read "last cutoff" from? KV?) that defeats the simplicity win. If build budget ever becomes a concern, revisit then.
 
 ## Sources
 
