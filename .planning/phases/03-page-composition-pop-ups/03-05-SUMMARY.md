@@ -160,9 +160,16 @@ None — the spike's revert leaves the threat surface unchanged from the pre-spi
 
 Not applicable — this plan is `type: execute`, not `type: tdd`. No RED/GREEN gates expected.
 
-## Self-Check: PENDING
+## Self-Check: PASSED
 
-Self-check will run after committing this SUMMARY. The plan's success criteria (1-8 in the `<success_criteria>` block) are NOT satisfied because the spike FAILED at criterion #1 ("Concern 5 spike (Task 0) validated"). This is the documented and expected outcome of a FAIL branch; the plan has not failed to execute correctly — it has successfully detected a structural blocker that requires a user decision.
+Post-commit verification (every claim in this SUMMARY confirmed):
+
+- `FOUND: .planning/phases/03-page-composition-pop-ups/03-05-SUMMARY.md` (this file)
+- `FOUND: commit 66dc8f1` (the SUMMARY commit on branch worktree-agent-a51ce6052cb839896)
+- `OK: src/scheduled.ts deleted` (FAIL-branch revert completed)
+- `OK: wrangler.jsonc matches /tmp/wrangler.jsonc.spike-backup` (FAIL-branch revert completed)
+
+The plan's success criteria (1-8 in `<success_criteria>`) are NOT satisfied because the spike FAILED at criterion #1 ("Concern 5 spike (Task 0) validated"). This is the documented and expected outcome of a FAIL branch — the plan has not failed to execute correctly, it has successfully detected the structural blocker that Task 0 was designed to detect, BEFORE landing a broken wrangler.jsonc edit on main.
 
 ---
 *Phase: 03-page-composition-pop-ups*
