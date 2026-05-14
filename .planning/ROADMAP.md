@@ -97,7 +97,7 @@ Plans:
 - [x] 03-01-brand-system-tweaks-PLAN.md — Wordmark font swap (Bagel Fat One -> Caveat Brush) and project-wide NoPa -> NOPA casing fix on user-facing copy (D-24, D-25)
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 03-02-seo-sitemap-robots-PLAN.md — Shared <SEO /> + @astrojs/sitemap + env-aware /robots.txt endpoint + default og:image PNG + REQUIREMENTS.md edits (PAG-02, PAG-06, PAG-07, PAG-08; D-19, D-23, D-26-D-29)
+- [x] 03-02-seo-sitemap-robots-PLAN.md — Shared <SEO /> + @astrojs/sitemap + env-aware /robots.txt endpoint + default og:image PNG + REQUIREMENTS.md edits (PAG-02, PAG-06, PAG-07, PAG-08; D-19, D-23, D-26-D-29)
 
 **Wave 3** *(blocked on Wave 2 completion; three plans run in parallel)*
 - [ ] 03-03-popups-and-landing-PLAN.md — TZ-aware splitPopups() helper + landing mini-callout + /popups page with ALSO COMING UP/PAST/empty-state + PopupStrip CTA delete (PAG-01, PAG-03; D-02-D-11)
