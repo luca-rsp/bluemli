@@ -1,0 +1,46 @@
+# Cloudflare Workers Static Assets headers file — Phase 4 LCH-04 / D-08 / D-09.
+# Applies to every static-asset response. Does NOT apply to Worker code (v1 ships
+# no /api/* routes; run_worker_first: ["/api/*"] in wrangler.jsonc is RESERVED but
+# unrouted — if a future phase adds /api/*, that Worker MUST inject these headers
+# in its own response, because _headers is NOT consulted for Worker responses).
+#
+# Order: most-specific path first; '/*' last. Cloudflare reads every block; more
+# specific paths can override the broad block on the same header name.
+# Reference: https://developers.cloudflare.com/workers/static-assets/headers/
+
+# --- Fingerprinted Astro assets (CSS, JS, fonts emitted by Vite/Astro build) ---
+# Content-hashed → safe to cache forever.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# --- Static images with stable filenames ---
+# 7 days = founder can refresh a hero on a PR-preview-then-merge loop and not wait
+# too long for stale caches. (RESEARCH.md A6: CONTENT_EDITING.md convention is
+# "never delete, flip availability" — pieces get a new slug, not a re-shoot at the
+# same slug — so 7d is safe.)
+/gallery/*
+  Cache-Control: public, max-age=604800
+/og-default.png
+  Cache-Control: public, max-age=604800
+/mark.svg
+  Cache-Control: public, max-age=604800
+/favicon.svg
+  Cache-Control: public, max-age=604800
+/favicon-16.png
+  Cache-Control: public, max-age=604800
+/favicon-32.png
+  Cache-Control: public, max-age=604800
+/favicon.ico
+  Cache-Control: public, max-age=604800
+/apple-touch-icon.png
+  Cache-Control: public, max-age=604800
+
+# --- Everything else (HTML, robots.txt, sitemap-*.xml) — always fresh ---
+# Cloudflare's edge caches at its own discretion; we just tell browsers not to.
+/*
+  Cache-Control: public, max-age=0, must-revalidate
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), interest-cohort=(), browsing-topics=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://cloud.umami.is; connect-src 'self' https://cloud.umami.is https://*.umami.is https://*.umami.dev; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
