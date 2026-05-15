@@ -25,11 +25,11 @@ const site = (await getEntry('site', 'default'))!.data;
   <section class="say-hi-stage" aria-label="Say hi">
     <h1 class="say-hi">say hi</h1>
     <p class="sub">let's talk earrings</p>
-    <a class="ig-button" href={site.ig_dm_url}>
+    <a class="ig-button" href={site.ig_dm_url} data-umami-event="say_hi_ig_dm">
       DM me on Instagram <span class="arrow" aria-hidden="true">&rarr;</span>
     </a>
     <p class="mailto">
-      or email <a href={`mailto:${site.contact_email}`}>{site.contact_email}</a>
+      or email <a href={`mailto:${site.contact_email}`} data-umami-event="say_hi_mailto">{site.contact_email}</a>
     </p>
   </section>
 

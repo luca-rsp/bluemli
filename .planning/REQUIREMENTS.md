@@ -103,7 +103,7 @@
 |-------------|-------|-------------------|
 | FND-01 | Phase 1: Foundations & Brand System | SC1 (cream/font shell renders on preview), SC2 (push-to-deploy + PR previews) |
 | FND-02 | Phase 1: Foundations & Brand System | SC1 (preview at *.workers.dev), SC2 (push-to-deploy + PR previews), SC5 (PROJECT.md updated to Workers wording) |
-| FND-03 | Phase 5: Analytics, Polish & Launch | SC1 (apex `https://studiobluemli.com` resolves; `www.` 301-redirects to apex) |
+| FND-03 | Phase 4: Analytics, Polish & Launch | SC1 (apex `https://studiobluemli.com` resolves; `www.` 301-redirects to apex) |
 | FND-04 | Phase 1: Foundations & Brand System | SC2 (push to main = production deploy; PR = unique preview URL) |
 | FND-05 | Phase 1: Foundations & Brand System | SC1 (header + footer chrome render on the placeholder page) |
 | FND-06 | Phase 1: Foundations & Brand System | SC1 (cream background), SC3 (CI fails on bg-white/#fff) |
@@ -112,7 +112,7 @@
 | FND-09 | Phase 1: Foundations & Brand System | SC1 (design-skill components render on the placeholder shell) |
 | FND-10 | Phase 1: Foundations & Brand System | SC3 (CI fails on bg-white, #fff, flower/petal/floral/bloom/blossom, gradient, backdrop-filter, border:1px) |
 | FND-11 | Phase 1: Foundations & Brand System | SC3 (CI fails on uppercase filenames under src/pages/) |
-| FND-12 | Phase 1: Foundations & Brand System | SC1 (mobile-first shell on preview) — Lighthouse ≥ 90 finalized in Phase 5 SC3 |
+| FND-12 | Phase 1: Foundations & Brand System | SC1 (mobile-first shell on preview) — Lighthouse ≥ 90 finalized in Phase 4 SC3 |
 | FND-13 | Phase 1: Foundations & Brand System | SC1 (focus-visible + skip-to-content + color-scheme: light on the shell) |
 | CNT-01 | Phase 2: Content Schema & Gallery | SC2 (typo'd frontmatter fails the build via Zod .strict()) |
 | CNT-02 | Phase 2: Content Schema & Gallery | SC1 (founder adds piece by dropping a photo into a per-slug folder via GitHub web UI) |
@@ -135,14 +135,14 @@
 | PAG-07 | Phase 3: Page Composition & Pop-ups | SC4 (iMessage/Slack/IG unfurls show correct title/description/og:image), SC5 (canonical points to apex) |
 | PAG-08 | Phase 3: Page Composition & Pop-ups | SC4 (sitemap-index.xml + robots.txt return valid content with sitemap reference) |
 | PAG-09 | Phase 3: Page Composition & Pop-ups | SC3 (alt text on every product image, never uses flower/petal/floral/bloom/blossom — also enforced by Phase 1 SC3 CI) |
-| LCH-01 | Phase 5: Analytics, Polish & Launch | SC2 (Umami script in BaseLayout with data-website-id + data-domains restricting to studiobluemli.com) |
-| LCH-02 | Phase 5: Analytics, Polish & Launch | SC2 (domain registered in Umami; Realtime view shows visit within 5 minutes of cutover) |
-| LCH-03 | Phase 5: Analytics, Polish & Launch | SC2 (custom events fire for gallery card click, IG inquire click, contact-form submit) |
-| LCH-04 | Phase 5: Analytics, Polish & Launch | SC1 (production HTTPS with valid cert + security headers in place at cutover) |
-| LCH-05 | Phase 5: Analytics, Polish & Launch | SC3 (Lighthouse mobile ≥ 90 across Performance/Accessibility/Best Practices/SEO on all 5 pages) |
-| LCH-06 | Phase 5: Analytics, Polish & Launch | SC4 (Facebook Sharing Debugger + Twitter Card validator return valid previews for home, gallery piece, popup) |
-| LCH-07 | Phase 5: Analytics, Polish & Launch | SC1 (apex resolves with valid HTTPS, www 301s to apex) |
-| LCH-08 | Phase 5: Analytics, Polish & Launch | SC5 ("Looks Done But Isn't" checklist walked top-to-bottom) |
+| LCH-01 | Phase 4: Analytics, Polish & Launch | SC2 (Umami script in BaseLayout with data-website-id + data-domains restricting to studiobluemli.com) |
+| LCH-02 | Phase 4: Analytics, Polish & Launch | SC2 (domain registered in Umami; Realtime view shows visit within 5 minutes of cutover) |
+| LCH-03 | Phase 4: Analytics, Polish & Launch | SC2 (custom events fire for gallery card click, IG inquire click, contact-form submit) |
+| LCH-04 | Phase 4: Analytics, Polish & Launch | SC1 (production HTTPS with valid cert + security headers in place at cutover) |
+| LCH-05 | Phase 4: Analytics, Polish & Launch | SC3 (Lighthouse mobile ≥ 90 across Performance/Accessibility/Best Practices/SEO on all 5 pages) |
+| LCH-06 | Phase 4: Analytics, Polish & Launch | SC4 (Facebook Sharing Debugger + Twitter Card validator return valid previews for home, gallery piece, popup) |
+| LCH-07 | Phase 4: Analytics, Polish & Launch | SC1 (apex resolves with valid HTTPS, www 301s to apex) |
+| LCH-08 | Phase 4: Analytics, Polish & Launch | SC5 ("Looks Done But Isn't" checklist walked top-to-bottom) |
 
 ---
 *Last updated: 2026-05-12 — Traceability filled in by gsd-roadmapper*
