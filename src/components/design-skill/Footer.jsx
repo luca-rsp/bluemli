@@ -20,7 +20,7 @@ function Footer({ igHandle, contactEmail }) {
       </div>
 
       <div style={{ marginTop: 22, display: 'flex', justifyContent: 'center', gap: 22, fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--indigo-500)' }}>
-        <a href={`https://instagram.com/${igHandle}`} target="_blank" rel="noreferrer" style={{ color: 'var(--coral-500)' }}>@{igHandle}</a>
+        <a href={`https://instagram.com/${igHandle}`} target="_blank" rel="noreferrer" data-umami-event="footer_ig_click" style={{ color: 'var(--coral-500)' }}>@{igHandle}</a>
         <span style={{ color: 'var(--ink-400)' }}>·</span>
         <a href={`mailto:${contactEmail}`} style={{ color: 'var(--coral-500)' }}>{contactEmail}</a>
         <span style={{ color: 'var(--ink-400)' }}>·</span>

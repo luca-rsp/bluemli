@@ -170,6 +170,28 @@ Give it up to 5 minutes. If it still doesn't appear, check the **Checks** tab fo
 
 ***
 
+## Analytics events
+
+The site records a small number of click events into Umami Cloud (cookieless,
+no consent banner). Page-load events (which pages people visit) are always
+recorded by Umami automatically — no setup needed. The named events below are
+specific clicks worth knowing about, with Umami's page URL recorded alongside
+each event so you can see "footer IG clicks from the gallery page" vs "footer
+IG clicks from the home page" without any extra tagging.
+
+| Event | Fires when | Where |
+|-------|------------|-------|
+| `gallery_card_click` | Visitor opens a gallery piece from the gallery grid | `/gallery` cards |
+| `inquire_ig_per_piece` | Visitor taps the "DM me to inquire" link on a piece page (the `piece` property captures which slug) | `/gallery/<slug>` IG CTA |
+| `say_hi_ig_dm` | Visitor taps the IG DM button on Say hi | `/say-hi` |
+| `say_hi_mailto` | Visitor taps the email link on Say hi | `/say-hi` |
+| `footer_ig_click` | Visitor taps the IG handle in the footer | every page (footer) |
+| `popups_empty_ig_click` | Visitor taps "follow @studio_bluemli for the next one" when no pop-ups are on the calendar | `/popups` empty state |
+
+To see them: log into Umami Cloud → studiobluemli.com → **Events** tab.
+
+---
+
 ## Operations
 
 When the site is ready for the public and you want to put it on `studiobluemli.com`,
