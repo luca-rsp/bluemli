@@ -42,7 +42,7 @@ function GalleryGrid({ pieces = [] }) {
         gap: 24,
       }}>
         {pieces.map((piece) => (
-          <a key={piece.slug} href={`/gallery/${piece.slug}`} className="card" style={{
+          <a key={piece.slug} href={`/gallery/${piece.slug}`} className="card" data-umami-event="gallery_card_click" style={{
             background: 'var(--color-surface-card)',
             borderRadius: 8,
             overflow: 'hidden',
