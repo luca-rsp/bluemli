@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 04 Plan 05 — paused at Task 6 (3 founder phone checks — `checkpoint:human-verify`, D-05 items 9/10/11)
-last_updated: "2026-05-15T19:15:00Z"
-last_activity: 2026-05-15 -- Phase 04 Plan 05 Task 5 complete (all 5 LCH-06 OG visual validation sub-items ✓ — founder-confirmed after PR #9 full-palette og-default.png deploy + FB Scrape Again); Cache-Control duplicate-header finding recorded in Fix Loop as v1.x follow-up (not a blocker); paused at Task 6 (founder phone checks: IG DM open, mailto open, cellular load speed)
+stopped_at: Phase 04 Plan 05 — paused at Task 7 (`checkpoint:human-action`, founder removes the `*.workers.dev` preview entry from Umami Cloud's site list)
+last_updated: "2026-05-15T19:45:00Z"
+last_activity: 2026-05-15 -- Phase 04 Plan 05 Task 6 complete (founder phone-check answers — items 9/10/11 all YES, founder-confirmed via phone 2026-05-15; commit 15e17d5); paused at Task 7 (checkpoint:human-action — founder removes `*.workers.dev` preview entry from Umami Cloud → Settings → Websites; one-click cleanup in dashboard, not a code change)
 progress:
   total_phases: 4
   completed_phases: 3
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-05-12)
 ## Current Position
 
 Phase: 04 (analytics-polish-launch) — EXECUTING
-Plan: 5 of 5 — paused at Task 6 (checkpoint:human-verify, D-05 founder phone checks 9/10/11)
-Status: Executing Phase 04 Plan 05 — cutover live (Task 2 via PRs #6/#7/#8); Task 3a scripted items 1/2/3/7/8 ✓ (commit cdd5c38); Task 4 Lighthouse all 24 cells >= 90 ✓ (commit 05dfc2e); Task 3b items 4 + 5 ✓ (commit 3934adb — clean console + all 6 Umami events in Realtime); Task 5 LCH-06 OG visual validation all 5 sub-items ✓ (founder-confirmed after PR #9 `1a6c176` full-palette `og-default.png` deploy, md5 `69ef1e8d…`); Cache-Control duplicate-header finding recorded in Fix Loop as v1.x follow-up; awaiting founder to walk Task 6 (3 phone checks: IG DM open, mailto open, cellular speed)
-Last activity: 2026-05-15 -- Plan 05 Task 5 complete; paused at Task 6 (checkpoint:human-verify, D-05 phone checks)
+Plan: 5 of 5 — paused at Task 7 (checkpoint:human-action, founder removes `*.workers.dev` preview entry from Umami's site list)
+Status: Executing Phase 04 Plan 05 — cutover live (Task 2 via PRs #6/#7/#8); Task 3a scripted items 1/2/3/7/8 ✓ (commit cdd5c38); Task 4 Lighthouse all 24 cells >= 90 ✓ (commit 05dfc2e); Task 3b items 4 + 5 ✓ (commit 3934adb — clean console + all 6 Umami events in Realtime); Task 5 LCH-06 OG visual validation all 5 sub-items ✓ (founder-confirmed after PR #9 `1a6c176` full-palette `og-default.png` deploy, md5 `69ef1e8d…`); Cache-Control duplicate-header finding recorded in Fix Loop as v1.x follow-up; Task 6 founder phone checks 9/10/11 all ✓ (founder-confirmed via phone 2026-05-15; commit 15e17d5); awaiting Task 7 (checkpoint:human-action — founder removes the `*.workers.dev` preview entry from Umami Cloud → Settings → Websites; Task 8 finalizes LAUNCH-REPORT.md + writes SUMMARY)
+Last activity: 2026-05-15 -- Plan 05 Task 6 complete; paused at Task 7 (checkpoint:human-action, Umami site-list post-cutover cleanup)
 
 Progress: [███████░░░] 75%
 
@@ -88,6 +88,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-15T19:15:00Z
-Stopped at: Phase 04 Plan 05 Task 6 — checkpoint:human-verify (D-05 founder phone checks: IG DM open, mailto open, cellular load speed)
-Resume file: .planning/phases/04-analytics-polish-launch/04-05-PLAN.md (Task 6)
+Last session: 2026-05-15T19:45:00Z
+Stopped at: Phase 04 Plan 05 Task 7 — checkpoint:human-action (founder removes the `*.workers.dev` preview entry from Umami Cloud → Settings → Websites; one-click dashboard cleanup, not a code change)
+Resume file: .planning/phases/04-analytics-polish-launch/04-05-PLAN.md (Task 7)
