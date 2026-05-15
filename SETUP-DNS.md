@@ -11,13 +11,23 @@ Everything below happens in your Cloudflare account. You'll need to be signed in
 
 1. Go to Cloudflare and open **Workers & Pages**.
 2. Click the **studio-bluemli** worker in the list.
-3. Click **Settings** at the top.
-4. Find the **Domains & Routes** section and click **Add**, then **Custom Domain**.
-5. Type `studiobluemli.com` (no `https`, no slashes — just the name).
-6. Click **Add Custom Domain**.
+3. Click the **Domains** tab.
+4. Click **Add domain**.
+5. In the popup, select `studiobluemli.com` from your zones (or type it).
+6. Cloudflare will then ask you to pick between:
+   - **Custom domains — simple domain mapping** ← pick this one.
+   - **Route pattern — advanced URL matching**
+7. Confirm.
 
-Cloudflare creates the DNS record and starts issuing the HTTPS certificate. Move
-on to Step 2 — the certificate finishes on its own in a few minutes.
+Why **Custom domains**: this Worker IS the whole site, so we want every request
+to `studiobluemli.com` to hit it, with Cloudflare auto-creating the DNS record
+and auto-issuing the cert. Route patterns are for the case where a Worker handles
+only a slice of a zone (e.g. `/api/*`) and you manage DNS separately — wrong shape
+for us.
+
+Cloudflare creates the apex DNS record (proxied) and starts issuing the HTTPS
+certificate. Move on to Step 2 — the certificate finishes on its own in a few
+minutes.
 
 ***
 
@@ -25,17 +35,18 @@ on to Step 2 — the certificate finishes on its own in a few minutes.
 
 1. Go to Cloudflare and open the **studiobluemli.com** zone (the domain itself,
    not the worker).
-2. Click **Rules** in the left sidebar, then **Redirect Rules**.
-3. Click **Create rule**.
+2. Click **Rules** in the left sidebar — this lands on the **Overview** page.
+3. Click **Create rule**, then **Redirect Rule**.
 4. Name the rule `www-to-apex` (any name works).
 5. Under **When incoming requests match**, choose **Wildcard pattern**.
-6. In the request URL field, paste: `http*://www.studiobluemli.com${URI}`
-7. Under **Then…**, set **Target URL** to: `https://studiobluemli.com${URI}`
+6. In the **Request URL** field, paste: `http*://www.studiobluemli.com/*`
+7. Under **Then…**, set **Target URL** to: `https://studiobluemli.com/${1}`
 8. Set the **Status code** to **301**.
 9. Click **Deploy**.
 
-The `${URI}` part keeps the path — so `www.studiobluemli.com/gallery` lands on
-`studiobluemli.com/gallery`, not the homepage.
+The `${1}` part keeps the path — so `www.studiobluemli.com/gallery` lands on
+`studiobluemli.com/gallery`, not the homepage. (It's the captured value of the
+trailing `*` in the request URL.)
 
 ***
 
