@@ -19,11 +19,12 @@ const W = 1200;
 const H = 630;
 const CREAM_100 = '#F5DCC7'; // --cream-100 from src/styles/colors_and_type.css
 
-// Pick the coral mark if available, fall back to the generic mark.
+// Pick the full-palette mark (SKILL.md non-negotiable: "Default to mark.svg
+// — full palette") and fall back to the monochrome coral only if it's missing.
 async function pickMark() {
   const candidates = [
-    'assets/logo/mark-coral.svg',
     'assets/logo/mark.svg',
+    'assets/logo/mark-coral.svg',
   ];
   for (const rel of candidates) {
     const abs = resolve(ROOT, rel);
