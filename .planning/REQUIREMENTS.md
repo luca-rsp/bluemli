@@ -11,7 +11,7 @@
 
 - [ ] **FND-01**: Site builds as static assets from an Astro 6.2 project using `@astrojs/cloudflare@13.5` and `@astrojs/react@5.0.4`, with React 19 server-rendered only (no `client:` directives)
 - [ ] **FND-02**: Site deploys to **Cloudflare Workers + Static Assets** (not Cloudflare Pages — adapter v13 dropped Pages support) via a single Worker that serves both static and the `/api/*` route via `wrangler.toml` `assets.run_worker_first: ["/api/*"]`
-- [ ] **FND-03**: Production traffic resolves at apex `https://studiobluemli.com`; `www.studiobluemli.com` 301-redirects to apex via Cloudflare Redirect Rules
+- [x] **FND-03**: Production traffic resolves at apex `https://studiobluemli.com`; `www.studiobluemli.com` 301-redirects to apex via Cloudflare Redirect Rules
 - [ ] **FND-04**: Every push to `main` triggers a production deploy via Cloudflare's git integration; every pull request gets a unique preview deploy URL
 - [ ] **FND-05**: A shared `BaseLayout.astro` provides the `<head>`, header (logo lockup + nav), and footer (Instagram link, copyright) for all 5 pages
 - [ ] **FND-06**: Brand color/type tokens from `studio-bluemli-design/colors_and_type.css` are imported once globally; `body` background is cream (never white)
@@ -53,13 +53,13 @@
 ### Launch & Operations
 
 - [ ] **LCH-01**: Umami Cloud `<script>` is loaded once in `BaseLayout`'s `<head>` with `data-website-id` and `data-domains="studiobluemli.com"` so preview-deploy traffic doesn't pollute production analytics
-- [ ] **LCH-02**: The site is registered in Umami Cloud's website list (so events aren't silently dropped); domain configured to match `data-domains`
+- [x] **LCH-02**: The site is registered in Umami Cloud's website list (so events aren't silently dropped); domain configured to match `data-domains`
 - [ ] **LCH-03**: Key user interactions emit Umami custom events via `data-umami-event` attributes: gallery card click, "inquire on Instagram" click, contact-form submit
 - [ ] **LCH-04**: A `_headers` file sets security headers (HSTS, X-Content-Type-Options: nosniff, Referrer-Policy: strict-origin-when-cross-origin, Permissions-Policy) and long-cache headers for static assets
-- [ ] **LCH-05**: Lighthouse mobile audit ≥ 90 across Performance, Accessibility, Best Practices, SEO on all 5 pages
-- [ ] **LCH-06**: OG preview is validated for the landing page, a representative gallery piece, and a pop-up via the Facebook Sharing Debugger and Twitter Card validator
-- [ ] **LCH-07**: DNS cutover: studiobluemli.com points at the Cloudflare Worker via the existing Cloudflare account; HTTPS certificate is issued and valid; apex + www both resolve correctly with the 301 in place
-- [ ] **LCH-08**: A short "Looks Done But Isn't" launch checklist is walked: contact form sends, sitemap is reachable, robots.txt is reachable, og:image URLs return 200, no console errors on any page, Umami events appearing in dashboard, all 5 pages load < 2s on a throttled mobile connection
+- [x] **LCH-05**: Lighthouse mobile audit ≥ 90 across Performance, Accessibility, Best Practices, SEO on all 5 pages
+- [x] **LCH-06**: OG preview is validated for the landing page, a representative gallery piece, and a pop-up via the Facebook Sharing Debugger and Twitter Card validator
+- [x] **LCH-07**: DNS cutover: studiobluemli.com points at the Cloudflare Worker via the existing Cloudflare account; HTTPS certificate is issued and valid; apex + www both resolve correctly with the 301 in place
+- [x] **LCH-08**: A short "Looks Done But Isn't" launch checklist is walked: contact form sends, sitemap is reachable, robots.txt is reachable, og:image URLs return 200, no console errors on any page, Umami events appearing in dashboard, all 5 pages load < 2s on a throttled mobile connection
 
 ---
 
