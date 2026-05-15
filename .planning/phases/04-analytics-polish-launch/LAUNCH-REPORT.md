@@ -24,17 +24,17 @@
 
 | # | Item | Status | Note |
 |---|------|--------|------|
-| 1 | sitemap-index.xml reachable + references all 5 routes + every /gallery/<slug> |   |   |
-| 2 | robots.txt reachable with Allow + Sitemap reference |   |   |
-| 3 | Every og:image URL returns 200 |   |   |
-| 4 | No console errors on each of 6 pages (DevTools walk) |   |   |
-| 5 | All 4 Umami custom events appear in Realtime within 5 min |   |   |
-| 6 | Lighthouse mobile >= 90 across Perf/A11y/BP/SEO on all 6 routes |   |   |
-| 7 | www->apex 301 returns 301 with correct Location |   |   |
-| 8 | Apex HTTPS cert chain is valid |   |   |
-| 9 | Founder phone: tap IG DM on /say-hi -> Instagram opens |   |   |
-| 10 | Founder phone: tap mailto on /say-hi -> email client opens |   |   |
-| 11 | Founder phone: studiobluemli.com over cellular feels fast (< ~2s) |   |   |
+| 1 | sitemap-index.xml reachable + references all 5 routes + every /gallery/<slug> | ✓ | `/sitemap-index.xml` 200, points at `/sitemap-0.xml`; `<loc>` count = 11 (5 page templates + 6 gallery slugs — cluster-blush, cluster-cobalt, cluster-coral, cluster-lavender, cluster-saffron, cluster-sage). Exact match to expectation. |
+| 2 | robots.txt reachable with Allow + Sitemap reference | ✓ | `/robots.txt` 200; body: `User-agent: *` / `Allow: /` / `Sitemap: https://studiobluemli.com/sitemap-index.xml`. Production branch of env-aware `robots.txt.ts` confirmed firing. |
+| 3 | Every og:image URL returns 200 | ✓ | `npm run ci:og-check` exit 0; all 11 og:image URLs return 200 (6 per-piece `hero-800.webp` + 5 default `og-default.png`). Full output in `## OG-Image Audit` below. |
+| 4 | No console errors on each of 6 pages (DevTools walk) |   | Pending Task 3b (human-in-the-loop). |
+| 5 | All 6 Umami custom events appear in Realtime within 5 min |   | Pending Task 3b (human-in-the-loop). 6 events post-PR#8: `gallery_card_click`, `inquire_ig_per_piece`, `say_hi_ig_dm`, `say_hi_mailto`, `footer_ig_click`, `popups_empty_ig_click`. |
+| 6 | Lighthouse mobile >= 90 across Perf/A11y/BP/SEO on all 6 routes |   | See `## Lighthouse Scores` below — populated by Task 4. |
+| 7 | www->apex 301 returns 301 with correct Location | ✓ | `https://www.studiobluemli.com/` → `HTTP 301 → https://studiobluemli.com/`; `/gallery` → same with path preserved; `/say-hi?utm=x` → same with **path AND query preserved** (confirms the `${2}` fix from PR #7). |
+| 8 | Apex HTTPS cert chain is valid | ✓ | TLSv1.3; `subject: CN=studiobluemli.com`; `issuer: C=US; O=Google Trust Services; CN=WE1` (Cloudflare custom-domain cert via GTS); `expire date: Aug 13 16:16:17 2026 GMT`; `SSL certificate verify ok`. No chain errors. |
+| 9 | Founder phone: tap IG DM on /say-hi -> Instagram opens |   | Pending Task 6 (founder phone check). |
+| 10 | Founder phone: tap mailto on /say-hi -> email client opens |   | Pending Task 6 (founder phone check). |
+| 11 | Founder phone: studiobluemli.com over cellular feels fast (< ~2s) |   | Pending Task 6 (founder phone check). |
 
 ***
 
@@ -55,11 +55,27 @@
 
 ## OG-Image Audit
 
-(Populated after Task 3a — `scripts/check-og-images.sh` output below.)
+`npm run ci:og-check` against production (`bash scripts/check-og-images.sh`):
 
 ```
-<output>
+Scanning 11 URLs from https://studiobluemli.com/sitemap-0.xml
+
+OK: https://studiobluemli.com/ -> https://studiobluemli.com/og-default.png (200)
+OK: https://studiobluemli.com/about/ -> https://studiobluemli.com/og-default.png (200)
+OK: https://studiobluemli.com/gallery/ -> https://studiobluemli.com/og-default.png (200)
+OK: https://studiobluemli.com/gallery/cluster-blush/ -> https://studiobluemli.com/gallery/cluster-blush/hero-800.webp (200)
+OK: https://studiobluemli.com/gallery/cluster-cobalt/ -> https://studiobluemli.com/gallery/cluster-cobalt/hero-800.webp (200)
+OK: https://studiobluemli.com/gallery/cluster-coral/ -> https://studiobluemli.com/gallery/cluster-coral/hero-800.webp (200)
+OK: https://studiobluemli.com/gallery/cluster-lavender/ -> https://studiobluemli.com/gallery/cluster-lavender/hero-800.webp (200)
+OK: https://studiobluemli.com/gallery/cluster-saffron/ -> https://studiobluemli.com/gallery/cluster-saffron/hero-800.webp (200)
+OK: https://studiobluemli.com/gallery/cluster-sage/ -> https://studiobluemli.com/gallery/cluster-sage/hero-800.webp (200)
+OK: https://studiobluemli.com/popups/ -> https://studiobluemli.com/og-default.png (200)
+OK: https://studiobluemli.com/say-hi/ -> https://studiobluemli.com/og-default.png (200)
+
+All og:image URLs return 200.
 ```
+
+Exit code 0. 11/11 og:image URLs return 200. Per-piece og:images resolve to the piece's `hero-800.webp`; non-gallery routes fall back to `/og-default.png`. LCH-06's "every og:image URL returns 200" gate is green (visual unfurl quality remains a founder phone-check in Task 6).
 
 ***
 
@@ -88,6 +104,39 @@
 - [ ] Umami Cloud → Settings → Websites — REMOVED the `*.workers.dev` preview entry; only `studiobluemli.com` remains.
 - [ ] HSTS preload-list submission DEFERRED to v1.x (NOT submitted in Phase 4).
 - [ ] `LAUNCH-REPORT.md` committed to the phase directory.
+
+***
+
+## Cutover Environment — verified live (post-PR#6 / PR#7 / PR#8)
+
+Captured during Task 3a from production HTTPS responses.
+
+**Security headers (apex, `curl -I https://studiobluemli.com/`):**
+
+```
+HTTP/1.1 200 OK
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+content-security-policy: default-src 'self'; script-src 'self' https://cloud.umami.is; connect-src 'self' https://cloud.umami.is https://*.umami.is https://*.umami.dev; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+permissions-policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=(), interest-cohort=(), browsing-topics=()
+referrer-policy: strict-origin-when-cross-origin
+x-content-type-options: nosniff
+```
+
+HSTS = 2y + `includeSubDomains` + `preload` directive present (preload-list submission still DEFERRED per the houskeeping checkbox below — directive on the response is independent of submitting to `hstspreload.org`). CSP allowlists `cloud.umami.is` in `script-src` AND `*.umami.is` / `*.umami.dev` in `connect-src`, matching the empirical-fallback path documented in 04-02 SUMMARY.
+
+**Umami snippet rendered in production HTML (`curl -fsS https://studiobluemli.com/ | grep umami`):**
+
+```html
+<script async src="https://cloud.umami.is/script.js" data-website-id="dda5c749-8ea9-45e4-8f71-67f468bf741d" data-domains="studiobluemli.com"></script>
+```
+
+`data-domains` is apex-only (no workers.dev preview hostname) — confirms D-02 post-cutover state (preview-deploy events will not pollute production data). The `PUBLIC_UMAMI_WEBSITE_ID` env var (Plaintext, in Worker → Settings → Build → Build variables — corrected location per PR #7) is reaching the build successfully.
+
+**PR/cutover trail (recorded for traceability):**
+
+- PR #6 (`97ef428`) — pushed Wave 1 code (Plans 04-01..04-04) + LAUNCH-REPORT.md scaffold to production.
+- PR #7 (`75e6b84`) — corrected three real errors in SETUP-DNS.md surfaced during the live cutover: Step 1 dashboard path (Workers & Pages → Worker → Domains → Add domain → "Custom domains — simple domain mapping" popup option, vs. the older "Settings → Domains & Routes" path); Step 2 wildcard capture (`${1}` → `${2}` — with two `*` in the pattern, the first captures the scheme suffix `s` and the second captures the path); Step 2 added missing explicit proxied `www` CNAME → apex (without it, the redirect rule cannot fire); Step 3 env var location (build-time `PUBLIC_*` variables live under Build → Build variables and secrets, not under runtime Variables and Secrets — Astro reads them via `import.meta.env` at build time).
+- PR #8 (`badf64f`) — added 2 more Umami events at founder request: `footer_ig_click` on `Footer.jsx` (fires from every page) and `popups_empty_ig_click` on `popups.astro` (fires on the empty-state branch). **Total Umami custom events is now 6, not 4.** CONTENT_EDITING.md gained an "Analytics events" section listing all 6 events.
 
 ***
 
