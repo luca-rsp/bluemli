@@ -126,13 +126,25 @@ Plans:
   3. Lighthouse mobile audit on the production URL scores ≥ 90 on Performance, Accessibility, Best Practices, and SEO for all 5 pages (landing, gallery, gallery detail sample, popups, about, say-hi).
   4. The Facebook Sharing Debugger and Twitter Card validator return valid previews (image, title, description) for the home, a representative gallery piece, and a pop-up URL.
   5. The "Looks Done But Isn't" checklist (LCH-08) is walked top-to-bottom: sitemap + robots.txt return 200; every `og:image` URL returns 200; no console errors on any page; all 5 pages load < 2s on a throttled mobile connection.
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+**Wave 1** *(four plans run in parallel — independent files, no shared file conflicts)*
+- [ ] 04-01-PLAN.md — Env-aware Umami snippet in BaseLayout reusing isProduction() + 4 data-umami-event attributes on gallery card / per-piece IG inquire / say-hi IG DM / say-hi mailto (LCH-01, LCH-02 scaffolding, LCH-03; D-01, D-02, D-03)
+- [ ] 04-02-PLAN.md — public/_headers with HSTS + CSP (Umami wildcards) + Permissions-Policy + Referrer-Policy + X-Content-Type-Options + Cache-Control buckets (LCH-04; D-08, D-09)
+- [ ] 04-03-PLAN.md — SETUP-DNS.md at repo root (founder-facing 5-step walkthrough); verify astro.config.mjs site:apex (D-07) + public/og-default.png brand fidelity (D-10); cross-link from CONTENT_EDITING.md (FND-03, LCH-07; D-06)
+- [ ] 04-04-PLAN.md — scripts/check-og-images.sh + scripts/lighthouse-production.sh + npm ci:og-check / ci:lighthouse-prod scripts; LCH-06 acceptance pivoted off the deprecated Twitter Card Validator to FB Sharing Debugger + real iMessage/IG unfurl (LCH-05, LCH-06, LCH-08)
+
+**Wave 2** *(blocked on Wave 1 completion — depends on all four)*
+- [ ] 04-05-PLAN.md — Cutover execution + LAUNCH-REPORT.md: founder walks SETUP-DNS.md; Claude scripts checklist items 1-8; founder walks items 9-11 (phone checks); Umami site-list housekeeping; HSTS preload-list submission DEFERRED to v1.x (FND-03, LCH-02, LCH-05, LCH-06, LCH-07, LCH-08; D-04, D-05)
+**UI hint**: no
 
 **Key risks / pitfalls:**
 - DNS cutover is one-way-ish — sequence it last in the phase, after final About copy is locked and Umami's domain registration is verified (Pitfall #19).
 - Umami "0 events" after cutover almost always means the production domain wasn't added to Umami's website list (Pitfall #19) — register `studiobluemli.com` (not the `*.workers.dev` preview) in Umami settings before cutover.
 - WWW vs apex split (Pitfall #18) — pick apex as canonical; verify the Cloudflare Redirect Rule fires *before* announcing.
 - `_headers` for security (HSTS, X-Content-Type-Options, Referrer-Policy, Permissions-Policy) and long-cache for static assets must ship with the cutover, not after — HSTS in particular is sticky once issued.
+- Twitter Card Validator deprecated 2022 — LCH-06 acceptance is pivoted in Plan 04 to Facebook Sharing Debugger + real iMessage/IG unfurl test on the founder's phone. The dead validator URL is explicitly excluded from `scripts/check-og-images.sh`.
+- Umami events endpoint origin has drifted three times in two years — CSP `connect-src` allows `https://*.umami.is https://*.umami.dev` wildcards as a defensive measure (RESEARCH.md Pitfall 1); Plan 05 launch-checklist item 5 confirms empirically by reading DevTools Network on each event click.
 
 ## Progress
 
@@ -144,4 +156,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Foundations & Brand System | 5/5 | Complete | 2026-05-13 |
 | 2. Content Schema & Gallery | 5/5 | Complete | 2026-05-14 |
 | 3. Page Composition & Pop-ups | 0/TBD | Not started | - |
-| 4. Analytics, Polish & Launch | 0/TBD | Not started | - |
+| 4. Analytics, Polish & Launch | 0/5 | Not started | - |
