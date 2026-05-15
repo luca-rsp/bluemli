@@ -107,9 +107,9 @@ Exit code 0. 11/11 og:image URLs return 200. Per-piece og:images resolve to the 
 
 ## Post-cutover House-keeping
 
-- [ ] Umami Cloud → Settings → Websites — REMOVED the `*.workers.dev` preview entry; only `studiobluemli.com` remains.
-- [ ] HSTS preload-list submission DEFERRED to v1.x (NOT submitted in Phase 4).
-- [ ] `LAUNCH-REPORT.md` committed to the phase directory.
+- [x] Umami Cloud → Settings → Websites — REMOVED the `*.workers.dev` preview entry; only `studiobluemli.com` remains. Founder confirmed via Umami Cloud dashboard, 2026-05-15 (T-04-30 mitigated; preview-deploy traffic can no longer pollute production analytics).
+- [~] HSTS preload-list submission DEFERRED to v1.x per CONTEXT D-09 (NOT submitted in Phase 4). Recorded explicitly so the deferral cannot be retroactively mis-claimed as "done in Phase 4." The `Strict-Transport-Security` response header on production already includes the `preload` directive (`max-age=63072000; includeSubDomains; preload`) — that is independent of submitting to `hstspreload.org`, which is the one-way ~1-year step the founder is deferring.
+- [x] `LAUNCH-REPORT.md` committed to the phase directory (this commit).
 
 ***
 
@@ -176,3 +176,16 @@ Cache-Control: public, max-age=0, must-revalidate, public, max-age=604800
 - **Scope:** affects every static asset that matches the `public/_headers` rule (`/og-default.png`, the per-piece `hero-*.webp` files, anything under `/_astro/`). All cells in the Lighthouse table still scored ≥ 92 on Best Practices — no audit failure observed in practice.
 - **Disposition:** **v1.x follow-up. NOT a launch blocker.** Recorded here so the cleanup has a paper trail; track as a deferred item in `deferred-items.md` and bundle with any other Cache-Control / header-hygiene work in a future plan.
 
+***
+
+## Status
+
+**LAUNCH COMPLETE — 2026-05-15.**
+
+All 11 checklist items, Lighthouse scores (24/24 cells ≥ 90; min 92, max 100), OG visual validation (5/5), and founder phone checks (3/3 YES): passed.
+
+HSTS preload-list submission deferred to v1.x (per CONTEXT D-09 — revisit after 30 days clean). The `preload` directive is present on the response header; submission to `hstspreload.org` is the one-way step explicitly NOT taken in Phase 4.
+
+Umami site list: apex-only (`*.workers.dev` preview entry removed by founder per D-02 post-cutover housekeeping, 2026-05-15).
+
+Studio Bluemli v1 is live at https://studiobluemli.com.
