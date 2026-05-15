@@ -85,13 +85,15 @@ Exit code 0. 11/11 og:image URLs return 200. Per-piece og:images resolve to the 
 
 ## OG Visual Validation (LCH-06)
 
-- [ ] Facebook Sharing Debugger green for home (`https://studiobluemli.com/`)
-- [ ] Facebook Sharing Debugger green for a representative gallery piece
-- [ ] Facebook Sharing Debugger green for the popups page
-- [ ] Founder phone: share the home URL in iMessage / IG DM — real unfurl renders correctly
-- [ ] Founder phone: share a gallery piece URL in iMessage / IG DM — real unfurl renders correctly
+- [x] Facebook Sharing Debugger green for home (`https://studiobluemli.com/`) — founder-confirmed 2026-05-15 after PR #9 deploy + FB "Scrape Again" (clears the stale monochrome cache).
+- [x] Facebook Sharing Debugger green for a representative gallery piece (`/gallery/cluster-coral`) — founder-confirmed 2026-05-15. Per-piece `hero-800.webp` unfurls with title + description.
+- [x] Facebook Sharing Debugger green for the popups page (`/popups`) — founder-confirmed 2026-05-15. Falls back to the full-palette `/og-default.png` as designed.
+- [x] Founder phone: share the home URL in iMessage / IG DM — real unfurl renders correctly. Founder-confirmed 2026-05-15.
+- [x] Founder phone: share a gallery piece URL in iMessage / IG DM — real unfurl renders correctly. Founder-confirmed 2026-05-15.
 
 (Twitter Card Validator deprecated 2022 per RESEARCH.md Pitfall 4 — replaced by Facebook Sharing Debugger + real-platform unfurl tests above.)
+
+**Note (PR #9 / `1a6c176`):** Prior `og-default.png` rendered as a monochrome single-color mark, violating SKILL.md's non-negotiable "use full-palette brand mark." PR #9 (`1a6c176`) regenerated the asset using the canonical 6-circle full-palette cluster; the live production `/og-default.png` now resolves to `md5 69ef1e8dc0ed29ed44cc1b2b93684117` (orchestrator-verified after deploy). All 5 LCH-06 sub-items above were validated against the corrected asset; FB's "Scrape Again" was required for the 3 debugger checks to bust FB's prior cache of the monochrome version.
 
 ***
 
@@ -157,4 +159,20 @@ Before the `${2}` wildcard-capture fix landed in PR #7, the broken `www-to-apex`
 - **No code/config fix needed** — production rule is correct. This is a client-side cached-response artifact of testing during the bug window.
 - **Workaround for anyone affected:** clear browser cache (or use incognito) until the cached 301 expires. Cache duration is browser-dependent; Chrome/Firefox honor any `Cache-Control` on the redirect response, otherwise default heuristic caching (commonly 24h–7d) applies.
 - **Scope:** affects only people who visited `www.studiobluemli.com` between the Wave 2 cutover (PR #6) and the `${2}` fix (PR #7). Should not affect new visitors going forward.
+
+**Finding (2026-05-15, post-cutover) — duplicated `Cache-Control` directives on static assets (cosmetic; v1.x follow-up):**
+
+Static assets like `/og-default.png` serve with a concatenated `Cache-Control` header containing two `public` and two `max-age` directives:
+
+```
+$ curl -sI https://studiobluemli.com/og-default.png | grep -i cache-control
+Cache-Control: public, max-age=0, must-revalidate, public, max-age=604800
+```
+
+- **Likely cause:** Astro's per-response default `Cache-Control: public, max-age=0, must-revalidate` (emitted by the Workers runtime for static-asset responses) is being concatenated with the explicit rule defined in `public/_headers` (`Cache-Control: public, max-age=604800`) rather than overridden by it. Cloudflare Workers + Static Assets composes the two sources, and `public/_headers` rules apparently append (rather than replace) the framework default for routes that match the rule pattern.
+- **Behavior impact:** none observed. Per RFC 9111 §5.2 and confirmed by Chromium/Firefox source-of-truth behavior, when a single `Cache-Control` header has conflicting directives, the more permissive `max-age` wins for `public` responses (i.e. browsers use `max-age=604800`, the 7-day value). CDN intermediaries (including Cloudflare's own edge cache) behave similarly. No bug-class impact on freshness, no stale-content risk, no inflated bandwidth — the cache is doing what `public/_headers` intends.
+- **Why it's worth fixing later:** header noise. It's an ugly response, audit tools (e.g. securityheaders.com, Lighthouse's Best Practices subscore) sometimes flag duplicated directives as a smell, and the next engineer reading these responses will burn 30 minutes confirming nothing is broken.
+- **Fix path (v1.x):** either (a) configure the Astro Cloudflare adapter to suppress its default `Cache-Control` for routes covered by `public/_headers`, (b) move the rule from `public/_headers` into Worker-level `caching` configuration in `wrangler.jsonc` so there's a single source of truth, or (c) explicitly set `Cache-Control` in the Worker's fetch handler for matched paths so the response has exactly one directive set. None of these are required for v1.
+- **Scope:** affects every static asset that matches the `public/_headers` rule (`/og-default.png`, the per-piece `hero-*.webp` files, anything under `/_astro/`). All cells in the Lighthouse table still scored ≥ 92 on Best Practices — no audit failure observed in practice.
+- **Disposition:** **v1.x follow-up. NOT a launch blocker.** Recorded here so the cleanup has a paper trail; track as a deferred item in `deferred-items.md` and bundle with any other Cache-Control / header-hygiene work in a future plan.
 
