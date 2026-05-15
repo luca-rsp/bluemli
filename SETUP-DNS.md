@@ -33,27 +33,48 @@ minutes.
 
 ## Step 2 — Redirect www.studiobluemli.com to studiobluemli.com
 
-1. Go to Cloudflare and open the **studiobluemli.com** zone (the domain itself,
-   not the worker).
+First add the DNS record so `www.studiobluemli.com` resolves at all (without
+this, no redirect rule can fire — there's nothing for Cloudflare to receive):
+
+1. Open the **studiobluemli.com** zone → **DNS** → **Records** → **Add record**.
+2. Type **CNAME**, Name **www**, Target `studiobluemli.com`, Proxy status
+   **Proxied** (orange cloud), TTL Auto. Save.
+
+Then the redirect rule itself:
+
+1. Stay in the **studiobluemli.com** zone (the domain, not the worker).
 2. Click **Rules** in the left sidebar — this lands on the **Overview** page.
 3. Click **Create rule**, then **Redirect Rule**.
 4. Name the rule `www-to-apex` (any name works).
 5. Under **When incoming requests match**, choose **Wildcard pattern**.
 6. In the **Request URL** field, paste: `http*://www.studiobluemli.com/*`
-7. Under **Then…**, set **Target URL** to: `https://studiobluemli.com/${1}`
+7. Under **Then…**, set **Target URL** to: `https://studiobluemli.com/${2}`
 8. Set the **Status code** to **301**.
 9. Click **Deploy**.
 
-The `${1}` part keeps the path — so `www.studiobluemli.com/gallery` lands on
-`studiobluemli.com/gallery`, not the homepage. (It's the captured value of the
-trailing `*` in the request URL.)
+Why `${2}` and not `${1}`: Cloudflare numbers wildcard captures left-to-right
+in the order the `*` characters appear. The pattern above has TWO wildcards —
+the first `*` is the scheme suffix (matches the `s` in `https`, or empty for
+`http`); the second `*` is the path. So `${1}` would be the scheme suffix and
+`${2}` is the path. Using `${1}` causes every redirect to land on `/s`, which
+is exactly the kind of error that's hard to spot until someone clicks a real
+link.
 
 ***
 
 ## Step 3 — Tell the worker your Umami website ID
 
+This site is Astro, and Astro reads `PUBLIC_*` environment variables at
+**build time** (it bakes them into the static HTML during `astro build`).
+Cloudflare distinguishes between **build-time** variables (available to the
+CI step that runs `astro build`) and **runtime** variables (available to the
+running Worker via `env.X`). For an Astro `PUBLIC_*` var, only the build-time
+location is correct — runtime won't reach the rendered HTML.
+
 1. Back in **Workers & Pages**, click **studio-bluemli** → **Settings**.
-2. Scroll to **Variables and Secrets**.
+2. Scroll to **Build** → **Build variables and secrets**. (Not the
+   **Variables and Secrets** section higher up — that one is runtime-only
+   and won't work for this var.)
 3. Click **Add**.
 4. Set the variable name to: `PUBLIC_UMAMI_WEBSITE_ID`
 5. Set the value to the website ID from your Umami Cloud dashboard
@@ -63,7 +84,8 @@ trailing `*` in the request URL.)
 7. Save.
 8. Trigger a fresh deploy so the new variable takes effect. The simplest way:
    in the **studio-bluemli** worker page, click **Deployments** at the top and
-   then **Trigger deploy**.
+   then **Trigger deploy** (or push any commit to `main` — Workers Builds
+   rebuilds automatically on push).
 
 ***
 
