@@ -27,8 +27,8 @@
 | 1 | sitemap-index.xml reachable + references all 5 routes + every /gallery/<slug> | ✓ | `/sitemap-index.xml` 200, points at `/sitemap-0.xml`; `<loc>` count = 11 (5 page templates + 6 gallery slugs — cluster-blush, cluster-cobalt, cluster-coral, cluster-lavender, cluster-saffron, cluster-sage). Exact match to expectation. |
 | 2 | robots.txt reachable with Allow + Sitemap reference | ✓ | `/robots.txt` 200; body: `User-agent: *` / `Allow: /` / `Sitemap: https://studiobluemli.com/sitemap-index.xml`. Production branch of env-aware `robots.txt.ts` confirmed firing. |
 | 3 | Every og:image URL returns 200 | ✓ | `npm run ci:og-check` exit 0; all 11 og:image URLs return 200 (6 per-piece `hero-800.webp` + 5 default `og-default.png`). Full output in `## OG-Image Audit` below. |
-| 4 | No console errors on each of 6 pages (DevTools walk) |   | Pending Task 3b (human-in-the-loop). |
-| 5 | All 6 Umami custom events appear in Realtime within 5 min |   | Pending Task 3b (human-in-the-loop). 6 events post-PR#8: `gallery_card_click`, `inquire_ig_per_piece`, `say_hi_ig_dm`, `say_hi_mailto`, `footer_ig_click`, `popups_empty_ig_click`. |
+| 4 | No console errors on each of 6 pages (DevTools walk) | ✓ | Verified by founder in DevTools — no red errors on any of 6 routes (`/`, `/gallery`, `/gallery/cluster-coral`, `/popups`, `/about`, `/say-hi`). |
+| 5 | All 6 Umami custom events appear in Realtime within 5 min | ✓ | All 6 Umami events confirmed in Realtime via click-walk (founder, 2026-05-15): `gallery_card_click`, `inquire_ig_per_piece`, `say_hi_ig_dm`, `say_hi_mailto`, `footer_ig_click`, `popups_empty_ig_click`. |
 | 6 | Lighthouse mobile >= 90 across Perf/A11y/BP/SEO on all 6 routes | ✓ | `npm run ci:lighthouse-prod` exit 0; all 24 cells (6 routes × 4 categories) >= 90. Min cell = 92 (Best Practices on all 6 routes); max cell = 100 (SEO on all 6 routes). Reports under `.lighthouse/2026-05-15/`. Full table below. |
 | 7 | www->apex 301 returns 301 with correct Location | ✓ | `https://www.studiobluemli.com/` → `HTTP 301 → https://studiobluemli.com/`; `/gallery` → same with path preserved; `/say-hi?utm=x` → same with **path AND query preserved** (confirms the `${2}` fix from PR #7). |
 | 8 | Apex HTTPS cert chain is valid | ✓ | TLSv1.3; `subject: CN=studiobluemli.com`; `issuer: C=US; O=Google Trust Services; CN=WE1` (Cloudflare custom-domain cert via GTS); `expire date: Aug 13 16:16:17 2026 GMT`; `SSL certificate verify ok`. No chain errors. |
@@ -147,4 +147,14 @@ HSTS = 2y + `includeSubDomains` + `preload` directive present (preload-list subm
 ## Fix Loop
 
 (Any in-the-moment fixes applied before re-running. Empty if nothing went sideways.)
+
+**Finding (2026-05-15, post-cutover) — stale 301 cached in founder's regular browser:**
+
+Before the `${2}` wildcard-capture fix landed in PR #7, the broken `www-to-apex` redirect rule emitted `https://studiobluemli.com/s` (capturing the scheme suffix `s` instead of the path) as the `Location:` for `https://www.studiobluemli.com/`. Browsers cache 301 responses indefinitely by default. Founder's regular browser had cached that broken 301, so typing `www.studiobluemli.com` continued to land on a 404 at `/s` even after PR #7 made the live behavior correct.
+
+- **Symptom:** `www.studiobluemli.com` in a previously-used browser → `https://studiobluemli.com/s` → 404.
+- **Live behavior:** Verified correct via incognito + `curl` in Task 3a item 7 (path AND query preserved).
+- **No code/config fix needed** — production rule is correct. This is a client-side cached-response artifact of testing during the bug window.
+- **Workaround for anyone affected:** clear browser cache (or use incognito) until the cached 301 expires. Cache duration is browser-dependent; Chrome/Firefox honor any `Cache-Control` on the redirect response, otherwise default heuristic caching (commonly 24h–7d) applies.
+- **Scope:** affects only people who visited `www.studiobluemli.com` between the Wave 2 cutover (PR #6) and the `${2}` fix (PR #7). Should not affect new visitors going forward.
 
