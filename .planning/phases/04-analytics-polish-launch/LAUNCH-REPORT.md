@@ -29,7 +29,7 @@
 | 3 | Every og:image URL returns 200 | ✓ | `npm run ci:og-check` exit 0; all 11 og:image URLs return 200 (6 per-piece `hero-800.webp` + 5 default `og-default.png`). Full output in `## OG-Image Audit` below. |
 | 4 | No console errors on each of 6 pages (DevTools walk) |   | Pending Task 3b (human-in-the-loop). |
 | 5 | All 6 Umami custom events appear in Realtime within 5 min |   | Pending Task 3b (human-in-the-loop). 6 events post-PR#8: `gallery_card_click`, `inquire_ig_per_piece`, `say_hi_ig_dm`, `say_hi_mailto`, `footer_ig_click`, `popups_empty_ig_click`. |
-| 6 | Lighthouse mobile >= 90 across Perf/A11y/BP/SEO on all 6 routes |   | See `## Lighthouse Scores` below — populated by Task 4. |
+| 6 | Lighthouse mobile >= 90 across Perf/A11y/BP/SEO on all 6 routes | ✓ | `npm run ci:lighthouse-prod` exit 0; all 24 cells (6 routes × 4 categories) >= 90. Min cell = 92 (Best Practices on all 6 routes); max cell = 100 (SEO on all 6 routes). Reports under `.lighthouse/2026-05-15/`. Full table below. |
 | 7 | www->apex 301 returns 301 with correct Location | ✓ | `https://www.studiobluemli.com/` → `HTTP 301 → https://studiobluemli.com/`; `/gallery` → same with path preserved; `/say-hi?utm=x` → same with **path AND query preserved** (confirms the `${2}` fix from PR #7). |
 | 8 | Apex HTTPS cert chain is valid | ✓ | TLSv1.3; `subject: CN=studiobluemli.com`; `issuer: C=US; O=Google Trust Services; CN=WE1` (Cloudflare custom-domain cert via GTS); `expire date: Aug 13 16:16:17 2026 GMT`; `SSL certificate verify ok`. No chain errors. |
 | 9 | Founder phone: tap IG DM on /say-hi -> Instagram opens |   | Pending Task 6 (founder phone check). |
@@ -40,16 +40,20 @@
 
 ## Lighthouse Scores
 
-(Populated after Task 4 — Lighthouse production audit. The "6 routes" = 5 page templates + 1 representative gallery slug, per ROADMAP SC3.)
+`npm run ci:lighthouse-prod` (lighthouse v13.1.0, mobile form-factor, simulated throttling) against production on 2026-05-15. Reports persisted under `.lighthouse/2026-05-15/` (HTML + JSON per route; gitignored locally per `.gitignore`). The "6 routes" = 5 page templates + 1 representative gallery slug (`/gallery/cluster-coral`), per ROADMAP SC3.
 
-| Route                  | Performance | Accessibility | Best Practices | SEO |
-|------------------------|------------:|--------------:|---------------:|----:|
-| /                      |             |               |                |     |
-| /gallery               |             |               |                |     |
-| /gallery/<sample-slug> |             |               |                |     |
-| /popups                |             |               |                |     |
-| /about                 |             |               |                |     |
-| /say-hi                |             |               |                |     |
+| Route                       | Performance | Accessibility | Best Practices | SEO |
+|-----------------------------|------------:|--------------:|---------------:|----:|
+| /                           |          94 |            95 |             92 | 100 |
+| /gallery                    |          93 |            95 |             92 | 100 |
+| /gallery/cluster-coral      |          93 |            95 |             92 | 100 |
+| /popups                     |          94 |            96 |             92 | 100 |
+| /about                      |          93 |            95 |             92 | 100 |
+| /say-hi                     |          95 |            95 |             92 | 100 |
+
+**Strict >= 90 gate (B-4):** all 24 cells (6 routes × 4 categories) are >= 90. Minimum observed = 92 (Best Practices, every route); maximum = 100 (SEO, every route). No founder ruling needed via Task 5 — item 6 passes the strict gate directly.
+
+The script's final stdout: `All 6 routes scored >= 90 across Performance, Accessibility, Best Practices, SEO.`
 
 ***
 
