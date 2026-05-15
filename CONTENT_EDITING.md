@@ -167,3 +167,11 @@ Make sure the photo is in the same folder as the piece's `index.md`, and that it
 **The preview URL isn't showing up in the pull request**
 
 Give it up to 5 minutes. If it still doesn't appear, check the **Checks** tab for build errors.
+
+***
+
+## Operations
+
+When the site is ready for the public and you want to put it on `studiobluemli.com`,
+follow the one-time steps in [SETUP-DNS.md](SETUP-DNS.md). It's a 15-minute walk-through
+of the Cloudflare dashboard. You only do it once.
