@@ -129,10 +129,10 @@ Plans:
 **Plans**: 5 plans
 Plans:
 **Wave 1** *(four plans run in parallel — independent files, no shared file conflicts)*
-- [ ] 04-01-PLAN.md — Env-aware Umami snippet in BaseLayout reusing isProduction() + 4 data-umami-event attributes on gallery card / per-piece IG inquire / say-hi IG DM / say-hi mailto (LCH-01, LCH-02 scaffolding, LCH-03; D-01, D-02, D-03)
-- [ ] 04-02-PLAN.md — public/_headers with HSTS + CSP (Umami wildcards) + Permissions-Policy + Referrer-Policy + X-Content-Type-Options + Cache-Control buckets (LCH-04; D-08, D-09)
-- [ ] 04-03-PLAN.md — SETUP-DNS.md at repo root (founder-facing 5-step walkthrough); verify astro.config.mjs site:apex (D-07) + public/og-default.png brand fidelity (D-10); cross-link from CONTENT_EDITING.md (FND-03, LCH-07; D-06)
-- [ ] 04-04-PLAN.md — scripts/check-og-images.sh + scripts/lighthouse-production.sh + npm ci:og-check / ci:lighthouse-prod scripts; LCH-06 acceptance pivoted off the deprecated Twitter Card Validator to FB Sharing Debugger + real iMessage/IG unfurl (LCH-05, LCH-06, LCH-08)
+- [x] 04-01-PLAN.md — Env-aware Umami snippet in BaseLayout reusing isProduction() + 4 data-umami-event attributes on gallery card / per-piece IG inquire / say-hi IG DM / say-hi mailto (LCH-01, LCH-02 scaffolding, LCH-03; D-01, D-02, D-03)
+- [x] 04-02-PLAN.md — public/_headers with HSTS + CSP (Umami wildcards) + Permissions-Policy + Referrer-Policy + X-Content-Type-Options + Cache-Control buckets (LCH-04; D-08, D-09)
+- [x] 04-03-PLAN.md — SETUP-DNS.md at repo root (founder-facing 5-step walkthrough); verify astro.config.mjs site:apex (D-07) + public/og-default.png brand fidelity (D-10); cross-link from CONTENT_EDITING.md (FND-03, LCH-07; D-06)
+- [x] 04-04-PLAN.md — scripts/check-og-images.sh + scripts/lighthouse-production.sh + npm ci:og-check / ci:lighthouse-prod scripts; LCH-06 acceptance pivoted off the deprecated Twitter Card Validator to FB Sharing Debugger + real iMessage/IG unfurl (LCH-05, LCH-06, LCH-08)
 
 **Wave 2** *(blocked on Wave 1 completion — depends on all four)*
 - [ ] 04-05-PLAN.md — Cutover execution + LAUNCH-REPORT.md: founder walks SETUP-DNS.md; Claude scripts checklist items 1-8; founder walks items 9-11 (phone checks); Umami site-list housekeeping; HSTS preload-list submission DEFERRED to v1.x (FND-03, LCH-02, LCH-05, LCH-06, LCH-07, LCH-08; D-04, D-05)
