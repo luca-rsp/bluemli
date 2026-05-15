@@ -32,9 +32,9 @@
 | 6 | Lighthouse mobile >= 90 across Perf/A11y/BP/SEO on all 6 routes | ✓ | `npm run ci:lighthouse-prod` exit 0; all 24 cells (6 routes × 4 categories) >= 90. Min cell = 92 (Best Practices on all 6 routes); max cell = 100 (SEO on all 6 routes). Reports under `.lighthouse/2026-05-15/`. Full table below. |
 | 7 | www->apex 301 returns 301 with correct Location | ✓ | `https://www.studiobluemli.com/` → `HTTP 301 → https://studiobluemli.com/`; `/gallery` → same with path preserved; `/say-hi?utm=x` → same with **path AND query preserved** (confirms the `${2}` fix from PR #7). |
 | 8 | Apex HTTPS cert chain is valid | ✓ | TLSv1.3; `subject: CN=studiobluemli.com`; `issuer: C=US; O=Google Trust Services; CN=WE1` (Cloudflare custom-domain cert via GTS); `expire date: Aug 13 16:16:17 2026 GMT`; `SSL certificate verify ok`. No chain errors. |
-| 9 | Founder phone: tap IG DM on /say-hi -> Instagram opens |   | Pending Task 6 (founder phone check). |
-| 10 | Founder phone: tap mailto on /say-hi -> email client opens |   | Pending Task 6 (founder phone check). |
-| 11 | Founder phone: studiobluemli.com over cellular feels fast (< ~2s) |   | Pending Task 6 (founder phone check). |
+| 9 | Founder phone: tap IG DM on /say-hi -> Instagram opens | ✓ | Founder confirmed via phone, 2026-05-15. |
+| 10 | Founder phone: tap mailto on /say-hi -> email client opens | ✓ | Founder confirmed via phone, 2026-05-15. |
+| 11 | Founder phone: studiobluemli.com over cellular feels fast (< ~2s) | ✓ | Founder confirmed via phone, 2026-05-15. |
 
 ***
 
@@ -99,9 +99,9 @@ Exit code 0. 11/11 og:image URLs return 200. Per-piece og:images resolve to the 
 
 ## Founder Phone Checks (D-05)
 
-- [ ] #1 IG DM open
-- [ ] #2 mailto open with correct address
-- [ ] #3 cellular load feels fast
+- [x] #1 IG DM open — Founder confirmed via phone, 2026-05-15.
+- [x] #2 mailto open with correct address — Founder confirmed via phone, 2026-05-15.
+- [x] #3 cellular load feels fast — Founder confirmed via phone, 2026-05-15.
 
 ***
 
