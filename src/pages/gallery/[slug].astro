@@ -89,7 +89,10 @@ const statusLabel =
     <p class="description">{description}</p>
 
     <div class="cta-stack">
-      <a class="cta-button" href={site.ig_dm_url}>{ctaCopy}</a>
+      <a class="cta-button"
+         href={site.ig_dm_url}
+         data-umami-event="inquire_ig_per_piece"
+         data-umami-event-piece={slug}>{ctaCopy}</a>
       <span class="mailto-fallback">
         or email <a href={`mailto:${site.contact_email}`}>{site.contact_email}</a>
       </span>

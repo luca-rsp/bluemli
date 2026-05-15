@@ -2,12 +2,35 @@
 // src/layouts/BaseLayout.astro
 // Shared <head>, header/footer slots, skip-to-content link, Fonts API preload,
 // global :focus-visible rule (FND-13). FND-05, FND-06, FND-07, FND-13.
+// Phase 4 (LCH-01, D-01, D-02, D-03): env-aware Umami Cloud snippet — see <head> below.
 import { Font } from 'astro:assets';
+import { isProduction } from '../lib/site-url';
 
 interface Props {
   title: string;
 }
 const { title } = Astro.props;
+
+// Phase 4 LCH-01 / D-02: env-aware Umami snippet inputs.
+const UMAMI_ID = import.meta.env.PUBLIC_UMAMI_WEBSITE_ID;
+const APEX = 'studiobluemli.com';
+const isProd = isProduction();
+
+// In non-production builds we ALSO tag the active workers.dev preview hostname so
+// Phase 4 D-02 verification (clicking the 4 events on the preview deploy) appears
+// in Umami Realtime. Read from BOTH process.env and import.meta.env per the
+// resolveAssetBase() pattern (src/lib/site-url.ts lines 73-80) — Vite's workerd
+// prerender subprocess only sees PUBLIC_-prefixed values.
+const procEnv = typeof process !== 'undefined' && process.env ? process.env : {};
+const previewRaw = !isProd
+  ? (procEnv.CF_WORKERS_URL ?? import.meta.env.PUBLIC_CF_WORKERS_URL ?? '')
+  : '';
+let previewHostname = '';
+try { previewHostname = previewRaw ? new URL(previewRaw).hostname : ''; } catch { /* ignore malformed URL */ }
+
+const dataDomains = isProd
+  ? APEX
+  : [APEX, previewHostname].filter(Boolean).join(',');
 ---
 <html lang="en">
   <head>
@@ -34,6 +57,21 @@ const { title } = Astro.props;
         Caveat entry to astro.config.mjs Fonts API; this <Font /> tag wires
         the preload + @font-face emission for the BaseLayout. */}
     <Font cssVariable="--font-hand-loaded" preload />
+
+    {/* Phase 4 LCH-01 / D-01 / D-02: Umami Cloud analytics — cookieless, no consent
+        banner. data-domains restricts event collection to apex (production) and the
+        active workers.dev preview hostname (pre-cutover only). Snippet omitted entirely
+        when PUBLIC_UMAMI_WEBSITE_ID is unset (local dev / misconfig) — same safe-default
+        stance as src/pages/robots.txt.ts's Disallow fallback. The script URL is versionless;
+        SRI hashes are not pinned (would break on every Umami release — deferred to v1.x). */}
+    {UMAMI_ID && (
+      <script
+        async
+        src="https://cloud.umami.is/script.js"
+        data-website-id={UMAMI_ID}
+        data-domains={dataDomains}
+      />
+    )}
 
     {/* Named slot for per-page <head> additions (per-piece og:image in Plan 04's
         [slug].astro; Phase 3 PAG-07 SEO.astro will absorb this pattern). Without
