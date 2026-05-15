@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundations & Brand System** - Astro 6 on Workers + Static Assets, design-skill components copied in, brand non-negotiables enforced via CI _(complete 2026-05-13)_
 - [ ] **Phase 2: Content Schema & Gallery** - Strict Zod collections with per-slug image co-location; gallery grid + per-piece detail pages live on preview
 - [ ] **Phase 3: Page Composition & Pop-ups** - Landing, popups (timezone-correct split + daily cron), about, say-hi shell, shared SEO, sitemap
-- [ ] **Phase 4: Analytics, Polish & Launch** - Umami events, security headers, Lighthouse/OG validation, DNS cutover to studiobluemli.com
+- [x] **Phase 4: Analytics, Polish & Launch** - Umami events, security headers, Lighthouse/OG validation, DNS cutover to studiobluemli.com _(complete 2026-05-15)_
 
 ## Phase Details
 
@@ -135,7 +135,7 @@ Plans:
 - [x] 04-04-PLAN.md — scripts/check-og-images.sh + scripts/lighthouse-production.sh + npm ci:og-check / ci:lighthouse-prod scripts; LCH-06 acceptance pivoted off the deprecated Twitter Card Validator to FB Sharing Debugger + real iMessage/IG unfurl (LCH-05, LCH-06, LCH-08)
 
 **Wave 2** *(blocked on Wave 1 completion — depends on all four)*
-- [ ] 04-05-PLAN.md — Cutover execution + LAUNCH-REPORT.md: founder walks SETUP-DNS.md; Claude scripts checklist items 1-8; founder walks items 9-11 (phone checks); Umami site-list housekeeping; HSTS preload-list submission DEFERRED to v1.x (FND-03, LCH-02, LCH-05, LCH-06, LCH-07, LCH-08; D-04, D-05)
+- [x] 04-05-PLAN.md — Cutover execution + LAUNCH-REPORT.md: founder walks SETUP-DNS.md; Claude scripts checklist items 1-8; founder walks items 9-11 (phone checks); Umami site-list housekeeping; HSTS preload-list submission DEFERRED to v1.x (FND-03, LCH-02, LCH-05, LCH-06, LCH-07, LCH-08; D-04, D-05)
 **UI hint**: no
 
 **Key risks / pitfalls:**
@@ -156,4 +156,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Foundations & Brand System | 5/5 | Complete | 2026-05-13 |
 | 2. Content Schema & Gallery | 5/5 | Complete | 2026-05-14 |
 | 3. Page Composition & Pop-ups | 0/TBD | Not started | - |
-| 4. Analytics, Polish & Launch | 0/5 | Not started | - |
+| 4. Analytics, Polish & Launch | 5/5 | Complete | 2026-05-15 |
