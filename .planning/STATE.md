@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 04 Plan 05 — paused at Task 3b (founder + Claude walk DevTools console + Umami Realtime click-walk for 6 events)
-last_updated: "2026-05-15T17:30:00Z"
-last_activity: 2026-05-15 -- Phase 04 Plan 05 Tasks 2, 3a, 4 complete (cutover live; scripted checklist items 1/2/3/7/8 ✓; Lighthouse all 24 cells >= 90); paused at Task 3b (human-verify checkpoint)
+stopped_at: Phase 04 Plan 05 — paused at Task 5 (OG visual validation, LCH-06 — Facebook Sharing Debugger + real iMessage/IG-DM unfurl tests)
+last_updated: "2026-05-15T18:30:00Z"
+last_activity: 2026-05-15 -- Phase 04 Plan 05 Task 3b complete (items 4 + 5 ✓ — founder confirmed clean DevTools console + all 6 Umami events in Realtime); paused at Task 5 (LCH-06 OG unfurl validation)
 progress:
   total_phases: 4
   completed_phases: 3
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-05-12)
 ## Current Position
 
 Phase: 04 (analytics-polish-launch) — EXECUTING
-Plan: 5 of 5 — paused at Task 3b (checkpoint:human-verify)
-Status: Executing Phase 04 Plan 05 — cutover live (Task 2 done via PRs #6/#7/#8); Task 3a scripted items 1/2/3/7/8 ✓ (commit cdd5c38); Task 4 Lighthouse all 24 cells >= 90 ✓ (commit 05dfc2e); awaiting founder + Claude to walk Task 3b (DevTools console on 6 pages + Umami Realtime click-walk for 6 events)
-Last activity: 2026-05-15 -- Plan 05 Tasks 3a + 4 complete; paused at Task 3b (checkpoint:human-verify)
+Plan: 5 of 5 — paused at Task 5 (checkpoint:human-verify, LCH-06 OG visual validation)
+Status: Executing Phase 04 Plan 05 — cutover live (Task 2 via PRs #6/#7/#8); Task 3a scripted items 1/2/3/7/8 ✓ (commit cdd5c38); Task 4 Lighthouse all 24 cells >= 90 ✓ (commit 05dfc2e); Task 3b items 4 + 5 ✓ (commit 3934adb — founder confirmed clean console + all 6 Umami events in Realtime); awaiting founder to walk Task 5 (Facebook Sharing Debugger + iMessage/IG-DM unfurl tests for home, gallery piece, popups)
+Last activity: 2026-05-15 -- Plan 05 Task 3b complete; paused at Task 5 (checkpoint:human-verify, LCH-06)
 
 Progress: [███████░░░] 75%
 
@@ -88,6 +88,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-05-15T17:30:00Z
-Stopped at: Phase 04 Plan 05 Task 3b — checkpoint:human-verify (founder + Claude walk DevTools console + Umami Realtime click-walk for 6 events)
-Resume file: .planning/phases/04-analytics-polish-launch/04-05-PLAN.md (Task 3b)
+Last session: 2026-05-15T18:30:00Z
+Stopped at: Phase 04 Plan 05 Task 5 — checkpoint:human-verify (LCH-06 OG visual validation: Facebook Sharing Debugger + real iMessage/IG-DM unfurl tests)
+Resume file: .planning/phases/04-analytics-polish-launch/04-05-PLAN.md (Task 5)
